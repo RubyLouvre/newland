@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>测试我的框架</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+        <%= javascript_include_tag("dom/mass") %>
+
+        <script>
+            dom.require("more/random",function(){
+          
+                dom.log(dom.format("#{name} is a #{sex}",{name:"Jhon",sex:"man"}));
+            });
+
+             
+        </script>
+    </head>
+    <body>
+        <!--         <script src="/javascripts/dom/dom.js">-->
+        <div>测试我的框架</div>
+        <table><tr><td><input type="text" id="xx"></td></tr></table>
+        这种东西想取出input里面属性的键值怎么弄？
+        整成{type:"text",id:"xx"}这种款式
+
+
+        var s = '<table><tr><td><input type="text" id="xx"></td></tr></table>';
+        var re_input = /<input([^>]*)>/i;
+            var re_attr = /\s+([\w-:]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^"'\s>]+))?/g;
+            var s2 = re_input.exec(s)[1];
+            var t, atts = [];
+            while (t = re_attr.exec(s2)) {
+            atts.push(t.slice(1));
+            }
+            alert(atts.join('\n'));
+            “你有没有男朋友”“你有什么优点/缺点”
+            “你自认为做的最好的一件事情”“你简单介绍下你家庭情况么”
+            “说一件你工作中遇到的困难，你是如何解决的”“你在朋友眼里是一个什么样的人”
+            “你性格是什么类型”“你有哪些兴趣爱好”
+    </body>
+</html>
