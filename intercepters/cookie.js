@@ -7,6 +7,7 @@ mass.define("parseCookie","cookie",function(Cookie){
         }else{
             req.cookie = Cookie.parse(str)
         }
+        //https://github.com/viatropos/tower/blob/master/lib/tower/http/cookies.js
         /*
              * @description Set a cookies on the client. 在客户端设置cookies
              * @param {String} name name of the cookies.(require) cookies的名字*

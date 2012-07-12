@@ -243,7 +243,6 @@
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
         }
         var ret = fn.apply( null, argv );//执行模块工厂，然后把返回值放到returns对象中
-        console.log(ret+name)
         $.debug( name );//想办法取得函法中的exports对象
         return ret;
     }
@@ -254,26 +253,25 @@
         var nick = name.slice(1);
         if(nativeModules[ nick ]){
             mapper[ name ].state = 2;
-            returns[ name ] = require(nick);
-            process.nextTick( $._checkDeps );
+            url = nick;
         }else{
-            url = url  || process.cwd()+"/" + nick + ".js";
-            try{
-                $.log("<code style='color:yellow'>"+url+"</code>",true);
-                var a =  require(url);;
-                console.log(a)
-                process.nextTick( $._checkDeps );
-            }catch( e ){
-                errorStack(function(){
-                    $.log("<code style='color:red'>"+e+"</code>", true);
-                }).fire();//打印错误堆栈
-            }
+            url = url || process.cwd()+"/" + nick + ".js";
+        }
+        try{
+            $.log("<code style='color:yellow'>"+url+"</code>",true);
+            returns[ name ] = require( url );
+            process.nextTick( $._checkDeps );
+        }catch( e ){
+            errorStack(function(){
+                $.log("<code style='color:red'>"+e+"</code>", true);
+            }).fire();//打印错误堆栈
         }
     }
 
     $.mix($,{
         define: function( name, deps, factory ){//模块名,依赖列表,模块本身
             var str = "/"+name;
+            //   console.log(module.filename)
             for(var prop in mapper){
                 if(mapper.hasOwnProperty(prop) ){
                     if(prop.substring(prop.length - str.length) === str && mapper[prop].state !== 2){
@@ -351,20 +349,15 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    $.log(require.main)
-    var a = require("./aa");
-    console.log(a)
-    $.require("aa", function(fs){
-        for(var i in fs){
-            console.log(i+" "+fs[i])
-        }
-    })
+    //  $.log(require.main)
+ 
+    $.require("aa",function(){})
+//  console.log(a.load(process.cwd()+"/" + "aa" + ".js"))
 })();
-
+//https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
 //2011.12.17 $.define再也不用指定模块所在的目录了,
 //如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
 //才能用mass.require("intercepters/favicon",callback)请求得到
 //现在可以直接mass.define("favicon",module)了
 //2012.7.12 重新开始搞后端框架
-
-
+//两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
