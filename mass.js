@@ -141,9 +141,6 @@
                 }
             }
         }(),
-        watchFiles:function(files){
-
-        },
         rmdirSync : (function(){
             function iterator(url,dirs){
                 var stat = fs.statSync(url);
@@ -238,9 +235,7 @@
         }
     }
     var errorStack = $.deferred()
-    var mapper = $[ "@modules" ] = {
-        "@ready" : { }
-    };
+    var mapper = $[ "@modules" ] = { };//后端不需要dom Ready
     function install( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
@@ -261,7 +256,6 @@
             url = url || process.cwd()+"/" + nick + ".js";
         }
         try{
-            $.log("<code style='color:yellow'>",url,"</code>",true);
             returns[ name ] = require( url );
             process.nextTick( $._checkDeps );
         }catch( e ){
@@ -271,7 +265,7 @@
         }
     }
 
-    $.mix($,{
+    $.mix( $, {
         define: function( name, deps, factory ){//模块名,依赖列表,模块本身
             var str = "/"+name;
             //   console.log(module.filename)
@@ -303,6 +297,7 @@
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
+                    $.log('<code style="color:cyan;">已加载', obj.name, '模块</code>', true);
                     returns[ obj.name ] = install( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
                     $._checkDeps();
@@ -329,6 +324,9 @@
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
             if( dn === cn ){//如果需要安装的等于已安装好的
                 (mapper[ token ] || {}).state = 2;
+                if( token.indexOf("@cb") === -1 ){
+                    $.log('<code style="color:cyan;">已加载', token, '模块</code>', true);
+                }
                 return returns[ token ] = install( token, args, factory );//装配到框架中
             }
             if( errback ){
@@ -352,81 +350,10 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    //监听当前目录下文件的变化,实现热启动!
-    new function(){
-        fs.watch( __dirname, function (event, filename) {
-            if(filename){
-                var type = event == "change" ? "changed" : "created"; //有文件或目录发生改变或被添加
-                var filepath = path.join(__dirname ,filename);
-                var stat = fs.statSync(filepath);
-                "isDirectory,isFile".replace(/\w+/g,function(method){
-                    if(stat[method]()){
-                        $.log( '<code style="color:yellow">', filepath ,"' has ", type, "</code>",true);
-                        killProcess()
-                    }
-                });
-            }else{
-                //如果要知道删除了那些文件,我们使用这里提供的位图法,判定前后两个文件树列表
-                //http://www.cnblogs.com/ilian/archive/2012/07/01/tx-test-entry.html
-                $.log( '<code style="color:yellow">Some file is removed</code>',true);
-                killProcess();
-            }
-        });
-        //重启线程
-        var child
-        function rebootProcess(exec,args){
-            args = args || []
-            child = require("child_process").spawn(exec, args);//创建一个新线程来接力
-            child.stdout.addListener("data", function (chunk) {
-                chunk && $.log(chunk);
-            });
-            child.stderr.addListener("data", function (chunk) {
-                chunk && $.log(chunk);
-            });
-            child.addListener("exit", function () {
-                $.log("<code style='color:yellow'>rebooting child process</code>" , true);
-                rebootProcess(exec, args);
-            });
-        }
-        //杀死一个进程
-        function killProcess () {
-            if ( !killProcess.lock ){
-                killProcess.lock = true;//正在处理中,锁死该操作
-                setTimeout(function() {
-                    if (child) {
-                        $.log("<code style='color:yellow'>crashing child process</code>" , true);
-                        process.kill(child.pid);
-                        child = null;
-                    } else {
-                        rebootProcess("node",[]);
-                        killProcess.lock = false;//解锁!
-                    }
-                }, 50);
-            }
-        }
-        try {
-            //信号是发送给进程的特殊信息。
-            //当一个进程接收到一个信号的时候，它会立即处理此信号，并不等待完成当前的函数调用甚至当前一行代码。
-            //http://tassardge.blog.163.com/blog/static/1723017082011627522600/
-            //我们可以通过编程手段发送SIGTERM和SIGKILL信号来结束一个进程。
-            //在键盘下按下CTL+C会产生SIGINT，而CTL+\会产生SIGQUIT。
-            // SIGHUP会在以下3种情况下被发送给相应的进程：
-            // 1、终端关闭时，该信号被发送到session首进程以及作为job提交的进程（即用 & 符号提交的进程）
-            // 2、session首进程退出时，该信号被发送到该session中的前台进程组中的每一个进程
-            // 3、若父进程退出导致进程组成为孤儿进程组，且该进程组中有进程处于停止状态（收到SIGSTOP或SIGTSTP信号），该信号会被发送到该进程组中的每一个进程。
-            [ "SIGTERM", "SIGINT", "SIGHUP", "SIGQUIT" ].forEach( function(signal) {
-                process.on(signal, function () {
-                    if (child) {
-                        util.debug("sending "+signal+" to child child");
-                        child.kill(signal);
-                    }
-                    process.exit();
-                });
-            });
-        // window平台不支持信号,我们直接忽略
-        // https://github.com/joyent/node/issues/1553
-        } catch(e) { }
-    };
+    
+    $.require(" deploy", function(deploy){
+        deploy( __dirname );//监听当前目录下文件的变化,实现热启动
+    })
   
     
 })();
