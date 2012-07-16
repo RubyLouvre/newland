@@ -1,6 +1,6 @@
-mass.define("parseCookie","cookie",function(Cookie){
-    console.log("本模块用于在req上添加一个名为cookie的对象");
-    return mass.intercepter(function(req, res){
+$.define("parseCookie","cookie",function(Cookie){
+    $.log("本模块用于在req上添加一个名为cookie的对象");
+    return $.intercepter(function(req, res){
         var str = req.headers.cookie ;
         if (typeof str !== "string") {
             req.cookie = {}

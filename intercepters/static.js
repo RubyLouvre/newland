@@ -1,5 +1,6 @@
-mass.define("static","fs, mime",function(fs,mime){
-    console.log("本模块用于处理放到public目录下的静态文件");
+$.define("static","fs, mime",function(fs,mime){
+   // 本模块用于处理放到public目录下的静态文件"
+   // 即便是动态页面也会生成对应的静态文件缓存起来
     return function(req, res, err){
         console.log("进入static回调");
         var cache = mass.cache;

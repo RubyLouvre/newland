@@ -350,27 +350,64 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    
-    $.require(" deploy, intercepters, http,settings", function(deploy,intercepters, http){
-        deploy( __dirname );//监听当前目录下文件的变化,实现热启动
+    $.intercepter = function(fn){//拦截器的外壳
+        return function(req, res, err){
+            if(err ){
+                req.emit("next_error", req, res)
+            //   endError(err,req,res)
+            }else if(fn(req,res) === true){
+                req.emit("next_intercepter", req, res)
+            }
+        }
+    }
+    $.require(" deploy,http,router,settings", function(deploy, http){
+        //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
+        //"mime","location","static","postData","methodOverride","json","render","matcher"
+        //路由系统的任务有二
+        //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
+        //接受前端参数，更新数据库
         http.createServer(function(req, res) {
             $.log("req.url  :  ", req.url);
-            var arr = intercepters.concat();
-            //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-            req.on("next_intercepter",function(){
-                try{
-                    var next = arr.shift();
-                    next && next.apply(null,arguments)
-                }catch( err ){
-                    err.statusCode = 500;
-                    //endError( err, req, res );
-                }
+            var opts = {};//从req中提炼出一些有用信息放到这里
+            var str = req.headers['content-type'] || '';
+            opts.mine =  str.split(';')[0];
+            var location =  require("url").parse(req.url);
+            location.query = require("querystring").parse(location.query || "") ;
+            location.extname = path.extname(req.url);
+            location.toString = function(){
+                return req.url;
+            }
+            opts.location = location;
+            router(req, res,opts)
+            //输出首页
+            //  var arr = intercepters.concat();
+            fs.readFile( path.join(__dirname,'/public/index.html'), 'utf-8',function (err, data) {//读取内容
+                if (err) throw err;
+                res.writeHead(200, {
+                    "Content-Type": "text/html"
+                });//注意这里
+                res.write(data);
+                res.end();
             });
-            req.emit("next_intercepter",req, res);
+        //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
+        //            req.on("next_intercepter",function(){
+        //              try{
+        //                 var next = arr.shift();
+        //                   next && next.apply(null,arguments)
+        //               }catch( err ){
+        //                  //  err.statusCode = 500;
+        //                //endError( err, req, res );
+        //               }
+        //            });
+        //            req.on("intercepter_err", function(req, res, err){
+        //
+        //            })
+        //   req.emit("next_intercepter",req, res);
 
         }).listen($.settings.port);
+        console.log($.settings.port)
     })
-  
+
     
 })();
 //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
