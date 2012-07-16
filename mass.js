@@ -351,8 +351,24 @@
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
     
-    $.require(" deploy", function(deploy){
+    $.require(" deploy, intercepters, http,settings", function(deploy,intercepters, http){
         deploy( __dirname );//监听当前目录下文件的变化,实现热启动
+        http.createServer(function(req, res) {
+            $.log("req.url  :  ", req.url);
+            var arr = intercepters.concat();
+            //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
+            req.on("next_intercepter",function(){
+                try{
+                    var next = arr.shift();
+                    next && next.apply(null,arguments)
+                }catch( err ){
+                    err.statusCode = 500;
+                    //endError( err, req, res );
+                }
+            });
+            req.emit("next_intercepter",req, res);
+
+        }).listen($.settings.port);
     })
   
     
