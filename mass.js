@@ -368,44 +368,92 @@
     //   fs.readFile(index, 'utf-8',function (err, data) {//读取内容
     //      console.log(data)
     //   })
-    $.cache = {};
-    $.require(" deploy,http,settings", function(deploy, http){
+    //"mime","location","static","postData","methodOverride","json","render","matcher"
+    $.pagesCache = {};
+    $.viewsCache = {}
+    var mimeMap = {
+        'txt': 'text/plain',
+        'html': 'text/html',
+        'css': 'text/css',
+        'xml': 'application/xml',
+        'json': 'application/json',
+        'js': 'application/javascript',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'gif': 'image/gif',
+        'png': 'image/png',
+        'manifest': 'text/cache-manifest'
+    };
+    $.require(" deploy,http,settings,app/modules/ejs", function(deploy, http){
         //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
-        //"mime","location","static","postData","methodOverride","json","render","matcher"
+
         //路由系统的任务有二
         //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
         //接受前端参数，更新数据库
 
-        //去掉根目录与端口号,先判定其是否带参数,如果没有进入缓存系统,没有进入pages,再没有进入views
+        /**一个请求过来，取其pathname，先进入缓存系统取页面，
+         没有进入pages目录找，再没有到views目录找模板页面，通过ejs系统拼好返回，
+        并放进缓存与pages中，如果views目录没有对应模板，说明是高度动态的页面，
+        进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
+        */
         http.createServer(function(req, res) {
             var opts = {};//从req中提炼出一些有用信息放到这里
             var str = req.headers['content-type'] || '';
-            opts.mine =  str.split(';')[0];
+            opts.mime = path.extname(req.url).slice(1) || "text"
+            opts.contentType =  str.split(';')[0] ||  mimeMap[ opts.mime ]
             var location =  require("url").parse(req.url);
             location.query = require("querystring").parse(location.query || "") ;
-            location.extname = path.extname(req.url);
             location.toString = function(){
                 return req.url;
             }
             opts.location = location;
-            var pathname = location.pathname
-            console.log(pathname )
-            if( $.cache[ pathname ]){
-                console.log("xxxxxxxxxxxxxxxxx")
+            var cache_key = location.pathname
+            if( $.pagesCache[ cache_key ]){
+                console.log("先从缓存系统中寻找")
             }else{
-                var url = $.adjustPath("app","pages", pathname )
-                fs.readFile( url, 'utf-8',function (err, data) {//读取内容
-                    if (err)
-                        throw err;
-                    res.writeHead(200, {
-                        "Content-Type": "text/html"
-                    });//注意这里
-                    res.write(data);
-                    res.end();
+                opts.pages_key = $.adjustPath("app","pages", cache_key );
+                fs.readFile( opts.pages_key, 'utf-8', function (err, data) {//读取内容
+                    if (err){
+                        opts.views_key = opts.pages_key.replace("app\\pages", "app\\views");
+                        fs.readFile( opts.views_key, 'utf-8', function (err, view_text ) {//读取内容
+                            if (err)
+                                throw err;
+                            var data = {}
+                            var partial = $.viewsCache[ opts.views_key ] || $.ejs( view_text );
+                            data.partial = partial.call({
+                                title: function( t ){
+                                    data.title = t
+                                },
+                                layout: function( t){
+                                    data.layout = t
+                                }
+                            });
+                            data.title = data.title || "xxxx"
+                            data.layout = data.layout || "xxxx";
+                            var layout_url = $.adjustPath("app","views/layout", data.layout )
+                            var page_text = fs.readFileSync( layout_url,  'utf-8');
+                            var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
+                            var html =  page( data );
+                            $.pagesCache[ cache_key ] = html;
+                            fs.writeFile(opts.pages_key,html,"utf-8");
+                            $.log("<code style='color:green'>",html,"</code>",true)
+                            res.writeHead(200, {
+                                "Content-Type":  opts.contentType
+                            });//注意这里
+                            res.write(html);
+                            res.end();
+                           
+                         
+                        })
+                    }else{
+                        res.writeHead(200, {
+                            "Content-Type":  opts.contentType
+                        });//注意这里
+                        res.write(data);
+                        res.end();
+                    }
                 });
             }
-
-     
         //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
 
         }).listen($.settings.port);
