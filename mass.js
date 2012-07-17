@@ -363,11 +363,12 @@
     $.adjustPath = function(){
         return path.join.apply(null,arguments)
     }
-    var index = $.adjustPath("index.html")
-    console.log(index);
-    fs.readFile(index, 'utf-8',function (err, data) {//读取内容
-        console.log(data)
-    })
+    //  var index = $.adjustPath("index.html")
+    //   console.log(index);
+    //   fs.readFile(index, 'utf-8',function (err, data) {//读取内容
+    //      console.log(data)
+    //   })
+    $.cache = {};
     $.require(" deploy,http,settings", function(deploy, http){
         //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
         //"mime","location","static","postData","methodOverride","json","render","matcher"
@@ -377,7 +378,6 @@
 
         //去掉根目录与端口号,先判定其是否带参数,如果没有进入缓存系统,没有进入pages,再没有进入views
         http.createServer(function(req, res) {
-            $.log("req.url  :  ", req.url);
             var opts = {};//从req中提炼出一些有用信息放到这里
             var str = req.headers['content-type'] || '';
             opts.mine =  str.split(';')[0];
@@ -388,31 +388,25 @@
                 return req.url;
             }
             opts.location = location;
-         //   router(req, res,opts)
-            //输出首页
-            //  var arr = intercepters.concat();
-            fs.readFile( path.join(__dirname,'/public/index.html'), 'utf-8',function (err, data) {//读取内容
-                if (err) throw err;
-                res.writeHead(200, {
-                    "Content-Type": "text/html"
-                });//注意这里
-                res.write(data);
-                res.end();
-            });
+            var pathname = location.pathname
+            console.log(pathname )
+            if( $.cache[ pathname ]){
+                console.log("xxxxxxxxxxxxxxxxx")
+            }else{
+                var url = $.adjustPath("app","pages", pathname )
+                fs.readFile( url, 'utf-8',function (err, data) {//读取内容
+                    if (err)
+                        throw err;
+                    res.writeHead(200, {
+                        "Content-Type": "text/html"
+                    });//注意这里
+                    res.write(data);
+                    res.end();
+                });
+            }
+
+     
         //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-        //            req.on("next_intercepter",function(){
-        //              try{
-        //                 var next = arr.shift();
-        //                   next && next.apply(null,arguments)
-        //               }catch( err ){
-        //                  //  err.statusCode = 500;
-        //                //endError( err, req, res );
-        //               }
-        //            });
-        //            req.on("intercepter_err", function(req, res, err){
-        //
-        //            })
-        //   req.emit("next_intercepter",req, res);
 
         }).listen($.settings.port);
         console.log($.settings.port)
