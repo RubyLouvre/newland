@@ -42,3 +42,50 @@ mass.define("matcher","endError,fs",function(endError,fs){
 
 后端一般都是控制器（角色）去适应模型（实体），而不是改变自己的模型，去适应自己的控制器吧。
 * */
+
+
+var __hasProp = {}.hasOwnProperty,
+__extends = function(child, parent) {
+    for (var key in parent) {
+        if (__hasProp.call(parent, key)) child[key] = parent[key];
+    } function ctor() {
+        this.constructor = child;
+    } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child;
+};
+
+Tower.Controller = (function(_super) {
+
+    __extends(Controller, _super);
+
+    Controller.name = 'Controller';
+
+    Controller.include(Tower.Support.Callbacks);
+
+    Controller.extend(Tower.Support.EventEmitter);
+
+    Controller.include(Tower.Support.EventEmitter);
+
+    Controller.instance = function() {
+        return this._instance || (this._instance = new this);
+    };
+
+    function Controller() {
+        var metadata;
+        this.constructor._instance = this;
+        this.headers = {};
+        this.status = 200;
+        this.request = null;
+        this.response = null;
+        this.params = {};
+        this.query = {};
+        metadata = this.constructor.metadata();
+        this.resourceName = metadata.resourceName;
+        this.resourceType = metadata.resourceType;
+        this.collectionName = metadata.collectionName;
+        this.formats = _.keys(metadata.mimes);
+        this.hasParent = this.constructor.hasParent();
+    }
+
+    return Controller;
+
+})(Tower.Class);

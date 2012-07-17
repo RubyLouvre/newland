@@ -360,12 +360,22 @@
             }
         }
     }
-    $.require(" deploy,http,router,settings", function(deploy, http){
+    $.adjustPath = function(){
+        return path.join.apply(null,arguments)
+    }
+    var index = $.adjustPath("index.html")
+    console.log(index);
+    fs.readFile(index, 'utf-8',function (err, data) {//读取内容
+        console.log(data)
+    })
+    $.require(" deploy,http,settings", function(deploy, http){
         //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
         //"mime","location","static","postData","methodOverride","json","render","matcher"
         //路由系统的任务有二
         //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
         //接受前端参数，更新数据库
+
+        //去掉根目录与端口号,先判定其是否带参数,如果没有进入缓存系统,没有进入pages,再没有进入views
         http.createServer(function(req, res) {
             $.log("req.url  :  ", req.url);
             var opts = {};//从req中提炼出一些有用信息放到这里
@@ -378,7 +388,7 @@
                 return req.url;
             }
             opts.location = location;
-            router(req, res,opts)
+         //   router(req, res,opts)
             //输出首页
             //  var arr = intercepters.concat();
             fs.readFile( path.join(__dirname,'/public/index.html'), 'utf-8',function (err, data) {//读取内容

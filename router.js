@@ -206,11 +206,11 @@ DELETE     /photos/1      Photos          destroy  用于删除photo的POST请�
         }
     }
 
-    'get,post,put,delete'.replace(mass.rword,function (method) {
+    'get,post,put,delete'.replace($.rword,function (method) {
         Router.prototype[method] = function (url, path, options) {
             path = path.split('#');
             options = options || {}
-            this.resources(path[0],mass.mix({},options,{
+            this.resources(path[0],$.mix({},options,{
                 controller:path[0],
                 action:path[1],
                 method:method.toUpperCase(),
