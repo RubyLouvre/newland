@@ -12,6 +12,7 @@
     , loadings = []                         //正在加载中的模块列表
     , returns  = {}                         //模块的返回值
     , cbi      = 1e5                        //用于生成回调函数的名字
+    , uuid     = 1
     , toString = returns.toString
     , fs = require("fs")
     , path = require("path");
@@ -47,6 +48,9 @@
         //切片操作,通常用于处理Arguments对象
         slice: function (nodes, start, end) {
             return Array.prototype.slice.call(nodes, start, end || nodes.length)
+        },
+        getUid:  function( node ){
+            return node.uniqueNumber || ( node.uniqueNumber = uuid++ );
         },
         /**
          * 生成键值统一的对象，用于高速化判定
@@ -250,7 +254,6 @@
     var nativeModules = $.oneObject("assert,child_process,cluster,crypto,dgram,dns,"+
         "events,fs,http,https,net,os,path,querystring,readline,repl,tls,tty,url,util,vm,zlib")
     function loadJS( name, url ){
-        console.log(name)
         var nick = name.slice(1);
         if( nativeModules[ nick ]){
             mapper[ name ].state = 2;
@@ -398,8 +401,8 @@
         并放进缓存与pages中，如果views目录没有对应模板，说明是高度动态的页面，
         进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
     deploy,http,app/modules/flow,app/modules/ejs,settings
-        */
-    $.require("app/modules/flow,app/modules/ejs,deploy,http,settings", function(flow, ejs, deploy, http){
+     */
+    $.require("app/modules/flow,app/modules/ejs,app/modules/status,deploy,http,settings", function(flow, status,ejs, deploy, http){
         //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
         http.createServer(function(req, res) {
             var opts = {};//从req中提炼出一些有用信息放到这里
@@ -416,51 +419,126 @@
             if( $.pagesCache[ cache_key ]){
                 console.log("先从缓存系统中寻找")
             }else{
-                opts.pages_key = $.path("app","pages", cache_key );
-                fs.readFile( opts.pages_key, 'utf-8', function (err, data) {//读取内容
+                var event = flow();
+                var pages_key = $.path("app","pages", cache_key )
+                var views_key = pages_key.replace("app\\pages", "app\\views");
+                fs.readFile( pages_key, 'utf-8', function (err, data) {//读取内容
                     if (err){
-                        opts.views_key = opts.pages_key.replace("app\\pages", "app\\views");
-                        fs.readFile( opts.views_key, 'utf-8', function (err, view_text ) {//读取内容
-                            if (err)
-                                throw err;
-                            var data = {}
-                            var partial = $.viewsCache[ opts.views_key ] || $.ejs( view_text );
-                            data.partial = partial.call({
-                                title: function( t ){
-                                    data.title = t
-                                },
-                                layout: function( t){
-                                    data.layout = t
-                                }
-                            });
-                            data.title = data.title || "xxxx"
-                            data.layout = data.layout || "xxxx";
+                        console.log("111111111111111111")
+                        event.fire(views_key)
+                    }else{
+                        console.log("222222222222222")
+                        event.fire(pages_key, data)
+                    }
+                });
+
+                event
+                .bind(pages_key,function(data){
+                    res.writeHead(200, {
+                        "Content-Type":  opts.contentType
+                    });//注意这里
+                    res.write(data);
+                    res.end();
+                } )
+                .bind(views_key,function(){
+                    fs.readFile( views_key, 'utf-8', function (err, view_text ) {//读取内容
+                        var data = {
+                            title: function( t ){
+                                data.title = t
+                            },
+                            layout: function( t){
+                                data.layout = t
+                            }
+                        };
+                        if (err){
+                            console.log("oooooooooooooooooooo")
+                            console.log(status[404])
+                            var text = fs.readFileSync( $.path("app","views", "error.html" ),  'utf-8');
+                            data.partial =  $.ejs( text ).call(data, $.mix(
+                                status[404],{
+                                    code: 404
+                                }));
                             var layout_url = $.path("app","views/layout", data.layout )
                             var page_text = fs.readFileSync( layout_url,  'utf-8');
                             var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
                             var html =  page( data );
-                            $.pagesCache[ cache_key ] = html;
-                            fs.writeFile(opts.pages_key,html,"utf-8");
+                            $.log("<code style='color:red'>",html,"</code>",true);
+                            res.writeHead(200, {
+                                "Content-Type":  opts.contentType
+                            });//注意这里
+                            res.write(html);
+                            res.end();
+                        }else{
+                            var partial = $.viewsCache[ views_key ] || $.ejs( view_text );
+                            data.partial = partial.call(data)
+                            console.log(data)
+                            var layout_url = $.path("app","views/layout", data.layout )
+                            var page_text = fs.readFileSync( layout_url,  'utf-8');
+                            var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
+                            var html =  page( data );
+                            //     $.pagesCache[ cache_key ] = html;
+                            //    fs.writeFile(opts.pages_key,html,"utf-8");
                             $.log("<code style='color:green'>",html,"</code>",true)
                             res.writeHead(200, {
                                 "Content-Type":  opts.contentType
                             });//注意这里
                             res.write(html);
                             res.end();
+                        }
+                    })
+                })
 
 
-                        })
-                    }else{
-                        res.writeHead(200, {
-                            "Content-Type":  opts.contentType
-                        });//注意这里
-                        res.write(data);
-                        res.end();
-                    }
-                });
+
+
+            //                fs.readFile( opts.pages_key, 'utf-8', function (err, data) {//读取内容
+            //                    if (err){
+            //                        opts.views_key = opts.pages_key.replace("app\\pages", "app\\views");
+            //                        fs.readFile( opts.views_key, 'utf-8', function (err, view_text ) {//读取内容
+            //                            if (err){
+            //                                throw err;
+            //                            }
+            //
+            //                            var data = {}
+            //                            var partial = $.viewsCache[ opts.views_key ] || $.ejs( view_text );
+            //                            data.partial = partial.call({
+            //                                title: function( t ){
+            //                                    data.title = t
+            //                                },
+            //                                layout: function( t){
+            //                                    data.layout = t
+            //                                }
+            //                            });
+            //                            data.title = data.title || "xxxx"
+            //                            data.layout = data.layout || "xxxx";
+            //                            var layout_url = $.path("app","views/layout", data.layout )
+            //                            var page_text = fs.readFileSync( layout_url,  'utf-8');
+            //                            var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
+            //                            var html =  page( data );
+            //                            //     $.pagesCache[ cache_key ] = html;
+            //                            //    fs.writeFile(opts.pages_key,html,"utf-8");
+            //                            $.log("<code style='color:green'>",html,"</code>",true)
+            //                            res.writeHead(200, {
+            //                                "Content-Type":  opts.contentType
+            //                            });//注意这里
+            //                            res.write(html);
+            //                            res.end();
+            //
+            //
+            //                        })
+            //                    }else{
+            //                        res.writeHead(200, {
+            //                            "Content-Type":  opts.contentType
+            //                        });//注意这里
+            //                        res.write(data);
+            //                        res.end();
+            //                    }
+            //                });
             }
         //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
         //http://localhost:8888/index.html
+        //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
+
         }).listen($.settings.port);
         console.log($.settings.port)
     });
