@@ -1,4 +1,4 @@
-$.define("server","~flow,~ejs,~status,fs,url, querystring, http,app/configs", function(flow, ejs, status, fs, url, qs, http){
+$.define("server","./flow,./view,./status,fs,url, querystring, http, app/configs", function(flow, view, status, fs, url, qs, http){
     $.mix({
         pagesCache: {},
         viewsCache: {}
@@ -22,13 +22,12 @@ $.define("server","~flow,~ejs,~status,fs,url, querystring, http,app/configs", fu
     var rext = /[^\/]\/.+?\.(\w+)$/
     // var rext = /(?:\.)(\w*)(?=$|\?|#|\:)/
     http.createServer(function(req, res) {
-
         var location =  url.parse( req.url );
         location.query = qs.parse(location.query || "") ;
         location.toString = function(){
             return req.headers.host + req.url;
         }
-        console.log(location)
+        // console.log(location)
         var cache_key = location.pathname;
         var mime = rext.test( cache_key ) && RegExp.$1 || "text"
         var contentType = req.headers['content-type'] ||  mimeMap[ mime ]
@@ -47,58 +46,48 @@ $.define("server","~flow,~ejs,~status,fs,url, querystring, http,app/configs", fu
                 }
             });
 
+            var data = {
+                title: function( t ){
+                    data.title = t
+                },
+                layout: function( t ){
+                    data.layout = t
+                }
+            };
+            //明天再把404抽取出来
             event
             .bind(pages_key,function(data){
+                //这里也应该用views生成
                 res.writeHead(200, {
                     "Content-Type":  contentType
                 });//注意这里
                 res.write(data);
                 res.end();
             } )
-            .bind(views_key,function(){
-                fs.readFile( views_key, 'utf-8', function (err, view_text ) {//读取内容
-                    var data = {
-                        title: function( t ){
-                            data.title = t
-                        },
-                        layout: function( t ){
-                            data.layout = t
-                        }
-                    };
+            .bind(views_key,function(){ //尝试取得
+                fs.readFile( views_key, 'utf-8', function (err ) {//读取内容
                     if (err){
-                        var text = fs.readFileSync( $.path("app","views", "error.html" ),  'utf-8');
-                        data.partial =  $.ejs( text ).call(data, $.mix(
-                            status[404],{
-                                code: 404
-                            }));
-                        var layout_url = $.path("app","views/layout", data.layout )
-                        var page_text = fs.readFileSync( layout_url,  'utf-8');
-                        var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
-                        var html =  page( data );
-                        $.log("<code style='color:red'>",html,"</code>",true);
-                        res.writeHead(200, {
-                            "Content-Type":  contentType
-                        });//注意这里
-                        res.write(html);
-                        res.end();
+                       event.fire("404")
                     }else{
-                        var partial = $.viewsCache[ views_key ] || $.ejs( view_text );
-                        data.partial = partial.call(data)
-                        console.log(data)
-                        var layout_url = $.path("app","views/layout", data.layout )
-                        var page_text = fs.readFileSync( layout_url,  'utf-8');
-                        var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
-                        var html =  page( data );
-                        //     $.pagesCache[ cache_key ] = html;
-                        //    fs.writeFile(opts.pages_key,html,"utf-8");
-                        $.log("<code style='color:green'>",html,"</code>",true)
-                        res.writeHead(200, {
-                            "Content-Type":  contentType
-                        });//注意这里
-                        res.write(html);
-                        res.end();
+                        view(res, data, event, {
+                            url: views_key,
+                            statusCode: 200,
+                            data: data,
+                            contentType:contentType
+                        });
                     }
                 })
+            })
+            .bind(404, function(){
+                var object = status[404];
+                object.code = 404;
+                console.log("40404")
+                view(res, data, event, {
+                    url: $.path("app","views", "error.html" ),
+                    statusCode: 404,
+                    data: object,
+                    contentType:contentType
+                });
             })
         }
     }).listen($.configs.port);

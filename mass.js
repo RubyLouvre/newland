@@ -241,7 +241,7 @@
     }
     var errorStack = $.deferred()
     var mapper = $[ "@modules" ] = { };//后端不需要dom Ready
-
+    var rsamedir = /^\.\//
     function install( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
@@ -324,8 +324,8 @@
         require: function( deps, factory, errback ){
             var _deps = {}, args = [], dn = 0, cn = 0;
             (deps +"").replace($.rword,function( url, name, match){
-                if(url.indexOf("~") == 0){
-                    url = url.replace("~", factory["@path"] );
+                if(url.indexOf("./") === 0){
+                    url = url.replace(rsamedir, factory["@path"] );
                 }
                 dn++;
                 match = url.match( rmodule );

@@ -1,7 +1,7 @@
 //=========================================
 //  操作流模块,用于流程控制
 //==========================================
-$.define("flow","~lang",function(){//~表示省略，说明lang模块与flow模块在同一目录
+$.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模块在同一目录
     function OperateFlow(){ //数据共享,但策略自定
         this.root = {};
         this.uuid = $.getUid({})

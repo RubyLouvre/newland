@@ -1,4 +1,4 @@
-mass.define("plural","lang",function($$){//处理单词的单复数
+$.define("plural","../lang",function($$){//处理单词的单复数
     var PLURALS = [],
     SINGULARS = [],
     UNCOUNTABLES = [];
