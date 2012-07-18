@@ -1,4 +1,4 @@
-$.define("server","~flow,~ejs,~status,path, http,app/configs", function(flow, ejs, status, path, http){
+$.define("server","~flow,~ejs,~status,fs,url, querystring, http,app/configs", function(flow, ejs, status, fs, url, qs, http){
     $.mix({
         pagesCache: {},
         viewsCache: {}
@@ -16,18 +16,23 @@ $.define("server","~flow,~ejs,~status,path, http,app/configs", function(flow, ej
         'png': 'image/png',
         'manifest': 'text/cache-manifest'
     };
+    //   var url = "/special/show_6582212/wbUD55K148PI7ryhIVCuhg...html"
+    //   var a = /(?:\.)(\w*)(?=$|\?|#|\:)/.test(url) && RegExp.$1 || "text";
+    //   console.log(a)
+    var rext = /[^\/]\/.+?\.(\w+)$/
+    // var rext = /(?:\.)(\w*)(?=$|\?|#|\:)/
     http.createServer(function(req, res) {
-        var opts = {};//从req中提炼出一些有用信息放到这里
-        var str = req.headers['content-type'] || '';
-        opts.mime = path.extname( req.url ).slice(1) || "text"
-        opts.contentType =  str.split(';')[0] ||  mimeMap[ opts.mime ];
-        var location =  require("url").parse( req.url );
-        location.query = require("querystring").parse(location.query || "") ;
+
+        var location =  url.parse( req.url );
+        location.query = qs.parse(location.query || "") ;
         location.toString = function(){
-            return req.url;
+            return req.headers.host + req.url;
         }
-        opts.location = location;
-        var cache_key = location.pathname
+        console.log(location)
+        var cache_key = location.pathname;
+        var mime = rext.test( cache_key ) && RegExp.$1 || "text"
+        var contentType = req.headers['content-type'] ||  mimeMap[ mime ]
+
         if( $.pagesCache[ cache_key ]){
             console.log("先从缓存系统中寻找")
         }else{
@@ -45,7 +50,7 @@ $.define("server","~flow,~ejs,~status,path, http,app/configs", function(flow, ej
             event
             .bind(pages_key,function(data){
                 res.writeHead(200, {
-                    "Content-Type":  opts.contentType
+                    "Content-Type":  contentType
                 });//注意这里
                 res.write(data);
                 res.end();
@@ -56,13 +61,11 @@ $.define("server","~flow,~ejs,~status,path, http,app/configs", function(flow, ej
                         title: function( t ){
                             data.title = t
                         },
-                        layout: function( t){
+                        layout: function( t ){
                             data.layout = t
                         }
                     };
                     if (err){
-                        console.log("oooooooooooooooooooo")
-                        console.log(status[404])
                         var text = fs.readFileSync( $.path("app","views", "error.html" ),  'utf-8');
                         data.partial =  $.ejs( text ).call(data, $.mix(
                             status[404],{
@@ -74,7 +77,7 @@ $.define("server","~flow,~ejs,~status,path, http,app/configs", function(flow, ej
                         var html =  page( data );
                         $.log("<code style='color:red'>",html,"</code>",true);
                         res.writeHead(200, {
-                            "Content-Type":  opts.contentType
+                            "Content-Type":  contentType
                         });//注意这里
                         res.write(html);
                         res.end();
@@ -90,7 +93,7 @@ $.define("server","~flow,~ejs,~status,path, http,app/configs", function(flow, ej
                         //    fs.writeFile(opts.pages_key,html,"utf-8");
                         $.log("<code style='color:green'>",html,"</code>",true)
                         res.writeHead(200, {
-                            "Content-Type":  opts.contentType
+                            "Content-Type":  contentType
                         });//注意这里
                         res.write(html);
                         res.end();
@@ -99,5 +102,5 @@ $.define("server","~flow,~ejs,~status,path, http,app/configs", function(flow, ej
             })
         }
     }).listen($.configs.port);
-    $.log($.configs.port)
+   
 })

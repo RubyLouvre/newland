@@ -318,7 +318,6 @@
                 [].splice.call( args, 1, 0, "" );
             }
             args[2].token = "@"+name; //模块名
-            $.log('<code style="color:magenta;">define ', name, '</code>', true);
             this.require( args[1], args[2] );
         },
         //请求模块
@@ -377,8 +376,8 @@
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
   
-    $.require("system/server", function(server){
-        server.start();
+    $.require("system/server", function(){
+        $.log($.configs.port)
     });
     //路由系统的任务有二
     //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
