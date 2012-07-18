@@ -15,11 +15,12 @@
     , toString = returns.toString
     , fs = require("fs")
     , path = require("path");
+
     /**
      * 糅杂，为一个对象添加更多成员
-     * @param {Object} target 目标对象
-     * @param {Object} source 属性包
-     * @return {Object} 目标对象
+     * @param {Object} receiver 接受者
+     * @param {Object} supplier 提供者
+     * @return  {Object} 目标对象
      */
     function mix( receiver, supplier ){
         var args = Array.apply([], arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
@@ -36,10 +37,10 @@
             }
         }
         return receiver;
-    }
-
-    mix($,{//为此版本的命名空间对象添加成员
-        rword : /[^, ]+/g,
+    };
+   
+    mix( $, {//为此版本的命名空间对象添加成员
+        rword: /[^, ]+/g,
         mix:  mix,
         "@debug" : true,
         isWindows: process.platform === 'win32',//判定当前平台是否为window
@@ -53,7 +54,7 @@
          * @param {Number} val 可选，默认为1
          * @return {Object}
          */
-        oneObject : function(array, val){
+        oneObject: function(array, val){
             if(typeof array == "string"){
                 array = array.match($.rword) || [];
             }
@@ -69,7 +70,7 @@
          * @param {String} str 要比较的类型
          * @return {String|Boolean}
          */
-        type : function (obj, str){
+        type: function (obj, str){
             var result = class2type[ (obj == null || obj !== obj )? obj : toString.call(obj) ] || "#";
             if( result.charAt(0) === "#"){
                 if(Buffer.isBuffer(obj)){
@@ -99,7 +100,7 @@
             return self;
         },
         //提供三组对文件夹的批处理:创建文件(夹),创建某一目录的东西到新目录,删除文件(夹)
-        mkdirSync:function(url,mode,cb){
+        mkdirSync: function(url,mode,cb){
             var path = require("path"), arr = url.replace(/\\/g,"/").split("/");
             mode = mode || 0755;
             cb = cb || $.noop;
@@ -122,7 +123,7 @@
             }
             arr.length && inner(arr.shift());
         } ,
-        cpdirSync:function() {
+        cpdirSync: function() {
             return function cpdirSync( old, neo ) {
                 var arr = fs.readdirSync(old), folder, stat;
                 if(!path.existsSync(neo)){//创建新文件
@@ -141,7 +142,7 @@
                 }
             }
         }(),
-        rmdirSync : (function(){
+        rmdirSync: (function(){
             function iterator(url,dirs){
                 var stat = fs.statSync(url);
                 if(stat.isDirectory()){
@@ -236,6 +237,7 @@
     }
     var errorStack = $.deferred()
     var mapper = $[ "@modules" ] = { };//后端不需要dom Ready
+
     function install( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
@@ -248,42 +250,35 @@
     var nativeModules = $.oneObject("assert,child_process,cluster,crypto,dgram,dns,"+
         "events,fs,http,https,net,os,path,querystring,readline,repl,tls,tty,url,util,vm,zlib")
     function loadJS( name, url ){
+        console.log(name)
         var nick = name.slice(1);
-        if(nativeModules[ nick ]){
+        if( nativeModules[ nick ]){
             mapper[ name ].state = 2;
+            returns[ name ] = require( nick );
             url = nick;
-        }else{
-            url = url || process.cwd()+"/" + nick + ".js";
-        }
-        try{
-            returns[ name ] = require( url );
             process.nextTick( $._checkDeps );
-        }catch( e ){
-            errorStack(function(){
-                $.log("<code style='color:red'>",e , "</code>", true);
-            }).fire();//打印错误堆栈
+        }else{
+            try{
+                var _define = $.define;
+                $.define = function(){
+                    var args = Array.apply([],arguments);
+                    args[0] = nick;      //自动修正名字;
+                    $.define = _define;  //还原为真正的define
+                    args[args.length - 1]["@path"] = nick.slice( 0, nick.lastIndexOf("/") + 1);//取得被依赖模块的文件夹
+                    _define.apply($, args);
+                }
+                url = url || path.join( process.cwd(), nick + ".js");
+                require( url );
+                process.nextTick( $._checkDeps );
+            }catch( e ){
+                errorStack(function(){
+                    $.log("<code style='color:red'>",e , "</code>", true);
+                }).fire();//打印错误堆栈
+            }
         }
     }
 
     $.mix( $, {
-        define: function( name, deps, factory ){//模块名,依赖列表,模块本身
-            var str = "/"+name;
-            //   console.log(module.filename)
-            for(var prop in mapper){
-                if(mapper.hasOwnProperty(prop) ){
-                    if(prop.substring(prop.length - str.length) === str && mapper[prop].state !== 2){
-                        name = prop.slice(1);//自动修正模块名(加上必要的目录)
-                        break;
-                    }
-                }
-            }
-            if(typeof deps == "function"){//处理只有两个参数的情况
-                factory = deps;
-                deps = "";
-            }
-            factory.token = "@"+name; //模块名
-            this.require( deps, factory );
-        },
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         _checkDeps: function (){
             loop:
@@ -295,18 +290,41 @@
                     }
                 }
                 //如果deps是空对象或者其依赖的模块的状态都是2
-                if( obj.state != 2){
+                if( obj.state !== 2){
                     loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
-                    $.log('<code style="color:cyan;">已加载', obj.name, '模块</code>', true);
-                    returns[ obj.name ] = install( obj.name, obj.args, obj.callback );
-                    obj.state = 2;//只收集模块的返回值
-                    $._checkDeps();
+                    var token = obj.name, ret = install( token, obj.args, obj.callback );
+                    if( token.indexOf("@cb") === -1 ){
+                        returns[ token ] = ret;
+                        mapper[ token ].state = 2;
+                        $.log('<code style="color:cyan;">已加载', token, '模块</code>', true);
+                        $._checkDeps();
+                    }
                 }
             }
         },
+        //定义模块
+        define: function( name, deps, factory ){//模块名,依赖列表,模块本身
+            var args = arguments;
+            if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
+                if( deps ){
+                    return;
+                }
+                [].splice.call( args, 1, 1 );
+            }
+            if( typeof args[1] === "function" ){//处理只有两个参数的情况
+                [].splice.call( args, 1, 0, "" );
+            }
+            args[2].token = "@"+name; //模块名
+            $.log('<code style="color:magenta;">define ', name, '</code>', true);
+            this.require( args[1], args[2] );
+        },
+        //请求模块
         require: function( deps, factory, errback ){
             var _deps = {}, args = [], dn = 0, cn = 0;
-            (deps +"").replace($.rword,function(url,name,match){
+            (deps +"").replace($.rword,function( url, name, match){
+                if(url.indexOf("~") == 0){
+                    url = url.replace("~", factory["@path"] );
+                }
                 dn++;
                 match = url.match( rmodule );
                 name  = "@"+ match[1];//取得模块名
@@ -323,11 +341,13 @@
             });
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
             if( dn === cn ){//如果需要安装的等于已安装好的
-                (mapper[ token ] || {}).state = 2;
+                var ret = install( token, args, factory )
                 if( token.indexOf("@cb") === -1 ){
+                    returns[ token ] = ret;
+                    mapper[ token ].state = 2;
                     $.log('<code style="color:cyan;">已加载', token, '模块</code>', true);
                 }
-                return returns[ token ] = install( token, args, factory );//装配到框架中
+                return ret;//装配到框架中
             }
             if( errback ){
                 errorStack( errback );//压入错误堆栈
@@ -345,30 +365,14 @@
         md5: function(str, encoding){
             return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
         },
-        settings:{}
+        path: function(){
+            return path.join.apply(null,arguments);
+        },
+        settings: {}
     });
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    $.intercepter = function(fn){//拦截器的外壳
-        return function(req, res, err){
-            if(err ){
-                req.emit("next_error", req, res)
-            //   endError(err,req,res)
-            }else if(fn(req,res) === true){
-                req.emit("next_intercepter", req, res)
-            }
-        }
-    }
-    $.adjustPath = function(){
-        return path.join.apply(null,arguments)
-    }
-    //  var index = $.adjustPath("index.html")
-    //   console.log(index);
-    //   fs.readFile(index, 'utf-8',function (err, data) {//读取内容
-    //      console.log(data)
-    //   })
-    //"mime","location","static","postData","methodOverride","json","render","matcher"
     $.pagesCache = {};
     $.viewsCache = {}
     var mimeMap = {
@@ -384,24 +388,25 @@
         'png': 'image/png',
         'manifest': 'text/cache-manifest'
     };
-    $.require(" deploy,http,settings,app/modules/ejs", function(deploy, http){
-        //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
+  
+    //路由系统的任务有二
+    //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
+    //接受前端参数，更新数据库
 
-        //路由系统的任务有二
-        //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
-        //接受前端参数，更新数据库
-
-        /**一个请求过来，取其pathname，先进入缓存系统取页面，
+    /**一个请求过来，取其pathname，先进入缓存系统取页面，
          没有进入pages目录找，再没有到views目录找模板页面，通过ejs系统拼好返回，
         并放进缓存与pages中，如果views目录没有对应模板，说明是高度动态的页面，
         进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
+    deploy,http,app/modules/flow,app/modules/ejs,settings
         */
+    $.require("app/modules/flow,app/modules/ejs,deploy,http,settings", function(flow, ejs, deploy, http){
+        //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
         http.createServer(function(req, res) {
             var opts = {};//从req中提炼出一些有用信息放到这里
             var str = req.headers['content-type'] || '';
-            opts.mime = path.extname(req.url).slice(1) || "text"
-            opts.contentType =  str.split(';')[0] ||  mimeMap[ opts.mime ]
-            var location =  require("url").parse(req.url);
+            opts.mime = path.extname( req.url ).slice(1) || "text"
+            opts.contentType =  str.split(';')[0] ||  mimeMap[ opts.mime ];
+            var location =  require("url").parse( req.url );
             location.query = require("querystring").parse(location.query || "") ;
             location.toString = function(){
                 return req.url;
@@ -411,7 +416,7 @@
             if( $.pagesCache[ cache_key ]){
                 console.log("先从缓存系统中寻找")
             }else{
-                opts.pages_key = $.adjustPath("app","pages", cache_key );
+                opts.pages_key = $.path("app","pages", cache_key );
                 fs.readFile( opts.pages_key, 'utf-8', function (err, data) {//读取内容
                     if (err){
                         opts.views_key = opts.pages_key.replace("app\\pages", "app\\views");
@@ -430,7 +435,7 @@
                             });
                             data.title = data.title || "xxxx"
                             data.layout = data.layout || "xxxx";
-                            var layout_url = $.adjustPath("app","views/layout", data.layout )
+                            var layout_url = $.path("app","views/layout", data.layout )
                             var page_text = fs.readFileSync( layout_url,  'utf-8');
                             var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
                             var html =  page( data );
@@ -442,8 +447,8 @@
                             });//注意这里
                             res.write(html);
                             res.end();
-                           
-                         
+
+
                         })
                     }else{
                         res.writeHead(200, {
@@ -455,12 +460,13 @@
                 });
             }
         //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-
+        //http://localhost:8888/index.html
         }).listen($.settings.port);
         console.log($.settings.port)
-    })
+    });
 
-    
+
+
 })();
 //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
 //2011.12.17 $.define再也不用指定模块所在的目录了,

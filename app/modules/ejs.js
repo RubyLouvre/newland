@@ -1,9 +1,8 @@
-$.define("ejs", function(){
+$.define("ejs", "~lang",function(){
     //用法如如ASP，JSP，ruby的ERB, 完全没有入门难度
     //不过太过自由写意，让用户任意在HTML镶嵌逻辑容易造成维护灾难
     //使用者请自行约束
     //http://www.cnblogs.com/rubylouvre/archive/2012/03/19/2405867.html
-    $.quote = JSON.stringify
     $.ejs = function( str ){
         var ropen = /\s*<%\s*/
         var rclose = /\s*%>\s*/
@@ -45,4 +44,5 @@ $.define("ejs", function(){
             "with(this){\n\t"
             + buff.join("")+'\t;return __views.join(""); \n}');
     }
+    return $.ejs;
 })
