@@ -285,7 +285,7 @@
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         _checkDeps: function (){
             loop:
-            for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
+                for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -371,27 +371,15 @@
         path: function(){
             return path.join.apply(null,arguments);
         },
-        settings: {}
+        configs: {}
     });
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    $.pagesCache = {};
-    $.viewsCache = {}
-    var mimeMap = {
-        'txt': 'text/plain',
-        'html': 'text/html',
-        'css': 'text/css',
-        'xml': 'application/xml',
-        'json': 'application/json',
-        'js': 'application/javascript',
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-        'gif': 'image/gif',
-        'png': 'image/png',
-        'manifest': 'text/cache-manifest'
-    };
   
+    $.require("system/server", function(server){
+        server.start();
+    });
     //路由系统的任务有二
     //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
     //接受前端参数，更新数据库
@@ -402,146 +390,12 @@
         进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
     deploy,http,app/modules/flow,app/modules/ejs,settings
      */
-    $.require("app/modules/flow,app/modules/ejs,app/modules/status,deploy,http,settings", function(flow, status,ejs, deploy, http){
-        //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
-        http.createServer(function(req, res) {
-            var opts = {};//从req中提炼出一些有用信息放到这里
-            var str = req.headers['content-type'] || '';
-            opts.mime = path.extname( req.url ).slice(1) || "text"
-            opts.contentType =  str.split(';')[0] ||  mimeMap[ opts.mime ];
-            var location =  require("url").parse( req.url );
-            location.query = require("querystring").parse(location.query || "") ;
-            location.toString = function(){
-                return req.url;
-            }
-            opts.location = location;
-            var cache_key = location.pathname
-            if( $.pagesCache[ cache_key ]){
-                console.log("先从缓存系统中寻找")
-            }else{
-                var event = flow();
-                var pages_key = $.path("app","pages", cache_key )
-                var views_key = pages_key.replace("app\\pages", "app\\views");
-                fs.readFile( pages_key, 'utf-8', function (err, data) {//读取内容
-                    if (err){
-                        console.log("111111111111111111")
-                        event.fire(views_key)
-                    }else{
-                        console.log("222222222222222")
-                        event.fire(pages_key, data)
-                    }
-                });
 
-                event
-                .bind(pages_key,function(data){
-                    res.writeHead(200, {
-                        "Content-Type":  opts.contentType
-                    });//注意这里
-                    res.write(data);
-                    res.end();
-                } )
-                .bind(views_key,function(){
-                    fs.readFile( views_key, 'utf-8', function (err, view_text ) {//读取内容
-                        var data = {
-                            title: function( t ){
-                                data.title = t
-                            },
-                            layout: function( t){
-                                data.layout = t
-                            }
-                        };
-                        if (err){
-                            console.log("oooooooooooooooooooo")
-                            console.log(status[404])
-                            var text = fs.readFileSync( $.path("app","views", "error.html" ),  'utf-8');
-                            data.partial =  $.ejs( text ).call(data, $.mix(
-                                status[404],{
-                                    code: 404
-                                }));
-                            var layout_url = $.path("app","views/layout", data.layout )
-                            var page_text = fs.readFileSync( layout_url,  'utf-8');
-                            var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
-                            var html =  page( data );
-                            $.log("<code style='color:red'>",html,"</code>",true);
-                            res.writeHead(200, {
-                                "Content-Type":  opts.contentType
-                            });//注意这里
-                            res.write(html);
-                            res.end();
-                        }else{
-                            var partial = $.viewsCache[ views_key ] || $.ejs( view_text );
-                            data.partial = partial.call(data)
-                            console.log(data)
-                            var layout_url = $.path("app","views/layout", data.layout )
-                            var page_text = fs.readFileSync( layout_url,  'utf-8');
-                            var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
-                            var html =  page( data );
-                            //     $.pagesCache[ cache_key ] = html;
-                            //    fs.writeFile(opts.pages_key,html,"utf-8");
-                            $.log("<code style='color:green'>",html,"</code>",true)
-                            res.writeHead(200, {
-                                "Content-Type":  opts.contentType
-                            });//注意这里
-                            res.write(html);
-                            res.end();
-                        }
-                    })
-                })
+    //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
+       
+//http://localhost:8888/index.html
+//现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
 
-
-
-
-            //                fs.readFile( opts.pages_key, 'utf-8', function (err, data) {//读取内容
-            //                    if (err){
-            //                        opts.views_key = opts.pages_key.replace("app\\pages", "app\\views");
-            //                        fs.readFile( opts.views_key, 'utf-8', function (err, view_text ) {//读取内容
-            //                            if (err){
-            //                                throw err;
-            //                            }
-            //
-            //                            var data = {}
-            //                            var partial = $.viewsCache[ opts.views_key ] || $.ejs( view_text );
-            //                            data.partial = partial.call({
-            //                                title: function( t ){
-            //                                    data.title = t
-            //                                },
-            //                                layout: function( t){
-            //                                    data.layout = t
-            //                                }
-            //                            });
-            //                            data.title = data.title || "xxxx"
-            //                            data.layout = data.layout || "xxxx";
-            //                            var layout_url = $.path("app","views/layout", data.layout )
-            //                            var page_text = fs.readFileSync( layout_url,  'utf-8');
-            //                            var page = $.viewsCache[ layout_url ] || $.ejs(page_text);
-            //                            var html =  page( data );
-            //                            //     $.pagesCache[ cache_key ] = html;
-            //                            //    fs.writeFile(opts.pages_key,html,"utf-8");
-            //                            $.log("<code style='color:green'>",html,"</code>",true)
-            //                            res.writeHead(200, {
-            //                                "Content-Type":  opts.contentType
-            //                            });//注意这里
-            //                            res.write(html);
-            //                            res.end();
-            //
-            //
-            //                        })
-            //                    }else{
-            //                        res.writeHead(200, {
-            //                            "Content-Type":  opts.contentType
-            //                        });//注意这里
-            //                        res.write(data);
-            //                        res.end();
-            //                    }
-            //                });
-            }
-        //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-        //http://localhost:8888/index.html
-        //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
-
-        }).listen($.settings.port);
-        console.log($.settings.port)
-    });
 
 
 
