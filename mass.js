@@ -241,7 +241,6 @@
     }
     var errorStack = $.deferred()
     var mapper = $[ "@modules" ] = { };//后端不需要dom Ready
-    var rsamedir = /^\.\//
     function install( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
@@ -250,7 +249,10 @@
         $.debug( name );//想办法取得函法中的exports对象
         return ret;
     }
-
+    function goTop(path, user){
+        for(var a = path+user;/\.\./.test(a); a=a.replace(/\w+\/\.\.\//g,"") );
+        return a;
+    }
     var nativeModules = $.oneObject("assert,child_process,cluster,crypto,dgram,dns,"+
         "events,fs,http,https,net,os,path,querystring,readline,repl,tls,tty,url,util,vm,zlib")
     function loadJS( name, url ){
@@ -285,7 +287,7 @@
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         _checkDeps: function (){
             loop:
-                for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
+            for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -322,10 +324,12 @@
         },
         //请求模块
         require: function( deps, factory, errback ){
-            var _deps = {}, args = [], dn = 0, cn = 0;
+            var _deps = {}, args = [], dn = 0, cn = 0, path = factory["@path"];
             (deps +"").replace($.rword,function( url, name, match){
                 if(url.indexOf("./") === 0){
-                    url = url.replace(rsamedir, factory["@path"] );
+                    url = url.replace(/^\.\//, path );
+                }else if(url.indexOf("../") === 0){ //by 一群 贵阳-Hodor(331492653)
+                    for( url = path+url;  /\.\./.test( url ); url = url.replace(/\w+\/\.\.\//g,"") );
                 }
                 dn++;
                 match = url.match( rmodule );
@@ -379,13 +383,10 @@
     $.require("system/server", function(){
         $.log($.configs.port)
     });
-    //路由系统的任务有二
-    //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
-    //接受前端参数，更新数据库
+//路由系统的任务有二
+//到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
+//接受前端参数，更新数据库
 
-
- 
-       
 //http://localhost:8888/index.html
 //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
 

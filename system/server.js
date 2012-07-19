@@ -1,5 +1,5 @@
-$.define("server","./flow,./view,./status, ./deploy,  fs,url, querystring, http, app/configs",
-    function(flow, view, status,deploy, fs, url, qs, http){
+$.define("server","./flow,./view,./status, ./deploy, fs,url, querystring, http, app/configs",
+    function(flow, view, status, deploy, fs, url, qs, http){
         $.mix({
             pagesCache: {},
             viewsCache: {}
