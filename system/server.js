@@ -70,10 +70,9 @@ $.define("server","./flow,./view,./status, ./deploy, fs,url, querystring, http, 
                 //明天再把404抽取出来
                 event
                 .bind(pages_key,function(data){
-                    //这里也应该用views生成
                     res.writeHead(200, {
                         "Content-Type":  contentType
-                    });//注意这里
+                    });
                     res.write(data);
                     res.end();
                 } )
@@ -85,8 +84,9 @@ $.define("server","./flow,./view,./status, ./deploy, fs,url, querystring, http, 
                         if (err){
                             event.fire("404")
                         }else{
-                            view(res, data,event, {
+                            view(res, data, event, {
                                 url: views_key,
+                                pagesKey:pages_key,
                                 status: 200,
                                 data: data,
                                 cacheKey: cache_key,
