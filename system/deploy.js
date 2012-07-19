@@ -1,4 +1,4 @@
-$.define("deploy","fs, path, child_process, app/config",function( fs, path, child_process){
+$.define("deploy","fs, path, child_process",function( fs, path, child_process){
     var child     //重启线程
     function rebootProcess(exec,args){
         args = args || []

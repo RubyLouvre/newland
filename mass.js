@@ -383,14 +383,8 @@
     //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
     //接受前端参数，更新数据库
 
-    /**一个请求过来，取其pathname，先进入缓存系统取页面，
-         没有进入pages目录找，再没有到views目录找模板页面，通过ejs系统拼好返回，
-        并放进缓存与pages中，如果views目录没有对应模板，说明是高度动态的页面，
-        进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
-    deploy,http,app/modules/flow,app/modules/ejs,settings
-     */
 
-    //deploy( __dirname );//监听当前目录下文件的变化,实现热启动
+ 
        
 //http://localhost:8888/index.html
 //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
