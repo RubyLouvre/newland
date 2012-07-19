@@ -34,15 +34,21 @@ $.define("server","./flow,./view,./status, ./deploy, fs,url, querystring, http, 
             location.toString = function(){
                 return req.headers.host + req.url;
             }
-            // console.log(location)
             var cache_key = location.pathname;
+            
             var mime = rext.test( cache_key ) && RegExp.$1 || "text"
             var contentType = req.headers['content-type'] ||  mimeMap[ mime ]
+            var event = flow(), page = $.pagesCache[ cache_key ]
+            if( page){
+                console.log("cache page")
+                res.writeHead(page.status, {
+                    "Content-Type":  page.contentType
+                });
+                res.write(page.data);
+                res.end();
 
-            if( $.pagesCache[ cache_key ]){
-                console.log("先从缓存系统中寻找")
             }else{
-                var event = flow();
+               
                 var pages_key = $.path("app","pages", cache_key )
                 var views_key = pages_key.replace("app\\pages", "app\\views");
                 fs.readFile( pages_key, 'utf-8', function (err, data) {//读取内容
@@ -83,6 +89,8 @@ $.define("server","./flow,./view,./status, ./deploy, fs,url, querystring, http, 
                                 url: views_key,
                                 status: 200,
                                 data: data,
+                                cacheKey: cache_key,
+                                cachePage: true,
                                 contentType:contentType
                             });
                         }
