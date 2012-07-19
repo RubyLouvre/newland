@@ -39,7 +39,7 @@
         }
         return receiver;
     };
-   
+  
     mix( $, {//为此版本的命名空间对象添加成员
         rword: /[^, ]+/g,
         mix:  mix,
@@ -103,50 +103,51 @@
             self.complete = $.noop;
             return self;
         },
-        //提供三组对文件夹的批处理:创建文件(夹),创建某一目录的东西到新目录,删除文件(夹)
-        mkdirSync: function(url,mode,cb){
-            var path = require("path"), arr = url.replace(/\\/g,"/").split("/");
-            mode = mode || 0755;
-            cb = cb || $.noop;
-            if(arr[0]==="."){//处理 ./aaa
-                arr.shift();
+        rmdirSync : function(path, failSilent) {
+            var files;
+            try {
+                files = fs.readdirSync(path);
+            } catch (err) {
+                if(failSilent) return;
+                throw new Error(err.message);
             }
-            if(arr[0] == ".."){//处理 ../ddd/d
-                arr.splice(0,2,arr[0]+"/"+arr[1])
+            /*  Loop through and delete everything in the sub-tree after checking it */
+            for(var i = 0; i < files.length; i++) {
+                var currFile = fs.lstatSync(path + "/" + files[i]);
+                if(currFile.isDirectory()) // Recursive function back to the beginning
+                    $.rmdirSync(path + "/" + files[i]);
+
+                else if(currFile.isSymbolicLink()) // Unlink symlinks
+                    fs.unlinkSync(path + "/" + files[i]);
+
+                else // Assume it's a file - perhaps a try/catch belongs here?
+                    fs.unlinkSync(path + "/" + files[i]);
             }
-            function inner(cur){
-                if(!path.existsSync(cur)){//不存在就创建一个
-                    fs.mkdirSync(cur, mode);
-                    $.log("<code style='color:green'>创建目录"+cur+"成功</code>", true);
-                }
-                if(arr.length){
-                    inner(cur + "/"+arr.shift());
-                }else{
-                    cb();
-                }
-            }
-            arr.length && inner(arr.shift());
-        } ,
-        cpdirSync: function() {
-            return function cpdirSync( old, neo ) {
-                var arr = fs.readdirSync(old), folder, stat;
-                if(!path.existsSync(neo)){//创建新文件
-                    fs.mkdirSync(neo, 0755);
-                    $.log("<code style='color:green'>创建目录"+neo + "/" + el+"成功</code>",true);
-                }
-                for(var i = 0, el ; el = arr[i++];){
-                    folder = old + "/" + el
-                    stat = fs.statSync(folder);
-                    if(stat.isDirectory()){
-                        cpdirSync(folder, neo + "/" + el)
-                    }else{
-                        fs.writeFileSync(neo + "/" + el,fs.readFileSync(folder));
-                        $.log("<code style='color:magenta'>创建文件"+neo + "/" + el+"成功</code>",true);
-                    }
-                }
-            }
-        }(),
-        rmdirSync: (function(){
+            /*  Now that we know everything in the sub-tree has been deleted, we can delete the main
+        directory. Huzzah for the shopkeep. */
+            return fs.rmdirSync(path);
+        },
+        rmdir : function (dir, clbk){
+            fs.readdir(dir, function(err, files){
+                if (err) return clbk(err);
+                (function rmFile(err){
+                    if (err) return clbk(err);
+                    var filename = files.shift();
+                    if (filename === null || typeof filename == 'undefined')
+                        return fs.rmdir(dir, clbk);
+
+                    var file = dir+'/'+filename;
+                    fs.stat(file, function(err, stat){
+                        if (err) return clbk(err);
+                        if (stat.isDirectory())
+                            $.rmdir(file, rmFile);
+                        else
+                            fs.unlink(file, rmFile);
+                    });
+                })();
+            });
+        },
+        removeSync: (function(){
             function iterator(url,dirs){
                 var stat = fs.statSync(url);
                 if(stat.isDirectory()){
@@ -175,7 +176,69 @@
                     e.code === "ENOENT" ? cb() : cb(e);
                 }
             }
-        })()
+        })(),
+        mkdirSync: function(p){
+            p = path.normalize(p);
+            var array = p.split( path.sep );
+            for(var i = 0, cur; i < array.length; i++){
+                if(i == 0){
+                    cur = array[i]
+                }else{
+                    cur += (path.sep + array[i]);
+                }
+                try{
+                    fs.mkdirSync(cur, "0755");
+                }catch(e){}
+            }
+        },
+        mkdir: function(p, cb){
+            p = path.normalize(p);
+            var array = p.split( path.sep );
+            function inner(dir, array, cn ){
+                dir  += (!dir ? array.shift() :  path.sep + array.shift());
+                try{
+                    fs.mkdirSync(dir, "0755");
+                }catch(e){}
+                if(array.length){
+                    inner(dir ,array)
+                }else if(typeof cb === "function"){
+                    cb()
+                }
+            }
+            inner("", array,cb)
+        },
+        
+        mkFileSync: function( p , data, encoding){
+            p = path.normalize(p);
+            var i = p.lastIndexOf(path.sep)
+            var dir = p.slice(0, i);
+            if(dir){
+                console.log(dir)
+                $.mkdirSync(dir, "0755" )
+            }
+            console.log(p)
+            fs.writeFileSync( p, data, encoding)
+        },
+
+        cpdirSync: function() {
+            return function cpdirSync( old, neo ) {
+                var arr = fs.readdirSync(old), folder, stat;
+                if(!path.existsSync(neo)){//创建新文件
+                    fs.mkdirSync(neo, 0755);
+                    $.log("<code style='color:green'>创建目录"+neo + "/" + el+"成功</code>",true);
+                }
+                for(var i = 0, el ; el = arr[i++];){
+                    folder = old + "/" + el
+                    stat = fs.statSync(folder);
+                    if(stat.isDirectory()){
+                        cpdirSync(folder, neo + "/" + el)
+                    }else{
+                        fs.writeFileSync(neo + "/" + el,fs.readFileSync(folder));
+                        $.log("<code style='color:magenta'>创建文件"+neo + "/" + el+"成功</code>",true);
+                    }
+                }
+            }
+        }()
     });
 
     $.noop = $.error = $.debug = function(){};
@@ -379,10 +442,11 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-  
-    $.require("system/server", function(){
-        $.log($.configs.port)
-    });
+//   $.mkFileSync("files/45643/aara/test.js",'alert(5)');
+
+//   $.require("system/server", function(){
+//       $.log($.configs.port)
+//   });
 //路由系统的任务有二
 //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
 //接受前端参数，更新数据库
