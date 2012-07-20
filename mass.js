@@ -176,63 +176,86 @@
             }
         })(),
         //p 为路径，cb为最终回调，opts为可选的配置对象，里面包含match过滤函数，one表示是否找到一个就终于遍历
-        walk: function  ( p, cb, opts){
-            var files = [],dirs =[], count = 0;
-            cb = typeof cb === "function" ? cb : $.noop
-            opts = opts ||{}
-            function push(arr, el){
+        walk: new function  (  ){
+            function push(opts, el, prop){
                 if((typeof opts.match == "function") ? opts.match( el ) : true){
-                    arr.push( el );
-                    if(opts.one){
+                    opts[prop].push( el );
+                    if(opts.one === true){
                         opts.match = function(){
                             return false
                         };
-                        count = 0
+                        opts.count = 0;
+                    //opts.cb(opts.files, opts.dirs)
                     }
                 }
             }
-            function inner( p ){
-                count++
+            function inner( p, opts ){
+                opts.count++
                 fs.stat(p, function(e, s){
-                    count--
+                    opts.count--
+                    //  opts.cb(opts.files, opts.dirs)
                     if(!e){
                         if( s.isDirectory() ){
-                            count++
-                            push(dirs, p);
+                            push(opts, p, "dirs");
+                            opts.count++
                             fs.readdir( p, function(e, array){
-                                count--
+                                opts.count--;
                                 for(var i = 0, n = array.length; i < n; i++ ){
-                                    inner( path.join( p , array[i]) )
+                                    inner( path.join( p , array[i]), opts )
                                 }
+                                if(opts.count == 0){
+                                    opts.cb(opts.files, opts.dirs)
+                                }      
                             });
                         }else{
-                            push(files, p )
+                            push(opts, p, "files");
                         }
+                        if(opts.count == 0){
+                            opts.cb(opts.files, opts.dirs)
+                        }      
                     }
-                    if(count === 0){
-                        cb( files, dirs );
+                    if(e && e.code == "ENOENT"){
+                        opts.cb(opts.files, opts.dirs)
                     }
-                })
+                });
             }
-            inner( path.normalize(p) )
+            return function( p, cb, opts ){
+                opts = opts ||{}
+                opts.files = [];
+                opts.dirs = [];
+                opts.cb = typeof cb === "function" ? cb : $.noop
+                opts.count = 0;
+                inner( path.normalize(p), opts );
+            }
         },
-        remove: new function(  ){
-            function inner(array, api, cb){
-                var c = array.length, n = c;
-                for(var i = 0 ; i < n ; i++){
-                    api(array[i], function(){
-                        c--;
-                        if(c == 0){
-                            cb()
-                        }
+        remove: new function( ){
+            function inner(dirs, cb){
+                var dir = dirs.pop();
+                if(dir){
+                    fs.rmdir(dir, function(e){
+                        inner(dirs, cb);
                     })
+                }else{
+                    cb()
                 }
             }
-            return function(p, cb){
+            return function(p, callback){
                 $.walk(p, function( files, dirs ){
-                    inner(files, fs.unlink, function(){
-                        inner(dirs, fs.mkdir, cb)
-                    })
+                    console.log("ccccccccccccc")
+                    var c = files.length, n = c;
+                    if( n ){
+                        for(var i = 0 ; i < n ; i++){
+                            fs.unlink(files[i], function(e){
+                                c--
+                                if(c == 0){
+                                    inner(dirs, callback)
+                                }
+                            })
+                        }
+                    }else{//如果不存在文件
+                        console.log(n)
+                        inner(dirs, callback)
+                    }
                 });
             }
         },
@@ -508,15 +531,32 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    if(false){
-        $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
-            $.writeFile("files/45643/aaa.js", "alert(1)",function(){
-                console.log("cccccccc")
+    var a = 3
+    switch(a){
+        case 1 ://create
+            $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
+                $.writeFile("files/45643/aaa.js", "alert(1)",function(){
+                    console.log("创建文件与目录成功")
+                })
+            });
+            break;
+        case 2 ://walk
+            $.walk("sas",function(files,dirs){
+                console.log(files);
+                console.log(dirs)
+                console.log("收集文件与目录，包括自身")
             })
-        });
-    }else{
-        $.remove("files")
+            break;
+        case 3: //delete
+            $.remove("files",function(files,dirs){
+                console.log("删除文件与目录，包括自身")
+            });
+            break;
     }
+
+//    fs.rmdir("files/45643/aara/", function(){
+//        console.log("dd")
+//    })
 
 
 //   $.require("system/server", function(){
