@@ -135,7 +135,6 @@
                     var filename = files.shift();
                     if (filename === null || typeof filename == 'undefined')
                         return fs.rmdir(dir, clbk);
-
                     var file = dir+'/'+filename;
                     fs.stat(file, function(err, stat){
                         if (err) return clbk(err);
@@ -153,7 +152,8 @@
                 if(stat.isDirectory()){
                     dirs.unshift(url);//收集目录
                     inner(url,dirs);
-                }else if(stat.isFile()){
+                }else if(stat.isFile()){//会把"快捷方式"也当成文件
+                    console.log(url +"!")
                     fs.unlinkSync(url);//直接删除文件
                 }
             }
@@ -177,12 +177,32 @@
                 }
             }
         })(),
+        remove: function( p, cb ){
+            p = path.normalize(p);
+            cb = cb || $.noop;
+            var dirs = [], file_count = 0//要删掉的文件总数
+            function deleteAndCollect(url,dirs){
+                fs.stat(url,  function(err, stat){
+                    if(stat.isDirectory()){
+                        dirs.unshift(url);//收集要删掉的目录
+                        inner( url, dirs );
+                    }else if(stat.isFile()){//会把"快捷方式"也当成文件
+                        file_count++
+                        fs.unlink(url, function(){
+                            file_count--
+                        });//直接删除文件
+                    }
+                });
+                
+            }
+
+        },
         mkdirSync: function(p){
             p = path.normalize(p);
-            var array = p.split( path.sep );
+            var array = p.split( path.sep )
             for(var i = 0, cur; i < array.length; i++){
                 if(i == 0){
-                    cur = array[i]
+                    cur = array[i];
                 }else{
                     cur += (path.sep + array[i]);
                 }
@@ -191,32 +211,38 @@
                 }catch(e){}
             }
         },
+
         mkdir: function(p, cb){
             p = path.normalize(p);
             var array = p.split( path.sep );
-            function inner(dir, array, cn ){
+            function inner(dir, array, cb ){
                 dir  += (!dir ? array.shift() :  path.sep + array.shift());
-                try{
-                    fs.mkdirSync(dir, "0755");
-                }catch(e){}
-                if(array.length){
-                    inner(dir ,array)
-                }else if(typeof cb === "function"){
-                    cb()
-                }
+                fs.mkdir(dir, "0755", function(){
+                    if(array.length){//忽略EEXIST错误
+                        inner(dir ,array, cb);
+                    }else if(typeof cb === "function"){
+                        cb();
+                    }
+                });
             }
-            inner("", array,cb)
+            inner("", array, cb)
         },
-        
-        mkFileSync: function( p , data, encoding){
+        writeFile: function(p , data, encoding, cb){
+            p = path.normalize(p);
+            var i = p.lastIndexOf( path.sep )
+            var dir = p.slice(0, i);
+            var fn  = function(){
+                fs.writeFile( p, data, encoding, cb)
+            }
+            dir ? $.mkdir(dir, fn) : fn();
+        },
+        writeFileSync: function( p , data, encoding){
             p = path.normalize(p);
             var i = p.lastIndexOf(path.sep)
             var dir = p.slice(0, i);
             if(dir){
-                console.log(dir)
                 $.mkdirSync(dir, "0755" )
             }
-            console.log(p)
             fs.writeFileSync( p, data, encoding)
         },
 
@@ -385,6 +411,7 @@
             args[2].token = "@"+name; //模块名
             this.require( args[1], args[2] );
         },
+
         //请求模块
         require: function( deps, factory, errback ){
             var _deps = {}, args = [], dn = 0, cn = 0, path = factory["@path"];
@@ -442,7 +469,18 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-//   $.mkFileSync("files/45643/aara/test.js",'alert(5)');
+    $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
+        console.log("dddddddddddddddd")
+        
+    });
+    fs.readdir("files",function(e, files){
+            console.log(files)
+        })
+// $.removeSync("files")
+//    fs.mkdir("files" , function(e){
+//        console.log(e);
+//        console.log("----------")
+//    })
 
 //   $.require("system/server", function(){
 //       $.log($.configs.port)
@@ -465,3 +503,4 @@
 //现在可以直接mass.define("favicon",module)了
 //2012.7.12 重新开始搞后端框架
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
+//一个很好的前端工具 https://github.com/colorhook/att
