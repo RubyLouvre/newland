@@ -101,199 +101,8 @@
             }
             self.complete = $.noop;
             return self;
-        },
-        //p 为路径，cb为最终回调，opts为可选的配置对象，里面包含match过滤函数，one表示是否找到一个就终于遍历
-        walk: new function  (){
-            function collect(opts, el, prop){
-                if((typeof opts.filter == "function") ? opts.filter( el ) : true){
-                    opts[prop].push( el );
-                    if(opts.one === true){
-                        opts.filter = function(){
-                            return false
-                        };
-                        opts.count = 0;
-                    }
-                }
-            }
-            function sync( p, opts){
-                console.log(" sync walk ")
-                try{
-                    var stat = fs.statSync( p );
-                    var prop = stat.isDirectory() ? "dirs" : "files";
-                    collect(opts, p, prop );
-                    if( prop === "dirs"){
-                        var array = fs.readdirSync( p );
-                        for(var i = 0, n = array.length; i < n; i++ ){
-                            sync( path.join( p , array[i]), opts )
-                        }
-                    }
-                }catch(e){ }
-            }
-            function async( p, opts ){
-                console.log(" async walk ")
-                opts.count++
-                fs.stat(p, function(e, s){
-                    opts.count--
-                    if(!e){
-                        if( s.isDirectory() ){
-                            collect(opts, p, "dirs");
-                            opts.count++
-                            fs.readdir( p, function(e, array){
-                                opts.count--;
-                                for(var i = 0, n = array.length; i < n; i++ ){
-                                    async( path.join( p , array[i]), opts )
-                                }
-                                if(opts.count == 0){
-                                    opts.cb(opts.files, opts.dirs)
-                                }
-                            });
-                        }else{
-                            collect(opts, p, "files");
-                        }
-                        if(opts.count == 0){
-                            opts.cb(opts.files, opts.dirs)
-                        }
-                    }
-                    if(e && e.code == "ENOENT"){
-                        opts.cb(opts.files, opts.dirs)
-                    }
-                });
-            }
-            return function( p, cb, opts ){
-                if(typeof cb == "object"){
-                    opts = cb
-                    cb = opts.cb;
-                }
-                opts = opts ||{}
-                opts.files = [];
-                opts.dirs = [];
-                opts.cb = typeof cb === "function" ? cb : $.noop
-                opts.count = 0;
-                if(opts.sync){
-                    sync( path.normalize(p), opts );
-                    opts.cb(opts.files, opts.dirs)
-                }else{
-                    async( path.normalize(p), opts );
-                }
-            }
-        },
-        removeSync: function(p, cb){
-            $.walk(p, {
-                cb: function( files, dirs ){
-                    var c = 0
-                    while((c = files.shift())){
-                        try{
-                            fs.rmdirSync(c)
-                        } catch(e){}
-                    }
-                    while((c = dirs.pop())){
-                        try{
-                            fs.rmdirSync(c)
-                        } catch(e){}
-                    }
-                },
-                sync: true
-            });
-            if(typeof cb == "function" ){
-                cb()
-            }
-        },
-        remove: new function( ){
-            function inner(dirs, cb){
-                var dir = dirs.pop();
-                if(dir){
-                    fs.rmdir(dir, function(e){
-                        inner(dirs, cb);
-                    })
-                }else{
-                    cb()
-                }
-            }
-            return function( p, cb ){
-                $.walk(p, function( files, dirs ){
-                    var c = files.length, n = c;
-                    if( n ){
-                        for(var i = 0 ; i < n ; i++){
-                            fs.unlink(files[i], function(e){
-                                c--
-                                if(c == 0){
-                                    inner(dirs, cb)
-                                }
-                            })
-                        }
-                    }else{//如果不存在文件
-                        inner(dirs, cb)
-                    }
-                });
-            }
-        },
-        mkdirSync: function(p){
-            p = path.normalize(p);
-            var array = p.split( path.sep )
-            for(var i = 0, cur; i < array.length; i++){
-                if(i == 0){
-                    cur = array[i];
-                }else{
-                    cur += (path.sep + array[i]);
-                }
-                try{
-                    fs.mkdirSync(cur, "0755");
-                }catch(e){}
-            }
-        },
-        mkdir: function(p, cb){
-            p = path.normalize(p);
-            var array = p.split( path.sep );
-            function inner(dir, array, cb ){
-                dir  += (!dir ? array.shift() :  path.sep + array.shift());
-                fs.mkdir(dir, "0755", function(){
-                    if(array.length){//忽略EEXIST错误
-                        inner(dir ,array, cb);
-                    }else if(typeof cb === "function"){
-                        cb();
-                    }
-                });
-            }
-            inner("", array, cb)
-        },
-        writeFile: function(p , data, cb){
-            p = path.normalize(p);
-            var i = p.lastIndexOf( path.sep )
-            var dir = p.slice(0, i);
-            var fn  = function(){
-                fs.writeFile( p, data, "utf-8", cb)
-            }
-            dir ? $.mkdir(dir, fn) : fn();
-        },
-        writeFileSync: function( p , data, encoding){
-            p = path.normalize(p);
-            var i = p.lastIndexOf(path.sep)
-            var dir = p.slice(0, i);
-            if(dir){
-                $.mkdirSync(dir, "0755" )
-            }
-            fs.writeFileSync( p, data, encoding)
-        },
+        }
 
-        cpdirSync: function() {
-            return function cpdirSync( old, neo ) {
-                var arr = fs.readdirSync(old), folder, stat;
-                if(!path.existsSync(neo)){//创建新文件
-                    fs.mkdirSync(neo, 0755);
-                    $.log("<code style='color:green'>创建目录"+neo + "/" + el+"成功</code>",true);
-                }
-                for(var i = 0, el ; el = arr[i++];){
-                    folder = old + "/" + el
-                    stat = fs.statSync(folder);
-                    if(stat.isDirectory()){
-                        cpdirSync(folder, neo + "/" + el)
-                    }else{
-                        fs.writeFileSync(neo + "/" + el,fs.readFileSync(folder));
-                        $.log("<code style='color:magenta'>创建文件"+neo + "/" + el+"成功</code>",true);
-                    }
-                }
-            }
-        }()
     });
 
     $.noop = $.error = $.debug = function(){};
@@ -320,11 +129,11 @@
             return '\x1b[' + arr[0] + 'm' + str + '\x1b[' + arr[1] + 'm';
         }
         /**
-         * 用于调试
-         * @param {String} s 要打印的内容
-         * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
-         * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
-         */
+             * 用于调试
+             * @param {String} s 要打印的内容
+             * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
+             * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
+             */
         $.log = function (s, color){
             var args = Array.apply([],arguments);
             if( args.pop() === true){
@@ -498,41 +307,8 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    var a = 2
-    switch(a){
-        case 1 ://create
-            $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
-                $.writeFile("files/45643/aaa.js", "alert(1)",function(){
-                    console.log("创建文件与目录成功")
-                })
-            });
-            $.mkdir("aaerewr",function(){
-                console.log("创建目录成功")
-            });
-            break;
-        case 2 ://walk
-            $.walk("files",{
-                cb:function(files,dirs){
-                    console.log(files);
-                    console.log(dirs)
-                    console.log("收集文件与目录，包括自身")
-                },
-                sync: true
-            })
-            break;
-        case 3: //delete
-            $.remove("files",function(files,dirs){
-                console.log("删除文件与目录，包括自身")
-            });
-            $.remove("aaerewr",function(files,dirs){
-                console.log("删除文件与目录，包括自身")
-            });
-            break;
-    }
 
-//    fs.rmdir("files/45643/aara/", function(){
-//        console.log("dd")
-//    })
+    
 
 
 //   $.require("system/server", function(){
@@ -549,11 +325,11 @@
 
 
 })();
-//https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
-//2011.12.17 $.define再也不用指定模块所在的目录了,
-//如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
-//才能用mass.require("intercepters/favicon",callback)请求得到
-//现在可以直接mass.define("favicon",module)了
-//2012.7.12 重新开始搞后端框架
-//两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
-//一个很好的前端工具 https://github.com/colorhook/att
+    //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
+    //2011.12.17 $.define再也不用指定模块所在的目录了,
+    //如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
+    //才能用mass.require("intercepters/favicon",callback)请求得到
+    //现在可以直接mass.define("favicon",module)了
+    //2012.7.12 重新开始搞后端框架
+    //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
+    //一个很好的前端工具 https://github.com/colorhook/att

@@ -1,4 +1,4 @@
-$.define("lang", Array.isArray ? "" : "./lang_fix", function(){
+$.define("lang", Array.isArray ? "" : "lang_fix", function(){
     // $.log("已加载语言扩展模块");
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
