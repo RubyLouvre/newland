@@ -1,3 +1,4 @@
+//height level file system
 $.define( "hfs","fs,path", function(fs, path){
     $.mix( {
         //遍历文件树,收集目录与文件,并包含自身
@@ -76,6 +77,7 @@ $.define( "hfs","fs,path", function(fs, path){
                 }
             }
         },
+        //删除文件或目录,如果里面有东西,也一并清空,这是同步化版本
         delSync: function(p, cb){
             $.walk(p, {
                 cb: function( files, dirs ){
@@ -97,6 +99,7 @@ $.define( "hfs","fs,path", function(fs, path){
                 cb()
             }
         },
+        //上面的异步化版本
         del: new function( ){
             function inner(dirs, cb){
                 var dir = dirs.pop();
@@ -126,6 +129,7 @@ $.define( "hfs","fs,path", function(fs, path){
                 });
             }
         },
+        //创建目录,如果指定路径中有许多中间的目录不存在,也一并创建它们
         mkdirSync: function(p){
             p = path.normalize(p);
             var array = p.split( path.sep );//创建目录,没有则补上
@@ -140,6 +144,7 @@ $.define( "hfs","fs,path", function(fs, path){
                 }catch(e){}
             }
         },
+        //上面的异步化版本
         mkdir: function(p, cb){
             p = path.normalize(p);
             var array = p.split( path.sep );
@@ -155,6 +160,7 @@ $.define( "hfs","fs,path", function(fs, path){
             }
             inner("", array, cb)
         },
+        //创建文件,并添加内容,如果指定的路径中里面某些目录不存在,也一并创建它们
         writeFileSync: function( p , data, encoding){
             p = path.normalize(p);
             var i = p.lastIndexOf(path.sep)
@@ -164,6 +170,7 @@ $.define( "hfs","fs,path", function(fs, path){
             }
             fs.writeFileSync( p, data, encoding)
         },
+        //上面的异步化版本
         writeFile: function(p, data, cb){
             p = path.normalize(p);
             var i = p.lastIndexOf( path.sep )
@@ -173,6 +180,7 @@ $.define( "hfs","fs,path", function(fs, path){
             }
             dir ? $.mkdir(dir, fn) : fn();
         },
+        //目录对拷,可以跨分区拷贝
         cpdirSync: new function(old, neo, cb) {
             function inner( old, neo ) {
                 var array = fs.readdirSync(old);
@@ -201,6 +209,7 @@ $.define( "hfs","fs,path", function(fs, path){
                 }
             }
         },
+         //上面的异步化版本
         cpdir: new function(){
             function copyFile(file, newFile, after ){
                 fs.stat(file, function(err, stat){//拷贝快捷方式与文件
