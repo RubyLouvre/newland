@@ -1,4 +1,3 @@
-
 (function(){
     //后端部分　2012.7.11 by 司徒正美
     function $(){}
@@ -39,7 +38,7 @@
         }
         return receiver;
     };
-  
+
     mix( $, {//为此版本的命名空间对象添加成员
         rword: /[^, ]+/g,
         mix:  mix,
@@ -135,7 +134,6 @@
                     var filename = files.shift();
                     if (filename === null || typeof filename == 'undefined')
                         return fs.rmdir(dir, clbk);
-
                     var file = dir+'/'+filename;
                     fs.stat(file, function(err, stat){
                         if (err) return clbk(err);
@@ -153,7 +151,7 @@
                 if(stat.isDirectory()){
                     dirs.unshift(url);//收集目录
                     inner(url,dirs);
-                }else if(stat.isFile()){
+                }else if(stat.isFile()){//会把"快捷方式"也当成文件
                     fs.unlinkSync(url);//直接删除文件
                 }
             }
@@ -177,12 +175,73 @@
                 }
             }
         })(),
+        //p 为路径，cb为最终回调，opts为可选的配置对象，里面包含match过滤函数，one表示是否找到一个就终于遍历
+        walk: function  ( p, cb, opts){
+            var files = [],dirs =[], count = 0;
+            cb = typeof cb === "function" ? cb : $.noop
+            opts = opts ||{}
+            function push(arr, el){
+                if((typeof opts.match == "function") ? opts.match( el ) : true){
+                    arr.push( el );
+                    if(opts.one){
+                        opts.match = function(){
+                            return false
+                        };
+                        count = 0
+                    }
+                }
+            }
+            function inner( p ){
+                count++
+                fs.stat(p, function(e, s){
+                    count--
+                    if(!e){
+                        if( s.isDirectory() ){
+                            count++
+                            push(dirs, p);
+                            fs.readdir( p, function(e, array){
+                                count--
+                                for(var i = 0, n = array.length; i < n; i++ ){
+                                    inner( path.join( p , array[i]) )
+                                }
+                            });
+                        }else{
+                            push(files, p )
+                        }
+                    }
+                    if(count === 0){
+                        cb( files, dirs );
+                    }
+                })
+            }
+            inner( path.normalize(p) )
+        },
+        remove: new function(  ){
+            function inner(array, api, cb){
+                var c = array.length, n = c;
+                for(var i = 0 ; i < n ; i++){
+                    api(array[i], function(){
+                        c--;
+                        if(c == 0){
+                            cb()
+                        }
+                    })
+                }
+            }
+            return function(p, cb){
+                $.walk(p, function( files, dirs ){
+                    inner(files, fs.unlink, function(){
+                        inner(dirs, fs.mkdir, cb)
+                    })
+                });
+            }
+        },
         mkdirSync: function(p){
             p = path.normalize(p);
-            var array = p.split( path.sep );
+            var array = p.split( path.sep )
             for(var i = 0, cur; i < array.length; i++){
                 if(i == 0){
-                    cur = array[i]
+                    cur = array[i];
                 }else{
                     cur += (path.sep + array[i]);
                 }
@@ -191,32 +250,38 @@
                 }catch(e){}
             }
         },
+
         mkdir: function(p, cb){
             p = path.normalize(p);
             var array = p.split( path.sep );
-            function inner(dir, array, cn ){
+            function inner(dir, array, cb ){
                 dir  += (!dir ? array.shift() :  path.sep + array.shift());
-                try{
-                    fs.mkdirSync(dir, "0755");
-                }catch(e){}
-                if(array.length){
-                    inner(dir ,array)
-                }else if(typeof cb === "function"){
-                    cb()
-                }
+                fs.mkdir(dir, "0755", function(){
+                    if(array.length){//忽略EEXIST错误
+                        inner(dir ,array, cb);
+                    }else if(typeof cb === "function"){
+                        cb();
+                    }
+                });
             }
-            inner("", array,cb)
+            inner("", array, cb)
         },
-        
-        mkFileSync: function( p , data, encoding){
+        writeFile: function(p , data, cb){
+            p = path.normalize(p);
+            var i = p.lastIndexOf( path.sep )
+            var dir = p.slice(0, i);
+            var fn  = function(){
+                fs.writeFile( p, data, "utf-8", cb)
+            }
+            dir ? $.mkdir(dir, fn) : fn();
+        },
+        writeFileSync: function( p , data, encoding){
             p = path.normalize(p);
             var i = p.lastIndexOf(path.sep)
             var dir = p.slice(0, i);
             if(dir){
-                console.log(dir)
                 $.mkdirSync(dir, "0755" )
             }
-            console.log(p)
             fs.writeFileSync( p, data, encoding)
         },
 
@@ -385,6 +450,7 @@
             args[2].token = "@"+name; //模块名
             this.require( args[1], args[2] );
         },
+
         //请求模块
         require: function( deps, factory, errback ){
             var _deps = {}, args = [], dn = 0, cn = 0, path = factory["@path"];
@@ -442,7 +508,16 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-//   $.mkFileSync("files/45643/aara/test.js",'alert(5)');
+    if(false){
+        $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
+            $.writeFile("files/45643/aaa.js", "alert(1)",function(){
+                console.log("cccccccc")
+            })
+        });
+    }else{
+        $.remove("files")
+    }
+
 
 //   $.require("system/server", function(){
 //       $.log($.configs.port)
@@ -465,3 +540,4 @@
 //现在可以直接mass.define("favicon",module)了
 //2012.7.12 重新开始搞后端框架
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
+//一个很好的前端工具 https://github.com/colorhook/att
