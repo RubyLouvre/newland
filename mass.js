@@ -176,8 +176,8 @@
             }
         })(),
         //p 为路径，cb为最终回调，opts为可选的配置对象，里面包含match过滤函数，one表示是否找到一个就终于遍历
-        walk: new function  (  ){
-            function push(opts, el, prop){
+        walk: new function  (){
+            function collect(opts, el, prop){
                 if((typeof opts.match == "function") ? opts.match( el ) : true){
                     opts[prop].push( el );
                     if(opts.one === true){
@@ -185,30 +185,45 @@
                             return false
                         };
                         opts.count = 0;
-                    //opts.cb(opts.files, opts.dirs)
                     }
                 }
             }
-            function inner( p, opts ){
+            collect.sync = function( p, opts){
+                try{
+                    var stat = fs.statSync( p );
+                    var prop = stat.isDirectory() ? "dirs" : "files"
+                    if(prop === "dirs"){
+                        var array = fs.readdirSync( p );
+                        console.log(array)
+                        for(var i = 0, n = array.length; i < n; i++ ){
+                            collect.sync( path.join( p , array[i]), opts )
+                        }
+                    }
+                }catch(e){
+                    if( e.code == "ENOENT"){
+                        opts.cb(opts.files, opts.dirs)
+                    }
+                }
+            }
+            collect.async = function( p, opts ){
                 opts.count++
                 fs.stat(p, function(e, s){
                     opts.count--
-                    //  opts.cb(opts.files, opts.dirs)
                     if(!e){
                         if( s.isDirectory() ){
-                            push(opts, p, "dirs");
+                            collect(opts, p, "dirs");
                             opts.count++
                             fs.readdir( p, function(e, array){
                                 opts.count--;
                                 for(var i = 0, n = array.length; i < n; i++ ){
-                                    inner( path.join( p , array[i]), opts )
+                                    collect.async( path.join( p , array[i]), opts )
                                 }
                                 if(opts.count == 0){
                                     opts.cb(opts.files, opts.dirs)
                                 }      
                             });
                         }else{
-                            push(opts, p, "files");
+                            collect(opts, p, "files");
                         }
                         if(opts.count == 0){
                             opts.cb(opts.files, opts.dirs)
@@ -225,7 +240,7 @@
                 opts.dirs = [];
                 opts.cb = typeof cb === "function" ? cb : $.noop
                 opts.count = 0;
-                inner( path.normalize(p), opts );
+                collect[ opts.sync ? "sync" : "async"]( path.normalize(p), opts );
             }
         },
         remove: new function( ){
@@ -241,7 +256,6 @@
             }
             return function(p, callback){
                 $.walk(p, function( files, dirs ){
-                    console.log("ccccccccccccc")
                     var c = files.length, n = c;
                     if( n ){
                         for(var i = 0 ; i < n ; i++){
@@ -273,7 +287,6 @@
                 }catch(e){}
             }
         },
-
         mkdir: function(p, cb){
             p = path.normalize(p);
             var array = p.split( path.sep );
@@ -539,16 +552,24 @@
                     console.log("创建文件与目录成功")
                 })
             });
+            $.mkdir("aaerewr",function(){
+                console.log("创建目录成功")
+            });
             break;
         case 2 ://walk
-            $.walk("sas",function(files,dirs){
+            $.walk("files",function(files,dirs){
                 console.log(files);
                 console.log(dirs)
                 console.log("收集文件与目录，包括自身")
+            },{
+                sync:true
             })
             break;
         case 3: //delete
             $.remove("files",function(files,dirs){
+                console.log("删除文件与目录，包括自身")
+            });
+            $.remove("aaerewr",function(files,dirs){
                 console.log("删除文件与目录，包括自身")
             });
             break;
