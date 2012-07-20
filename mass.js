@@ -1,4 +1,3 @@
-
 (function(){
     //后端部分　2012.7.11 by 司徒正美
     function $(){}
@@ -39,7 +38,7 @@
         }
         return receiver;
     };
-  
+
     mix( $, {//为此版本的命名空间对象添加成员
         rword: /[^, ]+/g,
         mix:  mix,
@@ -103,99 +102,130 @@
             self.complete = $.noop;
             return self;
         },
-        rmdirSync : function(path, failSilent) {
-            var files;
-            try {
-                files = fs.readdirSync(path);
-            } catch (err) {
-                if(failSilent) return;
-                throw new Error(err.message);
-            }
-            /*  Loop through and delete everything in the sub-tree after checking it */
-            for(var i = 0; i < files.length; i++) {
-                var currFile = fs.lstatSync(path + "/" + files[i]);
-                if(currFile.isDirectory()) // Recursive function back to the beginning
-                    $.rmdirSync(path + "/" + files[i]);
-
-                else if(currFile.isSymbolicLink()) // Unlink symlinks
-                    fs.unlinkSync(path + "/" + files[i]);
-
-                else // Assume it's a file - perhaps a try/catch belongs here?
-                    fs.unlinkSync(path + "/" + files[i]);
-            }
-            /*  Now that we know everything in the sub-tree has been deleted, we can delete the main
-        directory. Huzzah for the shopkeep. */
-            return fs.rmdirSync(path);
-        },
-        rmdir : function (dir, clbk){
-            fs.readdir(dir, function(err, files){
-                if (err) return clbk(err);
-                (function rmFile(err){
-                    if (err) return clbk(err);
-                    var filename = files.shift();
-                    if (filename === null || typeof filename == 'undefined')
-                        return fs.rmdir(dir, clbk);
-                    var file = dir+'/'+filename;
-                    fs.stat(file, function(err, stat){
-                        if (err) return clbk(err);
-                        if (stat.isDirectory())
-                            $.rmdir(file, rmFile);
-                        else
-                            fs.unlink(file, rmFile);
-                    });
-                })();
-            });
-        },
-        removeSync: (function(){
-            function iterator(url,dirs){
-                var stat = fs.statSync(url);
-                if(stat.isDirectory()){
-                    dirs.unshift(url);//收集目录
-                    inner(url,dirs);
-                }else if(stat.isFile()){//会把"快捷方式"也当成文件
-                    console.log(url +"!")
-                    fs.unlinkSync(url);//直接删除文件
-                }
-            }
-            function inner(path,dirs){
-                var arr = fs.readdirSync(path);
-                for(var i = 0, el ; el = arr[i++];){
-                    iterator(path+"/"+el,dirs);
-                }
-            }
-            return function(dir,cb){
-                cb = cb || $.noop;
-                var dirs = [];
-                try{
-                    iterator(dir,dirs);
-                    for(var i = 0, el ; el = dirs[i++];){
-                        fs.rmdirSync(el);//一次性删除所有收集到的目录
+        //p 为路径，cb为最终回调，opts为可选的配置对象，里面包含match过滤函数，one表示是否找到一个就终于遍历
+        walk: new function  (){
+            function collect(opts, el, prop){
+                if((typeof opts.filter == "function") ? opts.filter( el ) : true){
+                    opts[prop].push( el );
+                    if(opts.one === true){
+                        opts.filter = function(){
+                            return false
+                        };
+                        opts.count = 0;
                     }
-                    cb()
-                }catch(e){//如果文件或目录本来就不存在，fs.statSync会报错，不过我们还是当成没有异常发生
-                    e.code === "ENOENT" ? cb() : cb(e);
                 }
             }
-        })(),
-        remove: function( p, cb ){
-            p = path.normalize(p);
-            cb = cb || $.noop;
-            var dirs = [], file_count = 0//要删掉的文件总数
-            function deleteAndCollect(url,dirs){
-                fs.stat(url,  function(err, stat){
-                    if(stat.isDirectory()){
-                        dirs.unshift(url);//收集要删掉的目录
-                        inner( url, dirs );
-                    }else if(stat.isFile()){//会把"快捷方式"也当成文件
-                        file_count++
-                        fs.unlink(url, function(){
-                            file_count--
-                        });//直接删除文件
+            function sync( p, opts){
+                console.log(" sync walk ")
+                try{
+                    var stat = fs.statSync( p );
+                    var prop = stat.isDirectory() ? "dirs" : "files";
+                    collect(opts, p, prop );
+                    if( prop === "dirs"){
+                        var array = fs.readdirSync( p );
+                        for(var i = 0, n = array.length; i < n; i++ ){
+                            sync( path.join( p , array[i]), opts )
+                        }
+                    }
+                }catch(e){ }
+            }
+            function async( p, opts ){
+                console.log(" async walk ")
+                opts.count++
+                fs.stat(p, function(e, s){
+                    opts.count--
+                    if(!e){
+                        if( s.isDirectory() ){
+                            collect(opts, p, "dirs");
+                            opts.count++
+                            fs.readdir( p, function(e, array){
+                                opts.count--;
+                                for(var i = 0, n = array.length; i < n; i++ ){
+                                    async( path.join( p , array[i]), opts )
+                                }
+                                if(opts.count == 0){
+                                    opts.cb(opts.files, opts.dirs)
+                                }
+                            });
+                        }else{
+                            collect(opts, p, "files");
+                        }
+                        if(opts.count == 0){
+                            opts.cb(opts.files, opts.dirs)
+                        }
+                    }
+                    if(e && e.code == "ENOENT"){
+                        opts.cb(opts.files, opts.dirs)
                     }
                 });
-                
             }
-
+            return function( p, cb, opts ){
+                if(typeof cb == "object"){
+                    opts = cb
+                    cb = opts.cb;
+                }
+                opts = opts ||{}
+                opts.files = [];
+                opts.dirs = [];
+                opts.cb = typeof cb === "function" ? cb : $.noop
+                opts.count = 0;
+                if(opts.sync){
+                    sync( path.normalize(p), opts );
+                    opts.cb(opts.files, opts.dirs)
+                }else{
+                    async( path.normalize(p), opts );
+                }
+            }
+        },
+        removeSync: function(p, cb){
+            $.walk(p, {
+                cb: function( files, dirs ){
+                    var c = 0
+                    while((c = files.shift())){
+                        try{
+                            fs.rmdirSync(c)
+                        } catch(e){}
+                    }
+                    while((c = dirs.pop())){
+                        try{
+                            fs.rmdirSync(c)
+                        } catch(e){}
+                    }
+                },
+                sync: true
+            });
+            if(typeof cb == "function" ){
+                cb()
+            }
+        },
+        remove: new function( ){
+            function inner(dirs, cb){
+                var dir = dirs.pop();
+                if(dir){
+                    fs.rmdir(dir, function(e){
+                        inner(dirs, cb);
+                    })
+                }else{
+                    cb()
+                }
+            }
+            return function( p, cb ){
+                $.walk(p, function( files, dirs ){
+                    var c = files.length, n = c;
+                    if( n ){
+                        for(var i = 0 ; i < n ; i++){
+                            fs.unlink(files[i], function(e){
+                                c--
+                                if(c == 0){
+                                    inner(dirs, cb)
+                                }
+                            })
+                        }
+                    }else{//如果不存在文件
+                        inner(dirs, cb)
+                    }
+                });
+            }
         },
         mkdirSync: function(p){
             p = path.normalize(p);
@@ -211,7 +241,6 @@
                 }catch(e){}
             }
         },
-
         mkdir: function(p, cb){
             p = path.normalize(p);
             var array = p.split( path.sep );
@@ -227,12 +256,12 @@
             }
             inner("", array, cb)
         },
-        writeFile: function(p , data, encoding, cb){
+        writeFile: function(p , data, cb){
             p = path.normalize(p);
             var i = p.lastIndexOf( path.sep )
             var dir = p.slice(0, i);
             var fn  = function(){
-                fs.writeFile( p, data, encoding, cb)
+                fs.writeFile( p, data, "utf-8", cb)
             }
             dir ? $.mkdir(dir, fn) : fn();
         },
@@ -469,18 +498,42 @@
 
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
-        console.log("dddddddddddddddd")
-        
-    });
-    fs.readdir("files",function(e, files){
-            console.log(files)
-        })
-// $.removeSync("files")
-//    fs.mkdir("files" , function(e){
-//        console.log(e);
-//        console.log("----------")
+    var a = 2
+    switch(a){
+        case 1 ://create
+            $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
+                $.writeFile("files/45643/aaa.js", "alert(1)",function(){
+                    console.log("创建文件与目录成功")
+                })
+            });
+            $.mkdir("aaerewr",function(){
+                console.log("创建目录成功")
+            });
+            break;
+        case 2 ://walk
+            $.walk("files",{
+                cb:function(files,dirs){
+                    console.log(files);
+                    console.log(dirs)
+                    console.log("收集文件与目录，包括自身")
+                },
+                sync: true
+            })
+            break;
+        case 3: //delete
+            $.remove("files",function(files,dirs){
+                console.log("删除文件与目录，包括自身")
+            });
+            $.remove("aaerewr",function(files,dirs){
+                console.log("删除文件与目录，包括自身")
+            });
+            break;
+    }
+
+//    fs.rmdir("files/45643/aara/", function(){
+//        console.log("dd")
 //    })
+
 
 //   $.require("system/server", function(){
 //       $.log($.configs.port)
