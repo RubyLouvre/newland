@@ -115,6 +115,7 @@
         },
         require: function( deps, factory, errback ){
             var _deps = {}, args = [], dn = 0, cn = 0;
+            factory = typeof factory == "function" ? factory : $.noop;
             String(deps +"").replace( $.rword, function( str ){
                 if(str.indexOf("./") === 0){
                     str = str.replace(/^\.\//, "" );
@@ -126,8 +127,7 @@
                 if(!filename){
                     id = id.replace(/\.js$/,"")
                     filename = path.join( factory.parent || $.require.root, match[1] ); //path.join会自动处理../的情况
-                    filename = /\.js$/.test(filename) ? filename : filename +".js";//path.j
-                    console.log(filename)
+                    filename = /\.js$/.test(filename) ? filename : filename +".js";
                 }
                 if( !mapper[ filename ] || !mapper[ id ] ){ //防止重复生成节点与请求
                     mapper[ id ] =  mapper[ filename ] = {};//state: undefined, 未安装; 1 正在安装; 2 : 已安装
@@ -137,16 +137,6 @@
                 }
             });
             var id = factory.id || "@cb"+ ( cbi++ ).toString(32);
- 
-            if( dn === cn && mapper[ id ].state == 1 ){//如果需要安装的等于已安装好的
-                var ret = collect_rets( id, args, factory )
-                if( id.indexOf("@cb") === -1 ){
-                    returns[ id ] = ret;
-                    mapper[ id ].state = 2;
-                    $.log('<code style="color:cyan;">已加载', token, '模块</code>', true);
-                }
-                return ret;//装配到框架中
-            }
             if( errback ){
                 errorStack( errback );//压入错误堆栈
             }
@@ -164,9 +154,8 @@
         },
         load: function( id, filename, deps, args ){
             try{
-                returns[ id ]= require( id.slice(1) );
+                returns[ id ] = require( id.slice(1) );
                 mapper[ id ].state = 2;
-              
                 collect_args(id, deps, args)
             }catch(e){
                 try{
@@ -177,7 +166,6 @@
                         }
                         args[2].id = filename; //模块名
                         args[2].parent =  filename.slice(0, filename.lastIndexOf( path.sep ) + 1) //取得父模块的文件夹
-                        //  console.log( [args[1], args[2]])
                         $.require( args[1], args[2] );
                     }
                     require( filename );
@@ -204,7 +192,8 @@
                 if( obj.state !== 2){
                     loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
                     obj.state = 2 ;
-                    var id = obj.id, ret = collect_rets( id, obj.args || [], obj.callback );
+                    var  id = obj.id;
+                    var  ret = collect_rets( id, obj.args || [], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
                         $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);

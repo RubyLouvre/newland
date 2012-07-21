@@ -14,10 +14,13 @@ $.define("loader","path,../system/hfs", function(path){
     $.require("bbb.js", function(){
         $.log('<code style="color:green;">require("bbb.js")</code>', true);
     });
+    $.require("ccc", function(){
+        $.log('<code style="color:green;">require("ccc.js")</code>', true);
+    });
     $.require("./bbb.js", function(){
         $.log('<code style="color:green;">require("./bbb.js")</code>', true);
     });
-    $.require("ddd", function(){
+    $.require("ddd", function(){//测试../
         $.log('<code style="color:green;">require("ddd.js")</code>', true);
     });
 })
