@@ -62,8 +62,8 @@
                 array = array.match($.rword) || [];
             }
             var result = {},value = val !== void 0 ? val :1;
-            for(var i=0,n=array.length;i < n;i++){
-                result[array[i]] = value;
+            for(var i=0, n=array.length;i < n; i++){
+                result[ array[i] ] = value;
             }
             return result;
         },
@@ -101,10 +101,122 @@
             }
             self.complete = $.noop;
             return self;
+        },
+        md5: function(str, encoding){
+            return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
+        },
+        path: function(){
+            return path.join.apply(null,arguments);
+        },
+        configs: {},
+        //定义模块
+        define: function( name, deps, factory ){//模块名,依赖列表,模块本身
+        //这里只是一个空接口
+        },
+        require: function( deps, factory, errback ){
+            var _deps = {}, args = [], dn = 0, cn = 0;
+            String(deps +"").replace( $.rword, function( str ){
+                if(str.indexOf("./") === 0){
+                    str = str.replace(/^\.\//, "" );
+                }
+                dn++;
+                var match = str.match( rmodule );
+                var id  = "@"+ match[1];//模块的ID
+                var filename = match[2];//模块的URL
+                if(!filename){
+                    id = id.replace(/\.js$/,"")
+                    filename = path.join( factory.parent || $.require.root, match[1] ); //path.join会自动处理../的情况
+                    filename = /\.js$/.test(filename) ? filename : filename +".js";//path.j
+                    console.log(filename)
+                }
+                if( !mapper[ filename ] || !mapper[ id ] ){ //防止重复生成节点与请求
+                    mapper[ id ] =  mapper[ filename ] = {};//state: undefined, 未安装; 1 正在安装; 2 : 已安装
+                    $.load( id, filename, _deps, args );
+                }else if( mapper[ filename ].state === 2  ){
+                    cn++;
+                }
+            });
+            var id = factory.id || "@cb"+ ( cbi++ ).toString(32);
+ 
+            if( dn === cn && mapper[ id ].state == 1 ){//如果需要安装的等于已安装好的
+                var ret = collect_rets( id, args, factory )
+                if( id.indexOf("@cb") === -1 ){
+                    returns[ id ] = ret;
+                    mapper[ id ].state = 2;
+                    $.log('<code style="color:cyan;">已加载', token, '模块</code>', true);
+                }
+                return ret;//装配到框架中
+            }
+            if( errback ){
+                errorStack( errback );//压入错误堆栈
+            }
+            mapper[ id ] = mapper[ id ] || {}
+            $.mix( mapper[ id ], {//创建或更新模块的状态
+                callback: factory,
+                id:       id,
+                deps:     _deps,
+                args:     args,
+                state:    1
+            }, false);
+            //在正常情况下模块只能通过_checkDeps执行
+            loadings.unshift( id );
+            process.nextTick( $._checkDeps );
+        },
+        load: function( id, filename, deps, args ){
+            try{
+                returns[ id ]= require( id.slice(1) );
+                mapper[ id ].state = 2;
+              
+                collect_args(id, deps, args)
+            }catch(e){
+                try{
+                    $.define = function(){//诡变的$.define
+                        var args = Array.apply([],arguments);
+                        if( typeof args[1] === "function" ){//处理只有两个参数的情况
+                            [].splice.call( args, 1, 0, "" );
+                        }
+                        args[2].id = filename; //模块名
+                        args[2].parent =  filename.slice(0, filename.lastIndexOf( path.sep ) + 1) //取得父模块的文件夹
+                        //  console.log( [args[1], args[2]])
+                        $.require( args[1], args[2] );
+                    }
+                       console.log(filename)
+                    require( filename );
+                    mapper[ filename ].state = 1
+                    collect_args(filename, deps, args)
+                }catch( e ){
+                    errorStack(function(){
+                        $.log("<code style='color:red'>",e , "</code>", true);
+                    }).fire();//打印错误堆栈
+                }
+            }
+        },
+        //检测此JS模块的依赖是否都已安装完毕,是则安装自身
+        _checkDeps: function (){
+            loop:
+            for ( var i = loadings.length, filename; filename = loadings[ --i ]; ) {
+                var obj = mapper[ filename ], deps = obj.deps || {};
+                for( var key in deps ){
+                    if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
+                        continue loop;
+                    }
+                }
+                //如果deps是空对象或者其依赖的模块的状态都是2
+                if( obj.state !== 2){
+                    loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
+                    obj.state = 2 ;
+                    var id = obj.id, ret = collect_rets( id, obj.args || [], obj.callback );
+                    if( id.indexOf("@cb") === -1 ){
+                        returns[ id ] = ret;
+                        $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);
+                        $._checkDeps();
+                    }
+                }
+            }
         }
-
     });
 
+    var mapper = $.require.cache = {}//键名为模块ID或别名,值为路径
     $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace($.rword,function(name){
         class2type[ "[object " + name + "]" ] = name;
@@ -166,9 +278,8 @@
             console.log( s );
         }
     }
-    var errorStack = $.deferred()
-    var mapper = $[ "@modules" ] = { };//后端不需要dom Ready
-    function install( name, deps, fn ){
+    var errorStack = $.deferred();
+    function collect_rets( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
         }
@@ -176,141 +287,32 @@
         $.debug( name );//想办法取得函法中的exports对象
         return ret;
     }
-    function goTop(path, user){
-        for(var a = path+user;/\.\./.test(a); a=a.replace(/\w+\/\.\.\//g,"") );
-        return a;
-    }
-    var nativeModules = $.oneObject("assert,child_process,cluster,crypto,dgram,dns,"+
-        "events,fs,http,https,net,os,path,querystring,readline,repl,tls,tty,url,util,vm,zlib")
-    function loadJS( name, url ){
-        var nick = name.slice(1);
-        if( nativeModules[ nick ]){
-            mapper[ name ].state = 2;
-            returns[ name ] = require( nick );
-            url = nick;
-            process.nextTick( $._checkDeps );
-        }else{
-            try{
-                var _define = $.define;
-                $.define = function(){
-                    var args = Array.apply([],arguments);
-                    args[0] = nick;      //自动修正名字;
-                    $.define = _define;  //还原为真正的define
-                    args[args.length - 1]["@path"] = nick.slice( 0, nick.lastIndexOf("/") + 1);//取得被依赖模块的文件夹
-                    _define.apply($, args);
-                }
-                url = url || path.join( process.cwd(), nick + ".js");
-                require( url );
-                process.nextTick( $._checkDeps );
-            }catch( e ){
-                errorStack(function(){
-                    $.log("<code style='color:red'>",e , "</code>", true);
-                }).fire();//打印错误堆栈
-            }
+    function collect_args( id, deps, args){
+        if( !deps[ id ] ){
+            args.push( id );
+            deps[ id ] = "司徒正美";
         }
+        process.nextTick( $._checkDeps );
     }
-
-    $.mix( $, {
-        //检测此JS模块的依赖是否都已安装完毕,是则安装自身
-        _checkDeps: function (){
-            loop:
-            for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
-                var obj = mapper[ name ], deps = obj.deps;
-                for( var key in deps ){
-                    if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
-                        continue loop;
-                    }
-                }
-                //如果deps是空对象或者其依赖的模块的状态都是2
-                if( obj.state !== 2){
-                    loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
-                    var token = obj.name, ret = install( token, obj.args, obj.callback );
-                    if( token.indexOf("@cb") === -1 ){
-                        returns[ token ] = ret;
-                        mapper[ token ].state = 2;
-                        $.log('<code style="color:cyan;">已加载', token, '模块</code>', true);
-                        $._checkDeps();
-                    }
-                }
-            }
-        },
-        //定义模块
-        define: function( name, deps, factory ){//模块名,依赖列表,模块本身
-            var args = arguments;
-            if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
-                if( deps ){
-                    return;
-                }
-                [].splice.call( args, 1, 1 );
-            }
-            if( typeof args[1] === "function" ){//处理只有两个参数的情况
-                [].splice.call( args, 1, 0, "" );
-            }
-            args[2].token = "@"+name; //模块名
-            this.require( args[1], args[2] );
-        },
-
-        //请求模块
-        require: function( deps, factory, errback ){
-            var _deps = {}, args = [], dn = 0, cn = 0, path = factory["@path"];
-            (deps +"").replace($.rword,function( url, name, match){
-                if(url.indexOf("./") === 0){
-                    url = url.replace(/^\.\//, path );
-                }else if(url.indexOf("../") === 0){ //by 一群 贵阳-Hodor(331492653)
-                    for( url = path+url;  /\.\./.test( url ); url = url.replace(/\w+\/\.\.\//g,"") );
-                }
-                dn++;
-                match = url.match( rmodule );
-                name  = "@"+ match[1];//取得模块名
-                if( !mapper[ name ] ){ //防止重复生成节点与请求
-                    mapper[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                    loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
-                }else if( mapper[ name ].state === 2 ){
-                    cn++;
-                }
-                if( !_deps[ name ] ){
-                    args.push( name );
-                    _deps[ name ] = "司徒正美";//去重，去掉@ready
-                }
-            });
-            var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
-            if( dn === cn ){//如果需要安装的等于已安装好的
-                var ret = install( token, args, factory )
-                if( token.indexOf("@cb") === -1 ){
-                    returns[ token ] = ret;
-                    mapper[ token ].state = 2;
-                    $.log('<code style="color:cyan;">已加载', token, '模块</code>', true);
-                }
-                return ret;//装配到框架中
-            }
-            if( errback ){
-                errorStack( errback );//压入错误堆栈
-            }
-            mapper[ token ] = {//创建或更新模块的状态
-                callback: factory,
-                name:     token,
-                deps:     _deps,
-                args:     args,
-                state:    1
-            };//在正常情况下模块只能通过_checkDeps执行
-            loadings.unshift( token );
-            process.nextTick( $._checkDeps );
-        },
-        md5: function(str, encoding){
-            return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
-        },
-        path: function(){
-            return path.join.apply(null,arguments);
-        },
-        configs: {}
-    });
-
+ 
+    $.require.root = process.cwd();
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-
-    
-
-
+    //    $.require( "fs", function(){
+    //        console.log("测试结束!!!!!!!!!!!!!")
+    //    });
+    $.require( "test/loader", function(){
+        console.log("测试结束!!!!!!!!!!!!!")
+    });
+//    $.require( "test/aaa", function(){
+//        console.log("测试结束1");
+//    })
+//    $.require( "test/aaa.js", function(){
+//        console.log("测试结束2");
+//    })
+//  $.require( "uu(D:\\newland\\test\\aaa.js)", function(){
+//        console.log("测试结束3")
+//    })
 //   $.require("system/server", function(){
 //       $.log($.configs.port)
 //   });
