@@ -108,11 +108,13 @@
         path: function(){
             return path.join.apply(null,arguments);
         },
+        //它的内容由app/configs模块提供
         configs: {},
-        //定义模块
+        //模块加载的定义函数
         define: function( name, deps, factory ){//模块名,依赖列表,模块本身
         //这里只是一个空接口
         },
+        //模块加载的请求函数
         require: function( deps, factory, errback ){
             var _deps = {}, args = [], dn = 0, cn = 0;
             factory = typeof factory == "function" ? factory : $.noop;
@@ -166,6 +168,7 @@
             loadings.unshift( id );
             process.nextTick( $._checkDeps );
         },
+        //模块加载的加载函数
         load: function(  filename ){
             try{
                 $.define = function(){//诡变的$.define
@@ -186,7 +189,7 @@
                 }).fire();//打印错误堆栈
             }
         },
-        //检测此JS模块的依赖是否都已安装完毕,是则安装自身
+        //  模块加载的检测依赖函数,如果一个模块所依赖的其他模块的状态都是2了,那么将它也改成2,并执行回调
         _checkDeps: function (){
             loop:
             for ( var i = loadings.length, filename; filename = loadings[ --i ]; ) {
@@ -211,13 +214,27 @@
             }
         }
     });
-
-    var mapper = $.require.cache = {}//键名为模块ID或别名,值为路径
-    $.noop = $.error = $.debug = function(){};
+    //把模块有关信息都存放在这里
+    var mapper = $.require.cache = {}
+    //模块加载的根路径,默认是mass.js种子模块所在的目录
+    $.require.root = process.cwd();
+    //从returns对象取得依赖列表中的各模块的返回值
+    function collect_rets( name, args, fn ){
+        for(var i = 0, argv = []; i < args.length ; i++){
+            argv.push( returns[ args[i] ] );
+        }
+        var ret = fn.apply( null, argv );//执行模块工厂，然后把返回值放到returns对象中
+        $.debug( name );//想办法取得函法中的exports对象
+        return ret;
+    }
+    $.noop = $.error = $.debug = function(){};//error, debug现在还是空接口
+    //为[[class]] --> type 映射对象添加更多成员,用于$.type函数
     "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace($.rword,function(name){
         class2type[ "[object " + name + "]" ] = name;
     });
-    //实现漂亮的日志打印
+    //用于模块加载失败时的错误回调
+    var errorStack = $.deferred();
+    //实现漂亮的五颜六色的日志打印
     new function(){
         var rformat = /<code\s+style=(['"])(.*?)\1\s*>([\d\D]+?)<\/code>/ig
         , colors = {}
@@ -274,17 +291,8 @@
             console.log( s );
         }
     }
-    var errorStack = $.deferred();
-    function collect_rets( name, args, fn ){
-        for(var i = 0, argv = []; i < args.length ; i++){
-            argv.push( returns[ args[i] ] );//从returns对象取得依赖列表中的各模块的返回值
-        }
-        var ret = fn.apply( null, argv );//执行模块工厂，然后把返回值放到returns对象中
-        $.debug( name );//想办法取得函法中的exports对象
-        return ret;
-    }
- 
-    $.require.root = process.cwd();
+
+    //暴露到全局作用域下,所有模块可见!!
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
 
@@ -295,18 +303,10 @@
     $.require("system/server", function(){
         $.log($.configs.port)
     });
-// $.require( "system/deploy", function(fn){
-//    console.log("   deploy!!!!!!!!!!!!!")
-// });
 
-//路由系统的任务有二
-//到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
-//接受前端参数，更新数据库
-
+//
 //http://localhost:8888/index.html
 //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
-
-
 
 
 })();
