@@ -3,6 +3,9 @@
     <head>
         <title><%= @title || "xxx" %></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <% for(var i = 0; url =  @scripts[i++]; ){ %>
+        <%= url %>
+        <% } %>
     </head>
     <body>
         <%= @partial %>

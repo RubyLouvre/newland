@@ -5,6 +5,9 @@ $.define("loader","path,../system/hfs", function(path){
     $.require("aaa", function(){
         $.log('<code style="color:green;">require("aaa")</code>', true);
     });
+     $.require("fs,path", function(){
+        $.log('<code style="color:green;">require("fs,path") ',arguments.length,'</code>', true);
+    });
     $.require("./aaa", function(){
         $.log('<code style="color:green;">require("./aaa")</code>', true);
     });

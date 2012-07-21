@@ -288,9 +288,9 @@
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
 
-    $.require( "test/loader", function(){
-        console.log("测试结束!!!!!!!!!!!!!")
-    });
+    //    $.require( "test/loader", function(){
+    //        console.log("测试结束!!!!!!!!!!!!!")
+    //    });
 
     $.require("system/server", function(){
         $.log($.configs.port)
