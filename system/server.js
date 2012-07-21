@@ -39,8 +39,7 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
             
             var mime = rext.test( cache_key ) && RegExp.$1 || "text"
             var contentType = req.headers['content-type'] ||  mimeMap[ mime ];
-            console.log(location+"");
-            console.log( /\.js$/.test(cache_key) );
+
             var event = flow(), page = $.pagesCache[ cache_key ]
 
             function sendFile(res, page){
@@ -53,6 +52,7 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
             //如果是静态资态
             if(/\.(css|js|png|jpg|gif)$/.test( cache_key )){
                 if(page){
+                    console.log("直接从内存里面读取,不进行IO操作")
                     sendFile(res, page);
                 }else{
                     var statics =  path.join("app/public/",cache_key);
