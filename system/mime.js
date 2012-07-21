@@ -26,7 +26,7 @@ multipart/alternative（HTML邮件的HTML形式和纯文本形式，相同内容
 application/x-www-form-urlencoded（使用HTTP的POST方法提交的表单）
 multipart/form-data（同上，但主要用于表单提交时伴随文件上传的场合）
 */
-mass.define("mime","path,fs",function(path,fs){
+$.define("mime","path,fs",function(path,fs){
     var mime =  {
         //此对象键为文件扩展名,值为MIME
         types: {},
