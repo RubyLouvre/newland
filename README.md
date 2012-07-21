@@ -60,8 +60,10 @@ mass.js 框架的入口
 │  ├─helpers
 │  ├─logs
 │  ├─models
-│  ├─bublic
-│  │   └─drivers
+│  ├─public
+│  │   ├─scripts
+│  │   ├─styles
+│  │   └─images
 │  ├─config.js 配置文件,现在就只用到它的端口:8888
 │  └─views
 ├─system
