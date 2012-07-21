@@ -23,4 +23,5 @@ $.define("loader","path,../system/hfs", function(path){
     $.require("ddd", function(){//测试../
         $.log('<code style="color:green;">require("ddd.js")</code>', true);
     });
+    //留意共有七个绿色的打印
 })

@@ -1,4 +1,5 @@
 $.define("configs", function(){
+    console.log("已加载app/configs模块");
     return $.configs = {
         //栏截器"favicon",
         intercepters: ["mime","location","static","postData","methodOverride","json","render","matcher"],

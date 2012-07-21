@@ -1,4 +1,5 @@
 $.define("deploy","fs, path, child_process",function( fs, path, child_process){
+    console.log("已加载deploy模块")
     var child     //重启线程
     function rebootProcess(exec,args){
         args = args || []

@@ -129,10 +129,24 @@
                     filename = path.join( factory.parent || $.require.root, match[1] ); //path.join会自动处理../的情况
                     filename = /\.js$/.test(filename) ? filename : filename +".js";
                 }
-                if( !mapper[ filename ] || !mapper[ id ] ){ //防止重复生成节点与请求
-                    mapper[ id ] =  mapper[ filename ] = {};//state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                    $.load( id, filename, _deps, args );
-                }else if( mapper[ filename ].state === 2  ){
+                var input = id;
+                try{//先把它当成原生模块进行加载
+                    returns[ id ] = require( match[1] );//require自身是缓存请求的
+                    mapper[ id ] = {
+                        state : 2
+                    }
+                    process.nextTick( $._checkDeps );//每成功加载一个模块就进行依赖检测
+                }catch(e){
+                    input = filename
+                }
+                if( !_deps[ input ] ){
+                    args.push( input );
+                    _deps[ input ] = "司徒正美";
+                }
+                if( input === filename &&  !mapper[ input ] ){ //防止重复生成节点与请求
+                    mapper[ input ] = {};//state: undefined, 未安装; 1 正在安装; 2 : 已安装
+                    $.load( filename );
+                }else if( mapper[ input ].state === 2  ){
                     cn++;
                 }
             });
@@ -152,30 +166,24 @@
             loadings.unshift( id );
             process.nextTick( $._checkDeps );
         },
-        load: function( id, filename, deps, args ){
+        load: function(  filename ){
             try{
-                returns[ id ] = require( id.slice(1) );
-                mapper[ id ].state = 2;
-                collect_args(id, deps, args)
-            }catch(e){
-                try{
-                    $.define = function(){//诡变的$.define
-                        var args = Array.apply([],arguments);
-                        if( typeof args[1] === "function" ){//处理只有两个参数的情况
-                            [].splice.call( args, 1, 0, "" );
-                        }
-                        args[2].id = filename; //模块名
-                        args[2].parent =  filename.slice(0, filename.lastIndexOf( path.sep ) + 1) //取得父模块的文件夹
-                        $.require( args[1], args[2] );
+                $.define = function(){//诡变的$.define
+                    var args = Array.apply([],arguments);
+                    if( typeof args[1] === "function" ){//处理只有两个参数的情况
+                        [].splice.call( args, 1, 0, "" );
                     }
-                    require( filename );
-                    mapper[ filename ].state = 1
-                    collect_args(filename, deps, args)
-                }catch( e ){
-                    errorStack(function(){
-                        $.log("<code style='color:red'>",e , "</code>", true);
-                    }).fire();//打印错误堆栈
+                    args[2].id = filename; //模块名
+                    args[2].parent =  filename.slice(0, filename.lastIndexOf( path.sep ) + 1) //取得父模块的文件夹
+                    mapper[ filename ].state = 1;
+                    process.nextTick( $._checkDeps );//每成功加载一个模块就进行依赖检测
+                    $.require( args[1], args[2] );
                 }
+                require( filename );
+            }catch( e ){
+                errorStack(function(){
+                    $.log("<code style='color:red'>",e , "</code>", true);
+                }).fire();//打印错误堆栈
             }
         },
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
@@ -193,7 +201,7 @@
                     loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
                     obj.state = 2 ;
                     var  id = obj.id;
-                    var  ret = collect_rets( id, obj.args || [], obj.callback );
+                    var  ret = collect_rets( id, obj.args ||[], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
                         $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);
@@ -229,11 +237,11 @@
             return '\x1b[' + arr[0] + 'm' + str + '\x1b[' + arr[1] + 'm';
         }
         /**
-             * 用于调试
-             * @param {String} s 要打印的内容
-             * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
-             * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
-             */
+     * 用于调试
+     * @param {String} s 要打印的内容
+     * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
+     * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
+     */
         $.log = function (s, color){
             var args = Array.apply([],arguments);
             if( args.pop() === true){
@@ -267,43 +275,30 @@
         }
     }
     var errorStack = $.deferred();
-    function collect_rets( name, deps, fn ){
-        for ( var i = 0,argv = [], d; d = deps[i++]; ) {
-            argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
+    function collect_rets( name, args, fn ){
+        for(var i = 0, argv = []; i < args.length ; i++){
+            argv.push( returns[ args[i] ] );//从returns对象取得依赖列表中的各模块的返回值
         }
         var ret = fn.apply( null, argv );//执行模块工厂，然后把返回值放到returns对象中
         $.debug( name );//想办法取得函法中的exports对象
         return ret;
     }
-    function collect_args( id, deps, args){
-        if( !deps[ id ] ){
-            args.push( id );
-            deps[ id ] = "司徒正美";
-        }
-        process.nextTick( $._checkDeps );
-    }
  
     $.require.root = process.cwd();
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    //    $.require( "fs", function(){
-    //        console.log("测试结束!!!!!!!!!!!!!")
-    //    });
+
     $.require( "test/loader", function(){
         console.log("测试结束!!!!!!!!!!!!!")
     });
-//    $.require( "test/aaa", function(){
-//        console.log("测试结束1");
-//    })
-//    $.require( "test/aaa.js", function(){
-//        console.log("测试结束2");
-//    })
-//  $.require( "uu(D:\\newland\\test\\aaa.js)", function(){
-//        console.log("测试结束3")
-//    })
-//   $.require("system/server", function(){
-//       $.log($.configs.port)
-//   });
+
+    $.require("system/server", function(){
+        $.log($.configs.port)
+    });
+// $.require( "system/deploy", function(fn){
+//    console.log("   deploy!!!!!!!!!!!!!")
+// });
+
 //路由系统的任务有二
 //到达action 拼凑一个页面，或从缓存中发送静态资源（刚拼凑好的页面也可能进入缓存系统）
 //接受前端参数，更新数据库
@@ -315,11 +310,11 @@
 
 
 })();
-    //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
-    //2011.12.17 $.define再也不用指定模块所在的目录了,
-    //如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
-    //才能用mass.require("intercepters/favicon",callback)请求得到
-    //现在可以直接mass.define("favicon",module)了
-    //2012.7.12 重新开始搞后端框架
-    //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
-    //一个很好的前端工具 https://github.com/colorhook/att
+//https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
+//2011.12.17 $.define再也不用指定模块所在的目录了,
+//如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
+//才能用mass.require("intercepters/favicon",callback)请求得到
+//现在可以直接mass.define("favicon",module)了
+//2012.7.12 重新开始搞后端框架
+//两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
+//一个很好的前端工具 https://github.com/colorhook/att
