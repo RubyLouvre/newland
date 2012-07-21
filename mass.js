@@ -147,7 +147,7 @@
                 }
                 if( input === filename &&  !mapper[ input ] ){ //防止重复生成节点与请求
                     mapper[ input ] = {};//state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                    $.load( filename );
+                    loadJS( filename );
                 }else if( mapper[ input ].state === 2  ){
                     cn++;
                 }
@@ -168,27 +168,7 @@
             loadings.unshift( id );
             process.nextTick( $._checkDeps );
         },
-        //模块加载的加载函数
-        load: function(  filename ){
-            try{
-                $.define = function(){//诡变的$.define
-                    var args = Array.apply([],arguments);
-                    if( typeof args[1] === "function" ){//处理只有两个参数的情况
-                        [].splice.call( args, 1, 0, "" );
-                    }
-                    args[2].id = filename; //模块名
-                    args[2].parent =  filename.slice(0, filename.lastIndexOf( path.sep ) + 1) //取得父模块的文件夹
-                    mapper[ filename ].state = 1;
-                    process.nextTick( $._checkDeps );//每成功加载一个模块就进行依赖检测
-                    $.require( args[1], args[2] );
-                }
-                require( filename );
-            }catch( e ){
-                errorStack(function(){
-                    $.log("<code style='color:red'>",e , "</code>", true);
-                }).fire();//打印错误堆栈
-            }
-        },
+
         //  模块加载的检测依赖函数,如果一个模块所依赖的其他模块的状态都是2了,那么将它也改成2,并执行回调
         _checkDeps: function (){
             loop:
@@ -232,6 +212,27 @@
     "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace($.rword,function(name){
         class2type[ "[object " + name + "]" ] = name;
     });
+    //模块加载的加载函数
+    function loadJS(  filename ){
+        try{
+            $.define = function(){//诡变的$.define
+                var args = Array.apply([],arguments);
+                if( typeof args[1] === "function" ){//处理只有两个参数的情况
+                    [].splice.call( args, 1, 0, "" );
+                }
+                args[2].id = filename; //模块名
+                args[2].parent =  filename.slice(0, filename.lastIndexOf( path.sep ) + 1) //取得父模块的文件夹
+                mapper[ filename ].state = 1;
+                process.nextTick( $._checkDeps );//每成功加载一个模块就进行依赖检测
+                $.require( args[1], args[2] );
+            }
+            require( filename );
+        }catch( e ){
+            errorStack(function(){
+                $.log("<code style='color:red'>",e , "</code>", true);
+            }).fire();//打印错误堆栈
+        }
+    }
     //用于模块加载失败时的错误回调
     var errorStack = $.deferred();
     //实现漂亮的五颜六色的日志打印
@@ -318,3 +319,28 @@
 //2012.7.12 重新开始搞后端框架
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
 //一个很好的前端工具 https://github.com/colorhook/att
+/*
+ * 对此，SpringMVC所提出的方案是：将整个处理流程规范化，并把每一个处理步骤分派到不同的组件中进行处理。
+
+这个方案实际上涉及到两个方面：
+
+处理流程规范化 —— 将处理流程划分为若干个步骤（任务），并使用一条明确的逻辑主线将所有的步骤串联起来
+处理流程组件化 —— 将处理流程中的每一个步骤（任务）都定义为接口，并为每个接口赋予不同的实现模式
+在SpringMVC的设计中，这两个方面的内容总是在一个不断交叉、互为补充的过程中逐步完善的。
+
+处理流程规范化是目的，对于处理过程的步骤划分和流程定义则是手段。因而处理流程规范化的首要内容就是考虑一个通用的Servlet响应程序大致应该包含的逻辑步骤：
+
+步骤1 —— 对Http请求进行初步处理，查找与之对应的Controller处理类（方法）
+步骤2 —— 调用相应的Controller处理类（方法）完成业务逻辑
+步骤3 —— 对Controller处理类（方法）调用时可能发生的异常进行处理
+步骤4 —— 根据Controller处理类（方法）的调用结果，进行Http响应处理
+这些逻辑步骤虽然还在我们的脑海中，不过这些过程恰恰正是我们对整个处理过程的流程化概括，稍后我们就会把它们进行程序化处理。
+
+所谓的程序化，实际上也就是使用编程语言将这些逻辑语义表达出来。在Java语言中，最适合表达逻辑处理语义的语法结构是接口，因此上述的四个流程也就被定义为了四个不同接口，它们分别是：
+
+步骤1 —— HandlerMapping
+步骤2 —— HandlerAdapter
+步骤3 —— HandlerExceptionResolver
+步骤4 —— ViewResolver
+结合之前我们对流程组件化的解释，这些接口的定义不正是处理流程组件化的步骤嘛？这些接口，就是组件。 
+ */

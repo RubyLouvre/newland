@@ -1,21 +1,30 @@
-$.define("server","flow, view, status, deploy, fs, url, querystring, http, path, ../app/configs",
-    function(flow, view, status, deploy, fs, url, qs, http, path){
+$.define("server","flow, view, status, helper, deploy, fs, url, querystring, http, path, ../app/configs",
+    function(flow, view, status, helpers, deploy, fs, url, qs, http, path){
         
         $.mix({
             pagesCache: {},
             viewsCache: {}
         })
+        //很怀疑是否要动用到mime模块
         var mimeMap = {
-            'txt': 'text/plain',
-            'html': 'text/html',
-            'css': 'text/css',
-            'xml': 'application/xml',
-            'json': 'application/json',
-            'js': 'application/javascript',
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'gif': 'image/gif',
-            'png': 'image/png',
+            "css": "text/css",
+            "gif": "image/gif",
+            "html": "text/html",
+            "ico": "image/x-icon",
+            "jpeg": "image/jpeg",
+            "jpg": "image/jpeg",
+            "js": "text/javascript",
+            "json": "application/json",
+            "pdf": "application/pdf",
+            "png": "image/png",
+            "svg": "image/svg+xml",
+            "swf": "application/x-shockwave-flash",
+            "tiff": "image/tiff",
+            "txt": "text/plain",
+            "wav": "audio/x-wav",
+            "wma": "audio/x-ms-wma",
+            "wmv": "video/x-ms-wmv",
+            "xml": "text/xml",
             'manifest': 'text/cache-manifest'
         };
         /**一个请求过来，取其pathname，先进入缓存系统取页面，
@@ -27,7 +36,6 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
         //   var url = "/special/show_6582212/wbUD55K148PI7ryhIVCuhg...html"
         //   var a = /(?:\.)(\w*)(?=$|\?|#|\:)/.test(url) && RegExp.$1 || "text";
         //   console.log(a)
-        var rext = /[^\/]\/.+?\.(\w+)$/
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
         http.createServer(function(req, res) {
             var location =  url.parse( req.url );
@@ -36,9 +44,9 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
                 return req.headers.host + req.url;
             }
             var cache_key = location.pathname;
-            
-            var mime = rext.test( cache_key ) && RegExp.$1 || "text"
-            var contentType = req.headers['content-type'] ||  mimeMap[ mime ];
+            var ext = path.extname(cache_key);
+            ext = ext ? ext.slice(1) : 'unknown';
+            var contentType = req.headers['content-type'] ||  mimeMap[ ext ];
 
             var event = flow(), page = $.pagesCache[ cache_key ]
 
@@ -52,7 +60,7 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
             //如果是静态资态
             if(/\.(css|js|png|jpg|gif)$/.test( cache_key )){
                 if(page){
-                    console.log("直接从内存里面读取,不进行IO操作")
+                    $.log("直接从内存里面读取,不进行IO操作")
                     sendFile(res, page);
                 }else{
                     var statics =  path.join("app/public/",cache_key);
@@ -81,21 +89,7 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
                 }
             });
 
-            var data = {
-                scripts : [],
-                title: function( t ){
-                    data.title = t
-                },
-                layout: function( t ){
-                    data.layout = t
-                },
-                script: function(url, nocache){
-                    if(nocache){
-                        url += (/\?/.test( url) ? "&" : "?" ) + "_time=" + Date.now();
-                    }
-                    data.scripts.push( '<script src="' +url +'" type="text/javascript"></scr'+'ipt>')
-                }
-            };
+            var helper = new helpers()
             //明天再把404抽取出来
             event
             .bind(pages_key,function(data){
@@ -113,11 +107,11 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
                     if (err){
                         event.fire("404")
                     }else{
-                        view(res, data, event, {
+                        view(res, helper, event, {
                             url: views_key,
                             pagesKey:pages_key,
                             status: 200,
-                            data: data,
+                            data: helper,
                             cacheKey: cache_key,
                             cachePage: true,
                             contentType:contentType
@@ -128,7 +122,7 @@ $.define("server","flow, view, status, deploy, fs, url, querystring, http, path,
             .bind(404, function(){
                 var object = status[404];
                 object.code = 404;
-                view(res, data, event, {
+                view(res, helper, event, {
                     url: $.path("app","views", "error.html" ),
                     status: 404,
                     data: object,
