@@ -180,7 +180,6 @@
                         //  console.log( [args[1], args[2]])
                         $.require( args[1], args[2] );
                     }
-                       console.log(filename)
                     require( filename );
                     mapper[ filename ].state = 1
                     collect_args(filename, deps, args)

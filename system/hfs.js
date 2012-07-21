@@ -1,6 +1,6 @@
 //height level file system
 $.define( "hfs","fs,path", function(fs, path){
-    cosole.log("已加载了hfs模块")
+    console.log("已加载了hfs模块")
     $.mix( {
         //遍历文件树,收集目录与文件,并包含自身
         //p为路径，cb为最终回调，opts为可选的配置对象，
