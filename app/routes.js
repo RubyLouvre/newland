@@ -1,5 +1,5 @@
 //用于设置路由规则
-mass.define("routes",function(){
+$.define("routes",function(){
     //支持五种路由:方法路由,资源路由,嵌套路由,命名空间路由,根路由
     return function(map){
         //方法路由

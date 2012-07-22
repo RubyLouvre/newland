@@ -100,8 +100,6 @@ $.define( "hfs","fs,path", function(fs, path){
                 cb()
             }
         },
-        readFile: fs.readFile,
-        readFileSync: fs.readFileSync,
         //上面的异步化版本
         del: new function( ){
             function inner(dirs, cb){
@@ -163,6 +161,12 @@ $.define( "hfs","fs,path", function(fs, path){
             }
             inner("", array, cb)
         },
+        readFile: function(){
+            fs.readFile.apply(fs, arguments)
+        },
+        readFileSync: function(){
+            fs.readFileSync.apply(fs, arguments)
+        },
         //创建文件,并添加内容,如果指定的路径中里面某些目录不存在,也一并创建它们
         writeFileSync: function( p , data, encoding){
             p = path.normalize(p);
@@ -175,7 +179,7 @@ $.define( "hfs","fs,path", function(fs, path){
         },
         //上面的异步化版本
         writeFile: function(p, data, cb){
-            p = path.normalize(p);
+            p = path.normalize(p);cb = cb || $.noop
             var i = p.lastIndexOf( path.sep )
             var dir = p.slice(0, i);
             var fn  = function(){
@@ -212,7 +216,7 @@ $.define( "hfs","fs,path", function(fs, path){
                 }
             }
         },
-         //上面的异步化版本
+        //上面的异步化版本
         cpdir: new function(){
             function copyFile(file, newFile, after ){
                 fs.stat(file, function(err, stat){//拷贝快捷方式与文件

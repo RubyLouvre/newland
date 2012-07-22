@@ -1,6 +1,5 @@
-$.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs",
-    function(Flow, Helper, status, deploy, fs, http, ejs){
-        
+$.define("server","flow,  helper, status, deploy, http, ejs, hfs, ../app/configs",
+    function(Flow, Helper, status, deploy, http){
         $.mix({
             pagesCache: {}, //用于保存静态页面,可能是临时拼装出来的
             viewsCache: {}, //用于保存模板函数
@@ -57,14 +56,14 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                 this.res.end();
             })
             .bind("static", function( url ){
-                $.log("进入static回调")
+                $.log("进入static回调");
+                $.log(url);
                 var cache = $.staticCache[ url ];
                 if( cache ){
                     this.fire("send_file", cache);
-                }else if( /\.(css|js|png|jpg|gif)$/.test( url ) ){
+                }else if( /\.(css|js|png|jpg|gif|ico)$/.test( url ) ){
                     var statics =  $.path.join("app/public/",url);
-                    console.log(statics);
-                    fs.readFile(statics, function(err, data){
+                    $.readFile(statics, function(err, data){
                         if(err){
                             this.fire(404)
                         }else{
@@ -82,7 +81,7 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                 }
             })
             .bind(404, function( ){
-                var text = fs.readFileSync( "app/views/error.html", 'utf-8')//读取内容
+                var text = $.readFileSync( "app/views/error.html", 'utf-8')//读取内容
                 var fn = $.ejs(text);
                 var data = $.mix(
                     this.helper[0], 
@@ -108,7 +107,7 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                     this.fire("send_file", cache);
                 }else{
                     var pages_url = $.path.join("app","pages", url );
-                    fs.readFile( pages_url, 'utf-8', function (err, text) {//读取内容
+                    $.readFile( pages_url, 'utf-8', function (err, text) {//读取内容
                         if (err){
                             //如果不存在就从view目录中寻找相应模板来拼装
                             var view_url = $.path.join("app","views", url );
@@ -139,7 +138,7 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                         this.fire('cache_page', html, url)
                     }
                 }else{
-                    fs.readFile( view_url,  'utf-8', function(err, text){
+                    $.readFile( view_url,  'utf-8', function(err, text){
                         if(err){
                             this.fire( 404 )
                         }else{
@@ -157,6 +156,8 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                     data: html,
                     mine: mimes[ "html" ]
                 }
+                var pages_url = $.path.join("app","pages", url );
+                $.writeFile(pages_url, html)
                 $.pagesCache[ url ] = cache;
                 this.fire("send_file", cache)
             })
@@ -165,14 +166,21 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                 var fn = $.viewsCache[ layout_url ]
                 if( fn ){
                     var html = fn( this.helper[0] );
-                    this.fire('cache_page', html, url)
+                    this.fire('cache_page', html, url);
                 }else{
-                    fs.readFile( layout_url,  'utf-8', function(err, text){
+                    $.readFile( layout_url,  'utf-8', function(err, text){
                         if(err){
                             this.fire( 404 )
                         }else{
-                            $.viewsCache[ layout_url ] = $.ejs( text );
-                            this.fire("get_layout", layout_url, url)
+                            var fn = $.ejs( text );
+                            if(url){//如果指定了第二个参数才存入缓存系统
+                                $.viewsCache[ layout_url ] = fn
+                                this.fire("get_layout", layout_url, url)
+                            }else{
+                                var html = fn( this.helper[0] );
+                                this.fire('cache_page', html, url)
+                            }
+                           
                         }
                     }.bind(this))
                 }
