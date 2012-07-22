@@ -1,5 +1,5 @@
-$.define("server","flow,  helper, status, deploy, http, ejs, hfs, ../app/configs",
-    function(Flow, Helper, status, deploy, http){
+$.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs, ../app/configs",
+    function(Flow, Helper, status, deploy, http, tidy){
         $.mix({
             pagesCache: {}, //用于保存静态页面,可能是临时拼装出来的
             viewsCache: {}, //用于保存模板函数
@@ -107,7 +107,7 @@ $.define("server","flow,  helper, status, deploy, http, ejs, hfs, ../app/configs
                     this.fire("send_file", cache);
                 }else{
                     var pages_url = $.path.join("app","pages", url );
-                    $.readFile( pages_url, 'utf-8', function (err, text) {//读取内容
+                    $.readFile( pages_url, 'utf-8', function (err, html) {//读取内容
                         if (err){
                             //如果不存在就从view目录中寻找相应模板来拼装
                             var view_url = $.path.join("app","views", url );
@@ -115,11 +115,11 @@ $.define("server","flow,  helper, status, deploy, http, ejs, hfs, ../app/configs
                         }else{
                             var cache = {
                                 code: 200,
-                                data: text,
+                                data: html,
                                 mine: mimes[ "html" ]
                             }
                             $.pagesCache[ url ] = cache;
-                            this.fire("send_fire", cache)
+                            this.fire("send_file", cache)
                         }
                     }.bind(this));
                 }
@@ -151,13 +151,14 @@ $.define("server","flow,  helper, status, deploy, http, ejs, hfs, ../app/configs
             })
             .bind('cache_page', function( html, url ){
                 $.log("进入cache_page回调")
+                html = tidy(html);
                 var cache = {
                     code: 200,
                     data: html,
                     mine: mimes[ "html" ]
                 }
                 var pages_url = $.path.join("app","pages", url );
-                $.writeFile(pages_url, html)
+                $.writeFile(pages_url, html )
                 $.pagesCache[ url ] = cache;
                 this.fire("send_file", cache)
             })
