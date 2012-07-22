@@ -39,126 +39,140 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
         //   console.log(a)
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
 
-        function send_file(res, page){
-            res.writeHead(page.code, {
-                "Content-Type": page.mine
-            });
-            res.write(page.data);
-            res.end();
-        }
-
-        function make_view( fn,  helper ){
-
-        }
-        function make_layout( fn,  helper ){
-
-        }
-        function make_page( view_url, page_url, helper, res ){
-            var flow = this;
-            var fn = $.viewsCache[ view_url ]
-            if( fn ){
-                text = fn.call(helper, {});
-                if(typeof helper.layout == "string"){
-                    helper.partial = text;
-                    var layout_url = $.path.join("app","views/layout", helper.layout );
-                    fn = $.viewsCache[ layout_url ] ;
-                }
-            }else{
-                //读取对应的局部模块,并将它转换成函数,存入缓存系统,如果存在layout,进一步读取layout
-               
-                fs.readFile( view_url,  'utf-8', function(err, text){
-                    if(err){
-                        flow.fire( 404 )
-                    }else{
-                        fn = $.viewsCache[ view_url ] = $.ejs( text );
-                    }
-                    console.log(fn+"")
-                    text = fn.call({},{
-                        helper: helper
-                    });
-                    console.log(text)
-                    if(typeof helper.layout == "string"){
-                        helper.partial = text;
-                        var layout_url = $.path.join("app","views/layout", helper.layout )
-                        fs.readFile( view_url,  'utf-8', function(err, text){
-                            if(err){
-                                flow.fire( 404 )
-                            }else{
-                                fn = $.viewsCache[ layout_url ] = $.ejs( text );
-                                var cache = {
-                                    code: 200,
-                                    data: fn(helper),
-                                    mine: mimes[ "html" ]
-                                }
-                                send_file(res, cache);
-                                $.staticCache[ page_url ] = cache;
-                            }
-                        })
-                    }
-                });
-            }
-        }
 
         http.createServer(function(req, res) {
-            var location =  $.path.parse( req.url, true );
-            location.toString = function(){
-                return req.headers.host + req.url;
-            }
-            var url = location.pathname;
             var flow = Flow()
-            .bind("page",make_page)
-            .bind("view",make_view)
-
-
-            var cache = $.staticCache[ url ];
-
-            if( cache ){
-                return send_file(res, cache);
-            }else if( /\.(css|js|png|jpg|gif)$/.test( url ) ){
-                var statics =  $.path.join("app/public/",url);
-                fs.readFile(statics, function(err, data){
-                    if(err){
-                        return flow.fire(404)
-                    }
-                    cache = {
-                        code: 200,
-                        data: data,
-                        mine: mimes[ RegExp.$1 ]
-                    }
-                    send_file(res, cache);
-                    $.staticCache[ url ] = cache;
+            flow.res =  res;
+            flow.req =  req;
+            
+            flow.helper = Helper()
+            //把所有操作都绑定流程对象上
+            flow
+            .bind("send_file", function( page ){
+                 $.log("进入send_file回调")
+                this.res.writeHead(page.code, {
+                    "Content-Type": page.mine
                 });
-                return
-            }
-
-            //开始处理页面
-            var last_char = url[ url.length - 1 ]
-            if(last_char === "\\" || last_char == "/" ){ //如果是一个目录则默认加上index.html
-                url += "index.html"
-                url = $.path.normalize(url)
-            }
-
-            cache = $.pagesCache[ url ];
-            if( cache ){
-                return  send_file(res, cache);
-            }else{
-                var pages_url = $.path.join("app","pages", url );
-                fs.readFile( pages_url, 'utf-8', function (err, data) {//读取内容
-                    if (err){
-                        var a =  new Helper;
-                        console.log(a.set_title)
-                        flow.fire("page", pages_url.replace("app\\pages", "app\\views"), pages_url, new Helper, res )
-                    }else{
+                this.res.write(page.data);
+                this.res.end();
+            })
+            .bind("static", function( url ){
+                $.log("进入static回调")
+                var cache = $.staticCache[ url ];
+                if( cache ){
+                    this.fire("send_file", cache);
+                }else if( /\.(css|js|png|jpg|gif)$/.test( url ) ){
+                    var statics =  $.path.join("app/public/",url);
+                    fs.readFile(statics, function(err, data){
+                        if(err){
+                            this.fire(404)
+                        }else{
+                            var cache = {
+                                code: 200,
+                                data: data,
+                                mine: mimes[ RegExp.$1 ]
+                            }
+                            send_file(res, cache);
+                        }
                         cache = {
                             code: 200,
                             data: data,
-                            mine: mimes[ "html" ]
+                            mine: mimes[ RegExp.$1 ]
                         }
-                        $.pagesCache[ url ] = cache;
-                        send_file(res, cache);
+                        $.staticCache[ url ] = cache;
+                        this.fire("send_file", cache)
+                    }.bind(this));
+                }else{
+                    this.fire("get_page", url);
+                }
+            })
+            .bind("get_page", function( url ){
+                $.log("进入get_page回调")
+                var last_char = url[ url.length - 1 ]
+                //如果是一个目录则默认加上index.html
+                if(last_char === "\\" || last_char == "/" ){
+                    url += "index.html"
+                    url = $.path.normalize(url)
+                }
+                var cache = $.pagesCache[ url ];
+                
+                if( cache ){
+                    this.fire("send_file", cache);
+                }else{
+                    var pages_url = $.path.join("app","pages", url );
+                    fs.readFile( pages_url, 'utf-8', function (err, text) {//读取内容
+                        if (err){
+                            //如果不存在就从view目录中寻找相应模板来拼装
+                            var view_url = $.path.join("app","views", url );
+                            this.fire("get_tmpl", view_url, url )
+                        }else{
+                            var cache = {
+                                code: 200,
+                                data: text,
+                                mine: mimes[ "html" ]
+                            }
+                            $.pagesCache[ url ] = cache;
+                            this.fire("send_fire", cache)
+                        }
+                    }.bind(this));
+                }
+            })
+            .bind("get_tmpl", function( view_url, url ){
+                $.log("进入get_tmpl回调")
+                var fn = $.viewsCache[ view_url ]
+                if( fn ){
+                    var data = this.helper[0];
+                    var html = fn( data, this.helper[1]);
+                    if(typeof data.layout == "string"){
+                        data.partial = html;
+                        var layout_url = $.path.join("app","views/layout", data.layout );
+                        this.fire("get_layout", layout_url, url );
+                    }else{
+                        this.fire('cache_page', html, url)
                     }
-                });
-            }
+                }else{
+                    fs.readFile( view_url,  'utf-8', function(err, text){
+                        if(err){
+                            this.fire( 404 )
+                        }else{
+                            $.viewsCache[ view_url ] = $.ejs( text );
+                            console.log( $.viewsCache[ view_url ] +"")
+                            this.fire( "get_tmpl", view_url, url );
+                        }
+                    }.bind(this) );
+                }
+
+            })
+            .bind('cache_page', function( html, url ){
+                $.log("进入cache_page回调")
+                var cache = {
+                    code: 200,
+                    data: html,
+                    mine: mimes[ "html" ]
+                }
+                $.pagesCache[ url ] = cache;
+                console.log(cache)
+                this.fire("send_file", cache)
+            })
+            .bind("get_layout", function( layout_url, url ){
+                $.log("进入get_layout回调")
+                var fn = $.viewsCache[ layout_url ]
+                if( fn ){
+                    var html = fn( this.helper[0] );
+                    this.fire('cache_page', html, url)
+                }else{
+                    fs.readFile( layout_url,  'utf-8', function(err, text){
+                        if(err){
+                            this.fire( 404 )
+                        }else{
+                            $.viewsCache[ layout_url ] = $.ejs( text );
+                            this.fire("get_layout", layout_url, url)
+                        }
+                    }.bind(this))
+                }
+            })
+            .fire("static", req.url)
+       
 
         }).listen( $.configs.port );
     //今天的任务支持CSS JS 图片
