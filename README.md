@@ -85,6 +85,11 @@ mass.js 框架的入口
 </pre>
 <p>另外还有许多文件，这都是我上一次来这片大陆时，撞沉后的海盗船碎片，不用过于介怀！</p>
 
+<h3>试用</h3>
+<p>安装node.js,下载newland项目,命令台定位到newland目录下,然后node mass.js.在浏览器下http://localhost:8888/</p>
+
+
+
 
 
 
