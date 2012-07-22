@@ -11,27 +11,53 @@ $.define("helper","class", function(){
             set_title: function( str ){
                 data.title = str
             },
-            add_css : function (file) {
+            add_css : function ( file ) {
+                var opts = {
+                    media: 'screen',
+                    rel: 'stylesheet',
+                    type: 'text/css',
+                    http: 1
+                };
+                return create_tag.call(this, file, opts, arguments)
+            },
+             push_css: function( file ) {
                 var opts = {
                     media: 'screen',
                     rel: 'stylesheet',
                     type: 'text/css'
                 };
-                var tag = create_tag.call(this, file, opts, arguments)
-                if(opts.soon){
-                    return tag
-                }
-                data.links.push( tag);
+                var tag = create_tag.call(this, file, opts, arguments);
+                data.links.push( tag );
             },
-            add_js: function( file ){
+            unshift_css: function( file ){
+               var opts = {
+                    media: 'screen',
+                    rel: 'stylesheet',
+                    type: 'text/css'
+                };
+                var tag = create_tag.call(this, file, opts, arguments);
+                data.links.unshift( tag );
+            },
+            push_js: function( file ) {
                 var opts = {
                     type: 'text/javascript'
                 };
-                var tag = create_tag.call(this, file, opts, arguments)
-                if(opts.soon){
-                    return tag
-                }
+                var tag = create_tag.call(this, file, opts, arguments);
                 data.scripts.push( tag);
+            },
+            unshift_js: function( file ){
+                var opts = {
+                    type: 'text/javascript'
+                };
+                var tag = create_tag.call(this, file, opts, arguments);
+                data.scripts.unshift( tag);
+            },
+            add_js: function( file ){
+                var opts = {
+                    type: 'text/javascript',
+                    http: 1
+                };
+                return create_tag.call(this, file, opts, arguments)
             }
         }
         return [data, context]    
@@ -41,31 +67,28 @@ $.define("helper","class", function(){
     function create_tag(file, opts, args){
         args = Array.apply([],args)
         var last = args[args.length - 1]
-        if(last === true){
-            opts.http = opts.soon = 1;
-        }else if (typeof last === "object" ){
+        if (typeof last === "object" ){
             opts = $.mix( opts, args.pop(), false);
         }
         if(opts.http){//添加前缀
-            file = $.path.join( this.host ,file );
-            file = "http://"+ file.replace(/\\/g,"/");
+            if(file.indexOf(this.host) !== 0){
+                file = $.path.join( this.host ,file );
+                file = "http://"+ file.replace(/\\/g,"/");
+            }
             delete opts.http
         }
         var href = checkFile( file );
-        var soon = opts.soon, result
         if(opts.type == "text/css"){
             delete opts.href;
-            result = genericTagSelfclosing('link', opts, {
+            return genericTagSelfclosing('link', opts, {
                 href: href
             })
         }else{
             delete opts.src
-            result =  genericTag('script', '', opts, {
+            return  genericTag('script', '', opts, {
                 src: href
             });
         }
-        opts.soon = soon;
-        return result;
     }
     //辅助函数
     //判定是开发环境或是测试环境还是线上环境
