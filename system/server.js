@@ -49,7 +49,7 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
             //把所有操作都绑定流程对象上
             flow
             .bind("send_file", function( page ){
-                 $.log("进入send_file回调")
+                $.log("进入send_file回调")
                 this.res.writeHead(page.code, {
                     "Content-Type": page.mine
                 });
@@ -63,28 +63,36 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                     this.fire("send_file", cache);
                 }else if( /\.(css|js|png|jpg|gif)$/.test( url ) ){
                     var statics =  $.path.join("app/public/",url);
+                    console.log(statics);
                     fs.readFile(statics, function(err, data){
                         if(err){
                             this.fire(404)
                         }else{
-                            var cache = {
+                            cache = {
                                 code: 200,
                                 data: data,
                                 mine: mimes[ RegExp.$1 ]
                             }
-                            send_file(res, cache);
+                            $.staticCache[ url ] = cache;
+                            this.fire("send_file", cache)
                         }
-                        cache = {
-                            code: 200,
-                            data: data,
-                            mine: mimes[ RegExp.$1 ]
-                        }
-                        $.staticCache[ url ] = cache;
-                        this.fire("send_file", cache)
                     }.bind(this));
                 }else{
                     this.fire("get_page", url);
                 }
+            })
+            .bind(404, function( ){
+                var text = fs.readFileSync( "app/views/error.html", 'utf-8')//读取内容
+                var fn = $.ejs(text);
+                var data = $.mix(
+                    this.helper[0], 
+                    status["404"], {
+                        code: 404
+                    });
+                var html = fn( data, this.helper[1]);
+                data.partial = html;
+                var layout_url = $.path.join("app","views/layout", data.layout );
+                this.fire("get_layout", layout_url, 404 );
             })
             .bind("get_page", function( url ){
                 $.log("进入get_page回调")
@@ -136,7 +144,6 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                             this.fire( 404 )
                         }else{
                             $.viewsCache[ view_url ] = $.ejs( text );
-                            console.log( $.viewsCache[ view_url ] +"")
                             this.fire( "get_tmpl", view_url, url );
                         }
                     }.bind(this) );
@@ -151,7 +158,6 @@ $.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs"
                     mine: mimes[ "html" ]
                 }
                 $.pagesCache[ url ] = cache;
-                console.log(cache)
                 this.fire("send_file", cache)
             })
             .bind("get_layout", function( layout_url, url ){

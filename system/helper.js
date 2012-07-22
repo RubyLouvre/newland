@@ -21,8 +21,9 @@ $.define("helper","class", function(){
                 if (typeof args[args.length - 1] == 'object') {
                     opts = $.mix( opts, args.pop(), false);
                 }
-                var href = checkFile('css', file);
+                var href = checkFile( file );
                 delete opts.href;
+
                 data.links.push( genericTagSelfclosing('link', opts, {
                     href: href
                 }));
@@ -35,7 +36,7 @@ $.define("helper","class", function(){
                 if (typeof args[args.length - 1] == 'object') {
                     opts = $.mix( opts, args.pop(), false);
                 }
-                var href = checkFile('js', file);
+                var href = checkFile( file );
                 delete opts.src;
                 data.scripts.push( genericTag('script', '', opts, {
                     src: href
@@ -49,25 +50,10 @@ $.define("helper","class", function(){
     function checkProd() {
         return $.configs.env === 'production';
     }
-    var regexps = {
-        'cached': /^cache\//,
-        'isHttp': /^https?:\/\/|\/\//
-    },
-    exts = {
-        'css': '.css',
-        'js' : '.js'
-    },
-    paths = {
-        'css': '/stylesheets/',
-        'js' : '/javascripts/'
-    };
-    function checkFile(type, file) {
-        var isExternalFile = regexps.isHttp.test(file),
-        isCached         = file.match(regexps.cached),
-        href             = !isExternalFile ? paths[type] + file + exts[type] : file,
-        isProd           = checkProd();
-        if (!isCached && !isProd && !isExternalFile ) {
-            href += '?' + Date.now()
+
+    function checkFile(  href ) {
+        if (checkProd() ) {
+            href += ( /\?/.test(href) ? "&" : "?" ) + "_time=" + Date.now();
         }
         return href;
     }

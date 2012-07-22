@@ -3,8 +3,11 @@
     <head>
         <title><%= @title || "xxx" %></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <% for(var i = 0; url =  @scripts[i++]; ){ %>
-        <%= url %>
+        <% for(var i = 0; js =  @scripts[i++]; ){ %>
+        <%= js %>
+        <% } %>
+        <% for(var i = 0; css =  @links[i++]; ){ %>
+        <%= css %>
         <% } %>
     </head>
     <body>
