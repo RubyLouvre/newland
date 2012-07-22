@@ -39,9 +39,9 @@ $.define("ejs", "./lang",function(){
                 segment && buff.push(openHTML, $.quote(segment ), closeHTML);
             }
         }
-        return new Function("data",
-            "data = data || {};\n"+
-            "with(this){\n\t"
+        return new Function("data","opts",
+            "data = data || {};\n opts = opts || {};\nvar helper = opts.helper || {};\n"+
+            "with(helper){\n\t"
             + buff.join("")+'\t;return __views.join(""); \n}');
     }
     return $.ejs;

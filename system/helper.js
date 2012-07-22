@@ -3,6 +3,8 @@ $.define("helper","class", function(){
         init: function(){
             this.links = []
             this.scripts = []
+            this.set_layout = function(){}
+            this.set_title =  function(){}
         },
         set_layout: function( str ){
             this.layout = str
@@ -43,7 +45,7 @@ $.define("helper","class", function(){
     })
 
     function checkProd() {
-        return $.configss.env === 'production';
+        return $.configs.env === 'production';
     }
     var regexps = {
         'cached': /^cache\//,
@@ -77,7 +79,7 @@ $.define("helper","class", function(){
     
     function htmlTagParams(params, override) {
         var maybe_params = '';
-        safe_merge(params, override);
+        $.mix(params, override, false);
         for (var key in params) {
             if (params[key] != void 0) {
                 maybe_params += ' ' + key + '="' + params[key].toString().replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"';

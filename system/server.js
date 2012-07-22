@@ -1,12 +1,13 @@
-$.define("server","flow, view, status, helper, deploy, fs, url, querystring, http, path, ../app/configs",
-    function(flow, view, status, helpers, deploy, fs, url, qs, http, path){
+$.define("server","flow,  helper, status, deploy, fs, http, ejs, ../app/configs",
+    function(Flow, Helper, status, deploy, fs, http, ejs){
         
         $.mix({
-            pagesCache: {},
-            viewsCache: {}
+            pagesCache: {}, //用于保存静态页面,可能是临时拼装出来的
+            viewsCache: {}, //用于保存模板函数
+            staticCache: {} //用于保存静态资源
         })
         //很怀疑是否要动用到mime模块
-        var mimeMap = {
+        var mimes = {
             "css": "text/css",
             "gif": "image/gif",
             "html": "text/html",
@@ -37,99 +38,128 @@ $.define("server","flow, view, status, helper, deploy, fs, url, querystring, htt
         //   var a = /(?:\.)(\w*)(?=$|\?|#|\:)/.test(url) && RegExp.$1 || "text";
         //   console.log(a)
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
+
+        function send_file(res, page){
+            res.writeHead(page.code, {
+                "Content-Type": page.mine
+            });
+            res.write(page.data);
+            res.end();
+        }
+
+        function make_view( fn,  helper ){
+
+        }
+        function make_layout( fn,  helper ){
+
+        }
+        function make_page( view_url, page_url, helper, res ){
+            var flow = this;
+            var fn = $.viewsCache[ view_url ]
+            if( fn ){
+                text = fn.call(helper, {});
+                if(typeof helper.layout == "string"){
+                    helper.partial = text;
+                    var layout_url = $.path.join("app","views/layout", helper.layout );
+                    fn = $.viewsCache[ layout_url ] ;
+                }
+            }else{
+                //读取对应的局部模块,并将它转换成函数,存入缓存系统,如果存在layout,进一步读取layout
+               
+                fs.readFile( view_url,  'utf-8', function(err, text){
+                    if(err){
+                        flow.fire( 404 )
+                    }else{
+                        fn = $.viewsCache[ view_url ] = $.ejs( text );
+                    }
+                    console.log(fn+"")
+                    text = fn.call({},{
+                        helper: helper
+                    });
+                    console.log(text)
+                    if(typeof helper.layout == "string"){
+                        helper.partial = text;
+                        var layout_url = $.path.join("app","views/layout", helper.layout )
+                        fs.readFile( view_url,  'utf-8', function(err, text){
+                            if(err){
+                                flow.fire( 404 )
+                            }else{
+                                fn = $.viewsCache[ layout_url ] = $.ejs( text );
+                                var cache = {
+                                    code: 200,
+                                    data: fn(helper),
+                                    mine: mimes[ "html" ]
+                                }
+                                send_file(res, cache);
+                                $.staticCache[ page_url ] = cache;
+                            }
+                        })
+                    }
+                });
+            }
+        }
+
         http.createServer(function(req, res) {
-            var location =  url.parse( req.url );
-            location.query = qs.parse(location.query || "") ;
+            var location =  $.path.parse( req.url, true );
             location.toString = function(){
                 return req.headers.host + req.url;
             }
-            var cache_key = location.pathname;
-            var ext = path.extname(cache_key);
-            ext = ext ? ext.slice(1) : 'unknown';
-            var contentType = req.headers['content-type'] ||  mimeMap[ ext ];
+            var url = location.pathname;
+            var flow = Flow()
+            .bind("page",make_page)
+            .bind("view",make_view)
 
-            var event = flow(), page = $.pagesCache[ cache_key ]
 
-            function sendFile(res, page){
-                res.writeHead(page.code, {
-                    "Content-Type": page.mine
+            var cache = $.staticCache[ url ];
+
+            if( cache ){
+                return send_file(res, cache);
+            }else if( /\.(css|js|png|jpg|gif)$/.test( url ) ){
+                var statics =  $.path.join("app/public/",url);
+                fs.readFile(statics, function(err, data){
+                    if(err){
+                        return flow.fire(404)
+                    }
+                    cache = {
+                        code: 200,
+                        data: data,
+                        mine: mimes[ RegExp.$1 ]
+                    }
+                    send_file(res, cache);
+                    $.staticCache[ url ] = cache;
                 });
-                res.write(page.data);
-                res.end();
-            }
-            //如果是静态资态
-            if(/\.(css|js|png|jpg|gif)$/.test( cache_key )){
-                if(page){
-                    $.log("直接从内存里面读取,不进行IO操作")
-                    sendFile(res, page);
-                }else{
-                    var statics =  path.join("app/public/",cache_key);
-                    fs.readFile(statics, function(e, data){
-                        if(e){
-                            return page.fire(404)
-                        }
-                        page = {
-                            code: 200,
-                            data: data,
-                            mine: mimeMap[RegExp.$1]
-                        }
-                        sendFile(res, page);
-                        $.pagesCache[ cache_key ] = page;
-                    })
-                }
                 return
             }
-            var pages_key = $.path("app","pages", cache_key )
-            var views_key = pages_key.replace("app\\pages", "app\\views");
-            fs.readFile( pages_key, 'utf-8', function (err, data) {//读取内容
-                if (err){
-                    event.fire(views_key)
-                }else{
-                    event.fire(pages_key, data)
-                }
-            });
 
-            var helper = new helpers()
-            //明天再把404抽取出来
-            event
-            .bind(pages_key,function(data){
-                res.writeHead(200, {
-                    "Content-Type":  contentType
-                });
-                res.write(data);
-                res.end();
-            } )
-            .bind(views_key,function(){ //尝试取得
-                if(/\\$/.test(views_key)){ //如果是一个目录则默认加上index.html
-                    views_key += "index.html"
-                }
-                fs.readFile( views_key, 'utf-8', function (err ) {//读取内容
+            //开始处理页面
+            var last_char = url[ url.length - 1 ]
+            if(last_char === "\\" || last_char == "/" ){ //如果是一个目录则默认加上index.html
+                url += "index.html"
+                url = $.path.normalize(url)
+            }
+
+            cache = $.pagesCache[ url ];
+            if( cache ){
+                return  send_file(res, cache);
+            }else{
+                var pages_url = $.path.join("app","pages", url );
+                fs.readFile( pages_url, 'utf-8', function (err, data) {//读取内容
                     if (err){
-                        event.fire("404")
+                        var a =  new Helper;
+                        console.log(a.set_title)
+                        flow.fire("page", pages_url.replace("app\\pages", "app\\views"), pages_url, new Helper, res )
                     }else{
-                        view(res, helper, event, {
-                            url: views_key,
-                            pagesKey:pages_key,
-                            status: 200,
-                            data: helper,
-                            cacheKey: cache_key,
-                            cachePage: true,
-                            contentType:contentType
-                        });
+                        cache = {
+                            code: 200,
+                            data: data,
+                            mine: mimes[ "html" ]
+                        }
+                        $.pagesCache[ url ] = cache;
+                        send_file(res, cache);
                     }
-                })
-            })
-            .bind(404, function(){
-                var object = status[404];
-                object.code = 404;
-                view(res, helper, event, {
-                    url: $.path("app","views", "error.html" ),
-                    status: 404,
-                    data: object,
-                    contentType:contentType
                 });
-            })
+            }
 
-        }).listen($.configs.port);
+        }).listen( $.configs.port );
     //今天的任务支持CSS JS 图片
     })

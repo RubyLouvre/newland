@@ -13,8 +13,6 @@
     , cbi      = 1e5                        //用于生成回调函数的名字
     , uuid     = 1
     , toString = returns.toString
-    , fs = require("fs")
-    , path = require("path");
 
     /**
      * 糅杂，为一个对象添加更多成员
@@ -105,9 +103,7 @@
         md5: function(str, encoding){
             return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
         },
-        path: function(){
-            return path.join.apply(null,arguments);
-        },
+        path: require("path"),//将原生path模块劫持到命名空间中
         //它的内容由app/configs模块提供
         configs: {},
         //模块加载的定义函数
@@ -128,7 +124,7 @@
                 var filename = match[2];//模块的URL
                 if(!filename){
                     id = id.replace(/\.js$/,"")
-                    filename = path.join( factory.parent || $.require.root, match[1] ); //path.join会自动处理../的情况
+                    filename = $.path.join( factory.parent || $.require.root, match[1] ); //path.join会自动处理../的情况
                     filename = /\.js$/.test(filename) ? filename : filename +".js";
                 }
                 var input = id;
@@ -207,6 +203,7 @@
         $.debug( name );//想办法取得函法中的exports对象
         return ret;
     }
+    $.path.parse = require("url").parse; //将原生URL模块的parse劫持下来
     $.noop = $.error = $.debug = function(){};//error, debug现在还是空接口
     //为[[class]] --> type 映射对象添加更多成员,用于$.type函数
     "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace($.rword,function(name){
@@ -221,7 +218,7 @@
                     [].splice.call( args, 1, 0, "" );
                 }
                 args[2].id = filename; //模块名
-                args[2].parent =  filename.slice(0, filename.lastIndexOf( path.sep ) + 1) //取得父模块的文件夹
+                args[2].parent =  filename.slice(0, filename.lastIndexOf( $.path.sep ) + 1) //取得父模块的文件夹
                 mapper[ filename ].state = 1;
                 process.nextTick( $._checkDeps );//每成功加载一个模块就进行依赖检测
                 $.require( args[1], args[2] );

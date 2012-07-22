@@ -100,6 +100,8 @@ $.define( "hfs","fs,path", function(fs, path){
                 cb()
             }
         },
+        readFile: fs.readFile,
+        readFileSync: fs.readFileSync,
         //上面的异步化版本
         del: new function( ){
             function inner(dirs, cb){
