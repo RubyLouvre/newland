@@ -191,4 +191,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
 
         }).listen( $.configs.port );
     //今天的任务支持CSS JS 图片
-    })
+    });
+
+    //http://www.w3.org/html/ig/zh/wiki/Contributions#bugs
+    //http://yiminghe.iteye.com/blog/618432
