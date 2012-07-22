@@ -12,54 +12,60 @@ $.define("helper","class", function(){
                 data.title = str
             },
             add_css : function (file) {
-                var args = Array.apply([],arguments);
                 var opts = {
                     media: 'screen',
                     rel: 'stylesheet',
                     type: 'text/css'
                 };
-                if (typeof args[args.length - 1] == 'object') {
-                    opts = $.mix( opts, args.pop(), false);
+                var tag = create_tag.call(this, file, opts, arguments)
+                if(opts.soon){
+                    return tag
                 }
-                var href = checkFile( file );
-                delete opts.href;
-
-                data.links.push( genericTagSelfclosing('link', opts, {
-                    href: href
-                }));
+                data.links.push( tag);
             },
-
             add_js: function( file ){
-                var args = Array.apply([],arguments);
                 var opts = {
                     type: 'text/javascript'
                 };
-                var last = args[args.length - 1]
-                if(last == true){
-                    opts.soon = 1;
-                    opts.http = 1
-                }else if (typeof last === "object" ){
-                    opts = $.mix( opts, args.pop(), false);
-                }
-                if(opts.http){//添加前缀
-                    file = $.path.join( this.host ,file );
-                    file = "http://"+ file.replace(/\\/g,"/");
-                    delete opts.http
-                }
-                var href = checkFile( file );
-                var soon = opts.soon;
-                delete opts.soon;
-                delete opts.src;
-                var tag = genericTag('script', '', opts, {
-                    src: href
-                });
-                if(soon){
+                var tag = create_tag.call(this, file, opts, arguments)
+                if(opts.soon){
                     return tag
                 }
                 data.scripts.push( tag);
             }
         }
         return [data, context]    
+    }
+    //opts中的参数 soon为立即输出页面,不放进数组了
+    //http表示加上域名
+    function create_tag(file, opts, args){
+        args = Array.apply([],args)
+        var last = args[args.length - 1]
+        if(last === true){
+            opts.http = opts.soon = 1;
+        }else if (typeof last === "object" ){
+            opts = $.mix( opts, args.pop(), false);
+        }
+        if(opts.http){//添加前缀
+            file = $.path.join( this.host ,file );
+            file = "http://"+ file.replace(/\\/g,"/");
+            delete opts.http
+        }
+        var href = checkFile( file );
+        var soon = opts.soon, result
+        if(opts.type == "text/css"){
+            delete opts.href;
+            result = genericTagSelfclosing('link', opts, {
+                href: href
+            })
+        }else{
+            delete opts.src
+            result =  genericTag('script', '', opts, {
+                src: href
+            });
+        }
+        opts.soon = soon;
+        return result;
     }
     //辅助函数
     //判定是开发环境或是测试环境还是线上环境
