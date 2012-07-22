@@ -37,18 +37,36 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
         //   var a = /(?:\.)(\w*)(?=$|\?|#|\:)/.test(url) && RegExp.$1 || "text";
         //   console.log(a)
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
-
+        function router(flow , url){
+            // console.log(url+"!!!!!!!!!!!!!!")
+            switch(url){
+                case "/doc" :
+                    //   console.log("doc")
+                    $.walk( "app/views/doc", function(files, dirs){
+                        var pages = files.filter(function(file){
+                            return /\.html$/.test(file)
+                        });
+                        for(var i = 0; i < pages.length; i++){
+                            $.log(pages[i])
+                        }
+                    })
+                    flow.fire("static","/");
+                    break;
+                default:
+                    return true
+            }
+        }
 
         http.createServer(function(req, res) {
             var flow = Flow()
             flow.res =  res;
             flow.req =  req;
-            
+           
             flow.helper = Helper()
             //把所有操作都绑定流程对象上
             flow
             .bind("send_file", function( page ){
-                $.log("进入send_file回调")
+                //    $.log("进入send_file回调")
                 this.res.writeHead(page.code, {
                     "Content-Type": page.mine
                 });
@@ -56,13 +74,17 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 this.res.end();
             })
             .bind("static", function( url ){
-                $.log("进入static回调");
-                $.log(url);
+                //  $.log("进入static回调");
                 var cache = $.staticCache[ url ];
+                //  console.log(url)
                 if( cache ){
                     this.fire("send_file", cache);
+
                 }else if( /\.(css|js|png|jpg|gif|ico)$/.test( url ) ){
                     var statics =  $.path.join("app/public/",url);
+                    console.log(url)
+                    console.log(statics);
+                    console.log("======================")
                     $.readFile(statics, function(err, data){
                         if(err){
                             this.fire(404)
@@ -84,7 +106,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 var text = $.readFileSync( "app/views/error.html", 'utf-8')//读取内容
                 var fn = $.ejs(text);
                 var data = $.mix(
-                    this.helper[0], 
+                    this.helper[0],
                     status["404"], {
                         code: 404
                     });
@@ -94,7 +116,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 this.fire("get_layout", layout_url, 404 );
             })
             .bind("get_page", function( url ){
-                $.log("进入get_page回调")
+                // $.log("进入get_page回调")
                 var last_char = url[ url.length - 1 ]
                 //如果是一个目录则默认加上index.html
                 if(last_char === "\\" || last_char == "/" ){
@@ -125,11 +147,13 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 }
             })
             .bind("get_tmpl", function( view_url, url ){
-                $.log("进入get_tmpl回调")
+                // $.log("进入get_tmpl回调")
                 var fn = $.viewsCache[ view_url ]
                 if( fn ){
                     var data = this.helper[0];
-                    var html = fn( data, this.helper[1]);
+                    var context = this.helper[1]
+                    context.host = this.req.headers.host
+                    var html = fn( data, context);
                     if(typeof data.layout == "string"){
                         data.partial = html;
                         var layout_url = $.path.join("app","views/layout", data.layout );
@@ -150,7 +174,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
 
             })
             .bind('cache_page', function( html, url ){
-                $.log("进入cache_page回调")
+                //  $.log("进入cache_page回调")
                 html = tidy(html);
                 var cache = {
                     code: 200,
@@ -158,14 +182,15 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                     mine: mimes[ "html" ]
                 }
                 var pages_url = $.path.join("app","pages", url );
-                $.writeFile(pages_url, html )
-                $.pagesCache[ url ] = cache;
+                // $.writeFile(pages_url, html )
+                // $.pagesCache[ url ] = cache;
                 this.fire("send_file", cache)
             })
             .bind("get_layout", function( layout_url, url ){
-                $.log("进入get_layout回调")
+                //  $.log("进入get_layout回调")
                 var fn = $.viewsCache[ layout_url ]
                 if( fn ){
+                   
                     var html = fn( this.helper[0] );
                     this.fire('cache_page', html, url);
                 }else{
@@ -185,13 +210,20 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                         }
                     }.bind(this))
                 }
-            })
-            .fire("static", req.url)
+            });
+            if(router(flow, req.url)){
+                $.log(req.headers.host)
+
+                flow.fire("static", req.url)
+            }
+
+           
        
 
         }).listen( $.configs.port );
     //今天的任务支持CSS JS 图片
     });
 
-    //http://www.w3.org/html/ig/zh/wiki/Contributions#bugs
-    //http://yiminghe.iteye.com/blog/618432
+//http://www.w3.org/html/ig/zh/wiki/Contributions#bugs
+//http://yiminghe.iteye.com/blog/618432
+

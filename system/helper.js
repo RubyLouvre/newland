@@ -28,19 +28,35 @@ $.define("helper","class", function(){
                     href: href
                 }));
             },
+
             add_js: function( file ){
                 var args = Array.apply([],arguments);
                 var opts = {
                     type: 'text/javascript'
                 };
-                if (typeof args[args.length - 1] == 'object') {
+                var last = args[args.length - 1]
+                if(last == true){
+                    opts.soon = 1;
+                    opts.http = 1
+                }else if (typeof last === "object" ){
                     opts = $.mix( opts, args.pop(), false);
                 }
+                if(opts.http){//添加前缀
+                    file = $.path.join( this.host ,file );
+                    file = "http://"+ file.replace(/\\/g,"/");
+                    delete opts.http
+                }
                 var href = checkFile( file );
+                var soon = opts.soon;
+                delete opts.soon;
                 delete opts.src;
-                data.scripts.push( genericTag('script', '', opts, {
+                var tag = genericTag('script', '', opts, {
                     src: href
-                }));
+                });
+                if(soon){
+                    return tag
+                }
+                data.scripts.push( tag);
             }
         }
         return [data, context]    

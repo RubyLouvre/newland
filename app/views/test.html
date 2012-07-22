@@ -1,0 +1,40 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        <script>
+            Array.prototype.splice = function (x, y) {
+                var a = arguments, s = a.length - 2 - y, r = this.slice(x, x + y);
+                if (s > 0) {
+                    for (var i = this.length - 1, j = x + y; i >= j; --i)
+                        this[i + s] = this[i];
+                }
+                else if (s < 0) {
+                    for (var i = x + y, j = this.length; i < j; ++i)
+                        this[i + s] = this[i];
+                    this.length += s;
+                }
+                for (var i = 2, j = a.length; i < j; ++i)
+                    this[i - 2 + x] = a[i];
+                return r;
+            }
+            
+
+            console.log("xxxxxxxxxxxxx")
+
+            var a = [1,2,3,4,5]
+            a.splice(1)
+            console.log(a);
+            var b = [1,2,3,4,5]
+            b.splice(2)
+            console.log(b);
+        </script>
+    </body>
+</html>

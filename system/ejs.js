@@ -10,7 +10,7 @@ $.define("ejs", "lang",function(){
         var rlastSemi = /[,;]\s*$/
         var openHTML = "\t__views.push("
         var closeHTML = ");\n"
-        var arr = str.trim().split(ropen);
+        var arr = (str||"").trim().split(ropen);
         var buff = ["var __views = [];\n"];
         for(var i = 0, n = arr.length; i < n ; i++){
             var segment = arr[i];
