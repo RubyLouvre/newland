@@ -398,9 +398,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
          *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
          *随着浏览器普及对二进制的操作，这方法也越来越常用。
          */
-       // byteLen: function(target){
-       //     return target.replace(/[^\x00-\xff]/g,"--").length;
-       // },
+        // byteLen: function(target){
+        //     return target.replace(/[^\x00-\xff]/g,"--").length;
+        // },
         byteLen: function(str){
             for(var i = 0, cnt = 0; i < str.length; i++){
                 var value = str.charCodeAt(i);
@@ -495,10 +495,17 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             .replace(/><wbr>/g, '>');
         }
     });
-    if(window.Blob){
+
+    if(global.Blob){//不要使用window前缀
         $.String.byteLen = function(str){
-            var a = new Blob([str],{type:"text/css"});
-            return a.size;
+            return new Blob([str],{
+                type:"text/css"
+            }).size
+        }
+    }
+    if(global.Buffer){//不要使用window前缀
+        $.String.byteLen = function(str){
+            return new Buffer(str, "utf-8").length
         }
     }
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
