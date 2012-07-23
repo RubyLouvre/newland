@@ -83,7 +83,11 @@ $.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模
                     repeat = true;
                 }
             if(repeat){ //为了谨慎起见再检测一遍
-                this.fire.apply(this,arguments);
+                try{
+                    this.fire.apply(this, arguments);
+                }catch(e){
+                    this.fire.call(this, 500, e);//如果发生异常，抛出500错误
+                }
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {
                     if(fn.deps["__"+name]){//只处理相关的
