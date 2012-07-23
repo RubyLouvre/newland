@@ -33,15 +33,10 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
        进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
        deploy,http,app/modules/flow,app/modules/ejs,settings
      */
-        //   var url = "/special/show_6582212/wbUD55K148PI7ryhIVCuhg...html"
-        //   var a = /(?:\.)(\w*)(?=$|\?|#|\:)/.test(url) && RegExp.$1 || "text";
-        //   console.log(a)
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
         function router(flow , url){
-            // console.log(url+"!!!!!!!!!!!!!!")
             switch(url){
                 case "/doc" :
-                    //   console.log("doc")
                     $.walk( "app/views/doc", function(files, dirs){
                         var pages = files.filter(function(file){
                             return /\.html$/.test(file)
@@ -67,32 +62,48 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
             flow
             .bind("send_file", function( page ){
                 //    $.log("进入send_file回调")
-                this.res.writeHead(page.code, {
-                    "Content-Type": page.mine
+                var headers =  page.headers || {}
+                $.mix(headers, {
+                    "Content-Type": page.mine,
+                    "mass-mime" :"page.mine"
                 });
+                
+                this.res.writeHead(page.code, headers);
                 this.res.write(page.data);
                 this.res.end();
             })
             .bind("static", function( url ){
                 //  $.log("进入static回调");
+                //去掉#？等杂质，如果是符合如下后缀后，则进行静态资源缓存
                 if( /\.(css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
+                    var mine = RegExp.$1
                     url = url.replace(/[?#].*/, '');
-                   
                     var cache = $.staticCache[ url ];
                     if( cache ){
-                        console.log(url+" 缓存")
+                        var lm
+                        if(( lm = cache.headers && cache.headers["Last-Modified"] )){
+                            if(lm === this.req.headers["if-modified-since"]){
+                                res.writeHead(304, "Not Modified");
+                                res.end();
+                                return;
+                            }
+                        }
                         this.fire("send_file", cache);
                     }else{
-                        console.log(url+" IO")
+                        //从硬盘中读取数据
                         var statics =  $.path.join("app/public/",url);
                         $.readFile(statics, function(err, data){
                             if(err){
                                 this.fire(404)
                             }else{
+                                //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，而要用new Date().toGMTString()，因为前者可能出现中文乱码
                                 cache = {
                                     code: 200,
                                     data: data,
-                                    mine: mimes[ RegExp.$1 ]
+                                    mine: mimes[ mine ],
+                                    headers: {
+                                        "Last-Modified":new Date().toGMTString()
+                                    }
                                 }
                                 $.staticCache[ url ] = cache;
                                 this.fire("send_file", cache)
@@ -210,8 +221,6 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 }
             });
             if(router(flow, req.url)){
-                $.log(req.headers.host)
-
                 flow.fire("static", req.url)
             }
 
