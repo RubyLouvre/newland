@@ -75,29 +75,30 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
             })
             .bind("static", function( url ){
                 //  $.log("进入static回调");
-                var cache = $.staticCache[ url ];
-                //  console.log(url)
-                if( cache ){
-                    this.fire("send_file", cache);
-
-                }else if( /\.(css|js|png|jpg|gif|ico)$/.test( url ) ){
-                    var statics =  $.path.join("app/public/",url);
-                    console.log(url)
-                    console.log(statics);
-                    console.log("======================")
-                    $.readFile(statics, function(err, data){
-                        if(err){
-                            this.fire(404)
-                        }else{
-                            cache = {
-                                code: 200,
-                                data: data,
-                                mine: mimes[ RegExp.$1 ]
+                if( /\.(css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
+                    url = url.replace(/[?#].*/, '');
+                   
+                    var cache = $.staticCache[ url ];
+                    if( cache ){
+                        console.log(url+" 缓存")
+                        this.fire("send_file", cache);
+                    }else{
+                        console.log(url+" IO")
+                        var statics =  $.path.join("app/public/",url);
+                        $.readFile(statics, function(err, data){
+                            if(err){
+                                this.fire(404)
+                            }else{
+                                cache = {
+                                    code: 200,
+                                    data: data,
+                                    mine: mimes[ RegExp.$1 ]
+                                }
+                                $.staticCache[ url ] = cache;
+                                this.fire("send_file", cache)
                             }
-                            $.staticCache[ url ] = cache;
-                            this.fire("send_file", cache)
-                        }
-                    }.bind(this));
+                        }.bind(this));
+                    }
                 }else{
                     this.fire("get_page", url);
                 }
@@ -223,4 +224,25 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
 
 //http://www.w3.org/html/ig/zh/wiki/Contributions#bugs
 //http://yiminghe.iteye.com/blog/618432
+
+doTaskList = function(dataList, doAsync, callback){
+    dataList = dataList.slice();
+    var ret = [];
+    var next = function(){
+        if(dataList.length < 1)
+            return callback(null, ret)
+        var d = dataList.shift();
+        try{
+            doAsync(d, function(err,data){
+                if(err)
+                    return callback(err);
+                ret.push(data);
+                next();
+            })
+        }catch(err){
+            return callback(err)
+        }
+    }
+    next();
+}
 

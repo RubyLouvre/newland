@@ -88,7 +88,8 @@ void function( global, DOC ){
             node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
             url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
             $["@name"] = node.getAttribute("namespace") || "$"
-            $["@debug"] = !!node.getAttribute("debug");
+            var str = node.getAttribute("debug")
+            $["@debug"] = str == 'true' || str == '1';
             return url.substr( 0, url.lastIndexOf('/') );
         })(),
         /**
@@ -234,6 +235,7 @@ void function( global, DOC ){
      */
     function loadJS( name, url ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
+        console.log(url)
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
         '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
