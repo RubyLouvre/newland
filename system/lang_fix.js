@@ -95,7 +95,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
             return array.reduce(fn, lastResult, scope);
         }
     },false);
-
+   
     //修正IE67下unshift不返回数组长度的问题
     //http://www.cnblogs.com/rubylouvre/archive/2010/01/14/1647751.html
     if([].unshift(1) !== 1){
@@ -250,10 +250,6 @@ $.define( "lang_fix", !!Array.isArray, function(){
     String.prototype.split = function (separator, limit) {
         return fix(this, separator, limit);
     };
-//  http://www.sitepoint.com/the-power-of-stringprototypesplit-almost/
-//http://blog.stevenlevithan.com/archives/cross-browser-split
-//http://blog.stchur.com/2007/03/28/split-broken-in-ie/
-//http://kuangbaoxu.iteye.com/blog/209842
 });
 /**
 2011.7.26 添加Object.getPrototypeOf方法

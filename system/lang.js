@@ -284,7 +284,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         }
 
     }, false);
-
+   
     "Array,Function".replace($.rword, function( method ){
         $[ "is"+method ] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+method+"]";
@@ -681,7 +681,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return $[name].clone(item);
             default:
                 return item;
-        }
+        }       
     }
     //使用深拷贝方法将多个对象或数组合并成一个
     function mergeOne(source, key, current){
