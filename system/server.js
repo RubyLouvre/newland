@@ -151,9 +151,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 var fn = $.viewsCache[ view_url ]
                 if( fn ){
                     var data = this.helper[0];
-                    var context = this.helper[1]
-                    context.host = this.req.headers.host
-                    var html = fn( data, context);
+                    var html = fn( data, this.helper[1]);
                     if(typeof data.layout == "string"){
                         data.partial = html;
                         var layout_url = $.path.join("app","views/layout", data.layout );
@@ -190,8 +188,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 //  $.log("进入get_layout回调")
                 var fn = $.viewsCache[ layout_url ]
                 if( fn ){
-                   
-                    var html = fn( this.helper[0] );
+                    var html = fn( this.helper[0], this.helper[1] );
                     this.fire('cache_page', html, url);
                 }else{
                     $.readFile( layout_url,  'utf-8', function(err, text){

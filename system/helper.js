@@ -11,71 +11,71 @@ $.define("helper","class", function(){
             set_title: function( str ){
                 data.title = str
             },
+            push_css: function( file ) {
+                var opts = {
+                    media: 'screen',
+                    rel: 'stylesheet',
+                    type: 'text/css'
+                };
+                var tag = create_tag( file, opts, arguments );
+                data.links.push( tag );
+            },
+            unshift_css: function( file ){
+                var opts = {
+                    media: 'screen',
+                    rel: 'stylesheet',
+                    type: 'text/css'
+                };
+                var tag = create_tag( file, opts, arguments );
+                data.links.unshift( tag );
+            },
             add_css : function ( file ) {
                 var opts = {
                     media: 'screen',
                     rel: 'stylesheet',
                     type: 'text/css',
-                    http: 1
+                    root: 1
                 };
-                return create_tag.call(this, file, opts, arguments)
-            },
-             push_css: function( file ) {
-                var opts = {
-                    media: 'screen',
-                    rel: 'stylesheet',
-                    type: 'text/css'
-                };
-                var tag = create_tag.call(this, file, opts, arguments);
-                data.links.push( tag );
-            },
-            unshift_css: function( file ){
-               var opts = {
-                    media: 'screen',
-                    rel: 'stylesheet',
-                    type: 'text/css'
-                };
-                var tag = create_tag.call(this, file, opts, arguments);
-                data.links.unshift( tag );
+                return create_tag( file, opts, arguments );
             },
             push_js: function( file ) {
                 var opts = {
                     type: 'text/javascript'
                 };
-                var tag = create_tag.call(this, file, opts, arguments);
+                var tag = create_tag( file, opts, arguments );
                 data.scripts.push( tag);
             },
             unshift_js: function( file ){
                 var opts = {
                     type: 'text/javascript'
                 };
-                var tag = create_tag.call(this, file, opts, arguments);
+                var tag = create_tag( file, opts, arguments );
                 data.scripts.unshift( tag);
             },
             add_js: function( file ){
                 var opts = {
                     type: 'text/javascript',
-                    http: 1
+                    root: 1
                 };
-                return create_tag.call(this, file, opts, arguments)
+                return create_tag( file, opts, arguments );
             }
         }
         return [data, context]    
     }
-    //opts中的参数 soon为立即输出页面,不放进数组了
-    //http表示加上域名
+
+    var reg_full_path = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/
     function create_tag(file, opts, args){
-        args = Array.apply([],args)
-        var last = args[args.length - 1]
+        args = Array.apply([],args);//转换成纯数组
+        var last = args[args.length - 1];
         if (typeof last === "object" ){
-            opts = $.mix( opts, args.pop(), false);
+            opts = $.mix( opts, args.pop() );
         }
-        if(opts.http){//添加前缀
-            if(file.indexOf(this.host) !== 0){
-                file = $.path.join( this.host ,file );
-                file = "http://"+ file.replace(/\\/g,"/");
+        if(opts.root){//添加前缀
+            if( !reg_full_path.test (file) ) {//如果前面不存在http: https:
+                var pre = file.indexOf("/") === 0 ? "" : "/"
+                file = $.path.normalize( $.path.join( pre ,file ) ).replace(/\\/g,"/");
             }
-            delete opts.http
+            delete opts.root
         }
         var href = checkFile( file );
         if(opts.type == "text/css"){
