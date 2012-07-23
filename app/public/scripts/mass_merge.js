@@ -70,8 +70,6 @@ void function( global, DOC ){
         mix: mix,
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
-        "@name": "$",
-        "@debug": true,
         "@bind": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
@@ -80,6 +78,7 @@ void function( global, DOC ){
             $["@name"] = node.getAttribute("namespace") || "$"
             var str = node.getAttribute("debug")
             $["@debug"] = str == 'true' || str == '1';
+           
             return url.substr( 0, url.lastIndexOf('/') );
         })(),
         
