@@ -1,4 +1,7 @@
-$.define("lang", Array.isArray ? "" : "lang_fix", function(){
+//=========================================
+// 类型扩展模块v3 by 司徒正美
+//=========================================
+$.define("lang", Array.isArray ? "" : "lang_fix",function(){
     // $.log("已加载语言扩展模块");
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
@@ -395,10 +398,22 @@ $.define("lang", Array.isArray ? "" : "lang_fix", function(){
          *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
          *随着浏览器普及对二进制的操作，这方法也越来越常用。
          */
-        byteLen: function(target){
-            return target.replace(/[^\x00-\xff]/g,"--").length;
+       // byteLen: function(target){
+       //     return target.replace(/[^\x00-\xff]/g,"--").length;
+       // },
+        byteLen: function(str){
+            for(var i = 0, cnt = 0; i < str.length; i++){
+                var value = str.charCodeAt(i);
+                if(value < 0x080){
+                    cnt += 1
+                }else if(value < 0x0800){
+                    cnt += 2
+                }else{
+                    cnt += 3
+                }
+            }
+            return cnt;
         },
-
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
         truncate: function(target, length, truncation) {
             length = length || 30;
@@ -453,7 +468,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix", function(){
         //http://stevenlevithan.com/regex/xregexp/
         //将字符串安全格式化为正则表达式的源码
         escapeRegExp: function( target ){
-            return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+            return (target+"").replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
@@ -480,6 +495,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix", function(){
             .replace(/><wbr>/g, '>');
         }
     });
+    if(window.Blob){
+        $.String.byteLen = function(str){
+            var a = new Blob([str],{type:"text/css"});
+            return a.size;
+        }
+    }
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
@@ -734,3 +755,34 @@ $.define("lang", Array.isArray ? "" : "lang_fix", function(){
     $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
     return $.lang;
 });
+/**
+2011.7.12 将toArray转移到lang模块下
+2011.7.26 去掉toArray方法,添加globalEval,parseJSON,parseXML方法
+2011.8.6  增加tag方法
+2011.8.14 更新隐藏的命名空间,重构range方法,将node模块的parseHTML方法移到此处并大幅强化
+2011.8.16 $.String2,$.Number2,$.Array2,$.Object2,globalEval 更名为$.String,$.Number,$.Array,$.Object,parseJS
+2011.8.18 $.Object.merge不再设置undefined的值
+2011.8.28 重构Array.unique
+2011.9.11 重构$.isArray $.isFunction
+2011.9.16 修复$.format BUG
+2011.10.2 优化$.lang
+2011.10.3 重写$.isPlainObject与jQuery的保持一致, 优化parseJS，
+2011.10.4 去掉array.without（功能与array.diff相仿），更改object.widthout的参数
+2011.10.6 使用位反操作代替 === -1, 添加array.intersect,array.union
+2011.10.16 添加返回值
+2011.10.21 修复Object.keys BUG
+2011.10.26 优化quote ;将parseJSON parseXML中$.log改为$.error; FIX isPlainObject BUG;
+2011.11.6 对parseXML中的IE部分进行强化
+2011.12.22 修正命名空间
+2012.1.17 添加dump方法
+2012.1.20 重构$.String, $.Array, $.Number, $.Object, 让其变成一个函数v3
+2012.1.27 让$$.String等对象上的方法全部变成静态方法
+2012.1.31 去掉$.Array.ensure，添加$.Array.merge
+2012.3.17 v4 重构语言链对象
+2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
+2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法 v4
+2012.6.29 添加inGroupsOf，去掉last first
+键盘控制物体移动 http://www.wushen.biz/move/
+https://github.com/tristen/tablesort
+https://gist.github.com/395070
+ */

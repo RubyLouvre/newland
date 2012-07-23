@@ -105,6 +105,16 @@ $.define( "lang_fix", !!Array.isArray, function(){
             return this.length; //返回新数组的长度
         }
     }
+    if([1,2,3].splice(1).length === 0){
+        var _splice = Array[P].splice;
+        Array[P].splice = function(a){
+            if(arguments.length === 1){
+                return _splice.call(this, a, this.length)
+            }else{
+                return _splice.apply(this, arguments);
+            }
+        }
+    }
     if(!Array.isArray){
         Array.isArray = function(obj){
             return Object.prototype.toString.call(obj) =="[object Array]";
@@ -116,21 +126,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
         //http://www.cnblogs.com/rubylouvre/archive/2009/09/18/1568794.html
         //'      dfsd '.trim() === 'dfsd''
         trim: function(){
-            var str = this, whitespace = ' \n\r\t\f\x0b\xa0\u2000\u2001\u2002\u2003\n\
-  \u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000';
-            for (var i = 0; i < str.length; i++) {
-                if (whitespace.indexOf(str.charAt(i)) === -1) {
-                    str = str.substring(i);
-                    break;
-                }
-            }
-            for (i = str.length - 1; i >= 0; i--) {
-                if (whitespace.indexOf( str.charAt(i) ) === -1) {
-                    str = str.substring(0, i + 1);
-                    break;
-                }
-            }
-            return whitespace.indexOf(str.charAt(0)) === -1 ? str : '';
+            return  this.replace(/^[\s\xA0]+/,"").replace(/[\s\xA0]+$/,'')
         }
     },false);
 
@@ -254,6 +250,10 @@ $.define( "lang_fix", !!Array.isArray, function(){
     String.prototype.split = function (separator, limit) {
         return fix(this, separator, limit);
     };
+//  http://www.sitepoint.com/the-power-of-stringprototypesplit-almost/
+//http://blog.stevenlevithan.com/archives/cross-browser-split
+//http://blog.stchur.com/2007/03/28/split-broken-in-ie/
+//http://kuangbaoxu.iteye.com/blog/209842
 });
 /**
 2011.7.26 添加Object.getPrototypeOf方法
@@ -261,5 +261,4 @@ $.define( "lang_fix", !!Array.isArray, function(){
 2011.12.22 修正命名空间
 2012.3.19 添加对split的修复
 2012.5.31 添加Object.create的不完全修复
-2012.7.13 升级String.prototype.trim
 */
