@@ -3,96 +3,46 @@
 <% push_js("/scripts/mass.js") %>
 <% push_css("/styles/doc/common.css") %>
 <h2>Welcome to the newland </h2>
+<style>
+    .aaa{
+        width:200px;
+        background:red;
+        height:200px;
+        overflow:hidden;
+        position:relative;
+    }
+    .scrollbar{
+        width:10px;
+        background:green;
+        height:180px;
+        display:none;
+        position:absolute;
+        top:0px;
+        right:0px;
+    }
+</style>
 <script>
-    $.require("ready", function(){
-        var parser  = function (pathStr) {
-            var tokens = parser._tokenize(pathStr);
-            var ast = parser._parse(tokens);
-            return ast;
-        };
-        var Z = function(f) {
-            return (function(g) {
-                return function() {
-                    return f(g(g)).apply(this, arguments);
-                };
-            })(function(g) {
-                return function(m) {
-                    return f(g(g)).apply(this, arguments);
-                };
-            });
-        };
-        parser._parse = Z(function (parse) {
-            return function bb (tokens) {//原数组
-                console.log(tokens)
-                var smallAst = [];
-                var token;
+    $.require("ready,event,css",function(){
+        var a = $(".aaa");
+        a.mouseenter(function(){
+            console.log("----------")
+            $(".scrollbar").css("display","block")
+        }).mouseleave(function(){
+             $(".scrollbar").css("display","none")
+        }).mousewheel(function(e){
+            this.scrollTop
+            console.log(e)
+        })
 
-                while ((token = tokens.shift()) !== undefined) {
-                    if (token.length <= 0) {
-                        continue;
-                    }
-                    switch (token) {
-                        case '(':
-                            //console.log(parse+"");
-                            //   console.log(parse == parser._parse)
-                            smallAst.push(parse(tokens));
-                            break;
-                        case ')':
-                            return smallAst;
-                        default:
-                            smallAst.push(token);
-                    }
-                }
-                return smallAst;
-            };
-        });
 
-        var ZZ = function (tokens) {//原数组
-            var smallAst = [];
-            var token;
 
-            while ((token = tokens.shift()) !== undefined) {
-                if (token.length <= 0) {
-                    continue;
-                }
-                switch (token) {
-                    case '(':
-                        smallAst.push(ZZ(tokens));
-                        break;
-                    case ')':
-                        return smallAst;
-                    default:
-                        smallAst.push(token);
-                }
-            }
-            return smallAst;
-        };
-
-        parser._tokenize = function (pathStr) {
-            var stack = [''];
-            for (var i = 0; i < pathStr.length; i ++) {
-                var chr = pathStr[i];
-                if (chr === '/') {//用于让后面的字符串相加
-                    stack.push('');
-                    continue;
-                } else if (chr === '(') {
-                    stack.push('(');
-                    stack.push('');
-                } else if (chr === ')') {
-                    stack.push(')');
-                    stack.push('');
-                } else {
-                    stack[stack.length - 1] += chr;
-                }
-            }
-            return stack.filter(function (str) {
-                return str.length !== 0;
-            });
-        };
-        var a = parser._tokenize('/users(/:user_id/(profile))/(page)');
-       // var b = ZZ(a);
-        console.log(b)
     })
 </script>
+<div class="aaa">
+    <% for(var i = 0; i< 100; i++){ %>
+    <p>XXXXXXXXXXX</p>
+    <% } %>
+    <div class="scrollbar">
 
-
+    </div>
+</div>
