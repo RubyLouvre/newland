@@ -123,6 +123,21 @@ $.define("helper","class", function(){
     };
     return make_helper
 })
+//nodeで空いているポートを見つける http://d.hatena.ne.jp/sugyan/20110403/1301769822
+// node-flowless http://d.hatena.ne.jp/koichik/20120304
+/*
+ *
+function quote(s) {
+  (s+='').replace(/\\/g, '\\\\');
+  var use = +(s.match(quote.q[1][0]) === null);
+  return quote.q[0][use] + s.replace(quote.q[1][1-use], '\\$1') + quote.q[0][use];
+}
+quote.q=[ ['"', "'"], [/(')/g, /(")/g] ];
 
+ */
+
+//ecma 时代的类系统
+//https://github.com/Benvie/Node.js-Ultra-REPL/blob/master/lib/utility/object-utils.js
+//https://github.com/Benvie/Node.js-Ultra-REPL/blob/master/lib/utility/explorePath.js
 
 

@@ -33,6 +33,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
        进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
        deploy,http,app/modules/flow,app/modules/ejs,settings
      */
+   
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
         function router(flow , url){
             switch(url){
@@ -234,24 +235,24 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
 //http://www.w3.org/html/ig/zh/wiki/Contributions#bugs
 //http://yiminghe.iteye.com/blog/618432
 
-doTaskList = function(dataList, doAsync, callback){
-    dataList = dataList.slice();
-    var ret = [];
-    var next = function(){
-        if(dataList.length < 1)
-            return callback(null, ret)
-        var d = dataList.shift();
-        try{
-            doAsync(d, function(err,data){
-                if(err)
-                    return callback(err);
-                ret.push(data);
-                next();
-            })
-        }catch(err){
-            return callback(err)
-        }
-    }
-    next();
-}
+//doTaskList = function(dataList, doAsync, callback){
+//    dataList = dataList.slice();
+//    var ret = [];
+//    var next = function(){
+//        if(dataList.length < 1)
+//            return callback(null, ret)
+//        var d = dataList.shift();
+//        try{
+//            doAsync(d, function(err,data){
+//                if(err)
+//                    return callback(err);
+//                ret.push(data);
+//                next();
+//            })
+//        }catch(err){
+//            return callback(err)
+//        }
+//    }
+//    next();
+//}
 
