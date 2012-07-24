@@ -1,4 +1,5 @@
 $.define("router", function(){
+    $.log("已加载路由器模块")
     //表的结构：method+segments.length 普通字段
     function _tokenize (pathStr) {
         var stack = [''];
@@ -96,19 +97,20 @@ $.define("router", function(){
         }
     };
 
-    Router.prototype.add = function (method, path, value) {
+    Router.prototype.match = function (method, path, value) {
         var ast = parse(path),
         patterns = this._expandRules(ast);
         if (patterns.length === 0) {
             var query = [method, 0];
-            return this._set(this.routingTable, query, value);
+            this._set(this.routingTable, query, value);
+        }else{
+            patterns.every(function (pattern) {
+                var length = pattern.length,
+                query = [method, length].concat(pattern);
+                return this._set(this.routingTable, query, value);
+            }.bind(this));
         }
-
-        return patterns.every(function (pattern) {
-            var length = pattern.length,
-            query = [method, length].concat(pattern);
-            return this._set(this.routingTable, query, value);
-        }.bind(this));
+        return value
     };
 
     var methods = [
@@ -119,14 +121,15 @@ $.define("router", function(){
     ];
     methods.forEach(function (method) {
         Router.prototype[ method ] = function (path, value) {
-            return this.add( method, path, value );
+            return this.match( method, path, value );
         };
     });
 
     Router.prototype.all = function (path, value) {
-        return methods.every( function (method) {
-            return this.add( method, path, value );
+        methods.every( function (method) {
+            return this.match( method, path, value );
         });
+        return value
     };
 
     Router.prototype.routeWithQuery = function (method, path) {

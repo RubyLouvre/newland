@@ -22,21 +22,7 @@
     }
 </style>
 <script>
-    $.require("ready,event,css",function(){
-        var a = $(".aaa");
-        a.mouseenter(function(){
-            console.log("----------")
-            $(".scrollbar").css("display","block")
-        }).mouseleave(function(){
-             $(".scrollbar").css("display","none")
-        }).mousewheel(function(e){
-            this.scrollTop
-            console.log(e)
-        })
-
-
-
-    })
+  
 </script>
 <div class="aaa">
     <% for(var i = 0; i< 100; i++){ %>
