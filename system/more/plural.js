@@ -1,4 +1,4 @@
-$.define("plural","../lang",function($$){//处理单词的单复数
+$.define("plural","../lang",function(){//处理单词的单复数
     var PLURALS = [],
     SINGULARS = [],
     UNCOUNTABLES = [];
@@ -90,37 +90,36 @@ $.define("plural","../lang",function($$){//处理单词的单复数
     uncountable("jeans");
 
 
-    mass.mix(mass.String,{
-        pluralize : function () {//复数化
-            var word = this.toLowerCase();
+    $.mix($.String,{
+        pluralize : function (str) {//复数化
+            var word = str.toLowerCase();
             for (var i = 0, el; el = UNCOUNTABLES[i++];) {//如果是不可数名词
                 if (word == el) {
-                    return this;
+                    return str;
                 }
             }
             for (i = 0; el = PLURALS[i++];) {
                 var rule = el[0],replacement = el[1];
-                if (rule.test(this)) {
-                    return this.replace(rule, replacement);
+                if (rule.test(str)) {
+                    return str.replace(rule, replacement);
                 }
             }
         },
-        singularize:function(){
-            var word = this.toLowerCase();
+        singularize: function(str){
+            var word = str.toLowerCase();
             for (var i = 0, el; el = UNCOUNTABLES[i++];) {//如果是不可数名词
                 if (word == el) {
-                    return this;
+                    return str;
                 }
             }
             for (i = 0; el = SINGULARS[i++];) {
                 var rule = el[0],replacement = el[1];
-                if (rule.test(this)) {
-                    return this.replace(rule, replacement);
+                if (rule.test(str)) {
+                    return str.replace(rule, replacement);
                 }
             }
         }
 
     });
-    $$.force("String")
    // console.log(mass.String.singularize+"")
 });

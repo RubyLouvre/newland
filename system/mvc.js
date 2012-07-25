@@ -1,11 +1,13 @@
-$.define("mvc", "router,../app/routes",function(Router, routes){
+$.define("mvc", "more/router, flow, ../app/routes,deploy, more/plural, hfs, ../app/configs",function(Router,Flow, routes, deploy, plural){
     $.log("已加载mvc模块")
-    var router =  $.router = Router.createRouter();
-    //routes(router)
+  
+    deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
+
+    var router = Router.createRouter();
     var mapper = {}
     /* @param {String} name 资源的名字，必须是复数
-         * @param {Object} options 可选。包含only,except键名的普通对象,或as, path, sensitive等值
-         * @param {Number} actions 可选。子路由函数
+     * @param {Object} options 可选。包含only,except键名的普通对象,或as, path, sensitive等值
+     * @param {Number} actions 可选。子路由函数
 HTTP Verb	Path	action	used for
 GET	/photos	index	display a list of all photos
 GET	/photos/new	new	return an HTML form for creating a new photo
@@ -14,7 +16,7 @@ GET	/photos/:id	show	display a specific photo
 GET	/photos/:id/edit	edit	return an HTML form for editing a photo
 PUT	/photos/:id	update	update a specific photo
 DELETE	/photos/:id	destroy	delete a specific photo
-*/
+     */
     var availableRoutes = {
         index:  "GET    /mass(.:format)",
         "new":  "GET    /mass/new(.:format)",
@@ -51,11 +53,15 @@ DELETE	/photos/:id	destroy	delete a specific photo
         }
         return activeRoutes;
     }
-//http://guides.rubyonrails.org/routing.html
-//http://inosin.iteye.com/blog/786467
-    var mvc = {};
-    mapper.resources = function(name, opts, callback){
-        mvc[name] = {}
+    //http://guides.rubyonrails.org/routing.html
+    //http://inosin.iteye.com/blog/786467
+    "GET,POST,PUT,DELETE".replace( $.rword, function(method){
+        mapper[ method.toLowerCase() ] = function( url, path ){
+            router.add(method, url, path)
+        }
+    })
+
+    mapper.resources = function(name, opts, callback){   
         //如果只有两个参数，那么将它修正为三个
         opts = opts || {};
         if (typeof opts == 'function') {
@@ -63,17 +69,57 @@ DELETE	/photos/:id	destroy	delete a specific photo
             opts = {};
         }
         var activeRoutes = getActiveRoutes( opts );
+        var namespace  = opts.module  ? "/"+ opts.module : "";//
+        delete opts.module;
+        if (typeof handle == 'function') {// users/:user_id
+            this.subroutes(name + '/:' + $$(name).singularize() + '_id', callback);
+        }
         for(var action in activeRoutes){
             var path = activeRoutes[ action ].replace("mass", name);
-            var match = activeRoutes[ action ].replace("mass", name).match(/\S+/g)
-            console.log(path)
-            mvc[name][action] = router.match(match[0], match[1], function(){
-               // console.log(path)
-            })
-
+            var match = path.match(/\S+/g)
+            router.add(match[0], namespace + match[1], name+"#"+action)
         }
        
     }
+
+    var controllers = $.controllers = {};
+    var resource_flow = new Flow
+    resource_flow.bind("ok", function(full){
+        routes(mapper);//加载酏置
+        var go = router.route("GET","/");
+        console.log("======================")
+        console.log( go )
+        if(go){
+            var value = go.value;
+            if(typeof value === "string"){
+                var match = value.split("#");
+                var cname = match[0];
+                var aname = match[1];
+              //  console.log(value)
+                var controller = full[cname];
+                if( controller ){
+                    var action = controller[aname];
+                    console.log(action+"")
+                }else{
+                    console.log("不存在此控制器")
+                }
+            }
+        }
+    })
+    $.walk("app/controllers", function(files){//加载资源
+        $.require(files, function(  ){
+            Array.apply([], arguments).forEach(function(obj ){
+                var name = obj.controller_name;
+                delete obj.controller_name;
+                controllers[ name ] = obj
+            });
+            resource_flow.fire("ok",controllers)
+        // console.log("已加载所有控制器")
+        });
+    })
+
+
+
     mapper.resources("magazines")
 //   默认路由
 //   match '/:controller(/:action(/:id))'

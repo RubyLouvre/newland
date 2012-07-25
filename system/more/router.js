@@ -97,7 +97,7 @@ $.define("router", function(){
         }
     };
 
-    Router.prototype.match = function (method, path, value) {
+    Router.prototype.add = function (method, path, value) {
         var ast = parse(path),
         patterns = this._expandRules(ast);
         if (patterns.length === 0) {
@@ -121,13 +121,13 @@ $.define("router", function(){
     ];
     methods.forEach(function (method) {
         Router.prototype[ method ] = function (path, value) {
-            return this.match( method, path, value );
+            return this.add( method, path, value );
         };
     });
 
     Router.prototype.all = function (path, value) {
         methods.every( function (method) {
-            return this.match( method, path, value );
+            return this.add( method, path, value );
         });
         return value
     };

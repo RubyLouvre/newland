@@ -1,5 +1,5 @@
-$.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs, ../app/configs,mvc",
-    function(Flow, Helper, status, deploy, http, tidy){
+$.define("server","flow, helper, status, http, more/tidy_html, ejs, mvc",
+    function(Flow, Helper, status, http, tidy){
         $.mix({
             pagesCache: {}, //用于保存静态页面,可能是临时拼装出来的
             viewsCache: {}, //用于保存模板函数
@@ -41,7 +41,7 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
         //   });
 
 
-        deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
+      
         function router2(flow , url){
             switch(url){
                 case "/doc" :
@@ -69,9 +69,9 @@ $.define("server","flow,  helper, status, deploy, http, more/tidy_html, ejs, hfs
                 flow.fire(404)
             },2500);
 
-            var eee = $.path.parse(req.url, true);
-            console.log(eee.pathname+"!!!!!!!!")
-            router.route(req.method, eee.pathname);
+      //      var eee = $.path.parse(req.url, true);
+           // console.log(eee.pathname+"!!!!!!!!")
+      //      router.route(req.method, eee.pathname);
             flow.helper = Helper()
             //把所有操作都绑定流程对象上
             flow
