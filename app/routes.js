@@ -4,7 +4,7 @@ $.define("routes",function(){
     console.log("已加载路由规则模块")
     return function(mapper){
         mapper.get("/","home#index")
-
+     
 
     //方法路由
     //        map.get('/','site#index');
@@ -26,9 +26,6 @@ $.define("routes",function(){
     //        map.namespace("tests",function(tests){
     //            tests.resources('comments');
     //        });
-    //
-    //        map.root("scaffolds#index")
-    //        map.post("/","scaffolds#dispatch")
     //        map.resources('users', {
     //            only: ['index', 'show']
     //        });

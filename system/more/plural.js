@@ -90,36 +90,37 @@ $.define("plural","../lang",function(){//处理单词的单复数
     uncountable("jeans");
 
 
-    $.mix($.String,{
-        pluralize : function (str) {//复数化
-            var word = str.toLowerCase();
-            for (var i = 0, el; el = UNCOUNTABLES[i++];) {//如果是不可数名词
-                if (word == el) {
-                    return str;
-                }
-            }
-            for (i = 0; el = PLURALS[i++];) {
-                var rule = el[0],replacement = el[1];
-                if (rule.test(str)) {
-                    return str.replace(rule, replacement);
-                }
-            }
-        },
-        singularize: function(str){
-            var word = str.toLowerCase();
-            for (var i = 0, el; el = UNCOUNTABLES[i++];) {//如果是不可数名词
-                if (word == el) {
-                    return str;
-                }
-            }
-            for (i = 0; el = SINGULARS[i++];) {
-                var rule = el[0],replacement = el[1];
-                if (rule.test(str)) {
-                    return str.replace(rule, replacement);
-                }
+    $.String.pluralize = function (str) {//复数化
+        var word = str.toLowerCase();
+        for (var i = 0, el; el = UNCOUNTABLES[i++];) {//如果是不可数名词
+            if (word == el) {
+                return str;
             }
         }
-
-    });
-   // console.log(mass.String.singularize+"")
+        for (i = 0; el = PLURALS[i++];) {
+            var rule = el[0],replacement = el[1];
+            if (rule.test(str)) {
+                return str.replace(rule, replacement);
+            }
+        }
+    }
+    $.String.singularize = function(str){
+        var word = str.toLowerCase();
+        
+        for (var i = 0, el; el = UNCOUNTABLES[i++];) {//如果是不可数名词
+            if (word == el) {
+                return str;
+            }
+        }
+  
+        for (i = 0; el = SINGULARS[i++];) {
+            var rule = el[0],replacement = el[1];
+           
+            if ( rule.test(str) ) {
+                console.log("-------------")
+                return str.replace(rule, replacement);
+            }
+        }
+    }
+// console.log(mass.String.singularize+"")
 });

@@ -3,9 +3,12 @@ $.define( "hfs","fs,path", function(fs, path){
     // console.log("已加载了hfs模块")
     $.mix( {
         //遍历文件树,收集目录与文件,并包含自身
-        //p为路径，cb为最终回调，opts为可选的配置对象，
-        //里面包含filter表示过滤函数，one表示是否找到一个就终于遍历
-        //sync表示是否同步
+        //p为路径，
+        //cb为最终回调，它将接受两个参数files, dirs，所有文件列表与所有目录列表
+        //opts为可选的配置对象，里面参数：
+        //sync  表示是否同步，
+        //one   表示是否找到一个就终于遍历
+        //filter表示过滤函数，如果函数返回true则收录
         walk: new function  (){
             function collect(opts, el, prop){
                 if((typeof opts.filter == "function") ? opts.filter( el ) : true){

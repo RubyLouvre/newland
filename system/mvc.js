@@ -1,130 +1,48 @@
-$.define("mvc", "more/router, flow, ../app/routes,deploy, more/plural, hfs, ../app/configs",function(Router,Flow, routes, deploy, plural){
+$.define("mvc", "flow, more/mapper, hfs, controller, ../app/configs",function( Flow ){
     $.log("已加载mvc模块")
-  
-    deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
+    $.log(typeof $.router)
+   
+    //http://guides.rubyonrails.org/action_controller_overview.html
+    //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
+    ////http://code.google.com/p/raremvc/
+    //静态资源按需加载、框架核心函数钩子(hook)，让代码更容易共用，使用更加方便!
 
-    var router = Router.createRouter();
-    var mapper = {}
-    /* @param {String} name 资源的名字，必须是复数
-     * @param {Object} options 可选。包含only,except键名的普通对象,或as, path, sensitive等值
-     * @param {Number} actions 可选。子路由函数
-HTTP Verb	Path	action	used for
-GET	/photos	index	display a list of all photos
-GET	/photos/new	new	return an HTML form for creating a new photo
-POST	/photos	create	create a new photo
-GET	/photos/:id	show	display a specific photo
-GET	/photos/:id/edit	edit	return an HTML form for editing a photo
-PUT	/photos/:id	update	update a specific photo
-DELETE	/photos/:id	destroy	delete a specific photo
-     */
-    var availableRoutes = {
-        index:  "GET    /mass(.:format)",
-        "new":  "GET    /mass/new(.:format)",
-        create: "POST   /mass(.:format)",
-        show:   "GET    /mass/:id(.:format)",
-        edit:   "GET    /mass/:id/edit(.:format)",
-        update: "PUT   /mass/:id(.:format)",
-        destroy: "DELETE  /mass/:id(.:format)"
-    }
-    function getActiveRoutes(options) {
-        var activeRoutes = {};
-        if (options.only) {
-            // map.resources('users', {only: ['index', 'show']});
-            if (typeof options.only == 'string') {//如果是一个字符串则将它变成一个数组
-                options.only = [options.only];
-            }
-            options.only.forEach(function (action) {
-                if (action in availableRoutes) {
-                    activeRoutes[action] = availableRoutes[action];
-                }
-            });
-        }else if (options.except) {
-            // map.resources('users', {except: ['create', 'destroy']});
-            if (typeof options.except == 'string') {//如果是一个字符串则将它变成一个数组
-                options.except = [options.except];
-            }
-            for (var action in availableRoutes) {
-                if ( options.except.indexOf(action) === -1 ) {//如果不在列表中
-                    activeRoutes[action] = availableRoutes[action];
-                }
-            }
-        }else {
-            $.mix(activeRoutes,availableRoutes)
-        }
-        return activeRoutes;
-    }
-    //http://guides.rubyonrails.org/routing.html
-    //http://inosin.iteye.com/blog/786467
-    "GET,POST,PUT,DELETE".replace( $.rword, function(method){
-        mapper[ method.toLowerCase() ] = function( url, path ){
-            router.add(method, url, path)
-        }
+    $.walk("app/controllers", function(files){//加载资源
+        $.require(files, function(){
+            resource_flow.fire( "ok" )
+            console.log("已加载所有控制器")
+        });
     })
-
-    mapper.resources = function(name, opts, callback){   
-        //如果只有两个参数，那么将它修正为三个
-        opts = opts || {};
-        if (typeof opts == 'function') {
-            callback = opts;
-            opts = {};
-        }
-        var activeRoutes = getActiveRoutes( opts );
-        var namespace  = opts.module  ? "/"+ opts.module : "";//
-        delete opts.module;
-        if (typeof handle == 'function') {// users/:user_id
-            this.subroutes(name + '/:' + $$(name).singularize() + '_id', callback);
-        }
-        for(var action in activeRoutes){
-            var path = activeRoutes[ action ].replace("mass", name);
-            var match = path.match(/\S+/g)
-            router.add(match[0], namespace + match[1], name+"#"+action)
-        }
-       
-    }
-//http://guides.rubyonrails.org/action_controller_overview.html
-//提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
-//
-////http://code.google.com/p/raremvc/
-//静态资源按需加载、框架核心函数钩子(hook)，让代码更容易共用，使用更加方便!
-    var controllers = $.controllers = {};
     var resource_flow = new Flow
-    resource_flow.bind("ok", function(full){
-        routes(mapper);//加载酏置
-        var go = router.routeWithQuery("GET","/");
-    //    console.log("======================")
-        console.log( go )
-        if(go){
+    resource_flow.bind("ok", function(){
+      
+        var go = $.router.routeWithQuery("GET","/");
+     //   console.log(go)
+        if( go ){
             var value = go.value;
             if(typeof value === "string"){
                 var match = value.split("#");
                 var cname = match[0];
                 var aname = match[1];
-              //  console.log(value)
-                var controller = full[cname];
-                if( controller ){
-                    var action = controller[aname];
-                    console.log(action+"")
+                var instance = $.controllers[cname];
+                $.log(instance)
+
+                if( instance ){
+                    instance[aname]();
                 }else{
-                    console.log("不存在此控制器")
-                }
+            // console.log("不存在此控制器")
+            }
             }
         }
     })
     $.walk("app/controllers", function(files){//加载资源
-        $.require(files, function(  ){
-            Array.apply([], arguments).forEach(function(obj ){
-                var name = obj.controller_name;
-                delete obj.controller_name;
-                controllers[ name ] = obj
-            });
-            resource_flow.fire("ok",controllers)
-        // console.log("已加载所有控制器")
+      //  console.log(files)
+        $.require(files, function(){
+            resource_flow.fire( "ok" )
+           // console.log("已加载所有控制器")
         });
     })
 
-
-
-    mapper.resources("magazines")
 //   默认路由
 //   match '/:controller(/:action(/:id))'
 
@@ -135,3 +53,42 @@ DELETE	/photos/:id	destroy	delete a specific photo
    
 
 })
+/*
+ 用cookie在本地传输数据
+
+最近在研究如何测试网页的加载速度，发现了一个html5有一个叫performance的类可以获取诸如网络延迟，页面加载以及onload event处理时间等信息。
+为了自动化这个测试，我需要在用javascript获取这些信息之后用其他工具把他记录下来，我不想自己搭建一个webserver用javascript往web server发送数据。一个比较简单的办法就是把这些信息用cookie的形式记录下来，然后在其他程序读取cookie信息即可。
+以下是Javascript操作cookie的代码：
+
+function createCookie(name, value, days)
+{
+  if (days) {
+    var date = new Date();
+    date.setTime(date.getTime()+(days*24*60*60*1000));
+    var expires = "; expires="+date.toGMTString();
+    }
+  else var expires = "";
+  document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name)
+{
+  var ca = document.cookie.split(';');
+  var nameEQ = name + "=";
+  for(var i=0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0)==' ') c = c.substring(1, c.length); //delete spaces
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+  return null;
+}
+
+function eraseCookie(name)
+{
+  createCookie(name, "", -1);
+}
+
+IE下读取cookie用wininet API中的InternetGetCookie即可。需要注意的是第一个参数lpszUrl。我做测试的时候是在本机上面写了一个 html页面，在这个页面里面用javascript设置了cookie。从ie临时文件夹可以看到，cookie文件的名字叫cookie:zhijun.peizj@~~local~~/。其他的网站的cookie文件名叫cookie:zhijun.peizj@163.com/。 如下图所示：
+
+所以我猜测这个url参数应该使用~~local~~， 但是发现函数调用失败，返回值是12006，也就是ERROR_INTERNET_UNRECOGNIZED_SCHEME。尝试使用了local, 127.0.0.1都无效。后来发现这篇文章http://www.cnblogs.com/huqingyu/archive/2008/11/27/1342256.html， 知道需要加上http头，于是试过http:// ~~local~~, http://local, http://local.com, http://127.0.0.1 都发现无效。最后再次读上面那篇文章，发现下面有一个微软的员工的回答：that the URL field is the url that the user navigates to when browsing to a site. 于是想起再次用ie去打开那个html文件，发现地址栏是file:///C:/Users/zhijun.peizj/Desktop/performance.html。 重新使用file:///作为URL，发现函数调用成功！
+ */
