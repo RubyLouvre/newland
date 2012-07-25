@@ -10,7 +10,7 @@ $.define("mvc", "flow, more/mapper, hfs, controller, ../app/configs",function( F
     var resource_flow = new Flow
     resource_flow.bind("ok", function(){
       
-        var go = $.router.routeWithQuery("GET","/");
+        var go = $.router.routeWithQuery("GET","/?aaa=bbb");
         //   console.log(go)
         if( go ){
             var value = go.value;
