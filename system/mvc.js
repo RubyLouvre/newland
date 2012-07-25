@@ -81,13 +81,17 @@ DELETE	/photos/:id	destroy	delete a specific photo
         }
        
     }
-
+//http://guides.rubyonrails.org/action_controller_overview.html
+//提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
+//
+////http://code.google.com/p/raremvc/
+//静态资源按需加载、框架核心函数钩子(hook)，让代码更容易共用，使用更加方便!
     var controllers = $.controllers = {};
     var resource_flow = new Flow
     resource_flow.bind("ok", function(full){
         routes(mapper);//加载酏置
-        var go = router.route("GET","/");
-        console.log("======================")
+        var go = router.routeWithQuery("GET","/");
+    //    console.log("======================")
         console.log( go )
         if(go){
             var value = go.value;
