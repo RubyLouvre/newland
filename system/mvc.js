@@ -1,23 +1,17 @@
 $.define("mvc", "flow, more/mapper, hfs, controller, ../app/configs",function( Flow ){
     $.log("已加载mvc模块")
-    $.log(typeof $.router)
+
    
     //http://guides.rubyonrails.org/action_controller_overview.html
     //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
     ////http://code.google.com/p/raremvc/
     //静态资源按需加载、框架核心函数钩子(hook)，让代码更容易共用，使用更加方便!
 
-    $.walk("app/controllers", function(files){//加载资源
-        $.require(files, function(){
-            resource_flow.fire( "ok" )
-            console.log("已加载所有控制器")
-        });
-    })
     var resource_flow = new Flow
     resource_flow.bind("ok", function(){
       
         var go = $.router.routeWithQuery("GET","/");
-     //   console.log(go)
+        //   console.log(go)
         if( go ){
             var value = go.value;
             if(typeof value === "string"){
@@ -25,21 +19,20 @@ $.define("mvc", "flow, more/mapper, hfs, controller, ../app/configs",function( F
                 var cname = match[0];
                 var aname = match[1];
                 var instance = $.controllers[cname];
-                $.log(instance)
-
                 if( instance ){
+                    console.log("调用控制器")
                     instance[aname]();
                 }else{
-            // console.log("不存在此控制器")
-            }
+                    console.log("不存在此控制器")
+                }
             }
         }
     })
     $.walk("app/controllers", function(files){//加载资源
-      //  console.log(files)
+        //  console.log(files)
         $.require(files, function(){
             resource_flow.fire( "ok" )
-           // console.log("已加载所有控制器")
+        // console.log("已加载所有控制器")
         });
     })
 
