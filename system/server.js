@@ -105,75 +105,8 @@ $.define("server","flow, helper, status, http, more/tidy_html, ejs, mvc",
                 var layout_url = $.path.join("app","views/layout", data.layout );
                 this.fire("get_layout", layout_url, 404 );
             })
-            .bind("get_page", function( url ){
-                // $.log("进入get_page回调")
-                var last_char = url[ url.length - 1 ]
-                //如果是一个目录则默认加上index.html
-                if(last_char === "\\" || last_char == "/" ){
-                    url += "index.html"
-                    url = $.path.normalize(url)
-                }
-                var cache = $.pagesCache[ url ];
-                
-                if( cache ){
-                    this.fire("send_file", cache);
-                }else{
-                    var pages_url = $.path.join("app","pages", url );
-                    $.readFile( pages_url, 'utf-8', function (err, html) {//读取内容
-                        if (err){
-                            //如果不存在就从view目录中寻找相应模板来拼装
-                            var view_url = $.path.join("app","views", url );
-                            this.fire("get_tmpl", view_url, url )
-                        }else{
-                            var cache = {
-                                code: 200,
-                                data: html,
-                                mine: mimes[ "html" ]
-                            }
-                            $.pagesCache[ url ] = cache;
-                            this.fire("send_file", cache)
-                        }
-                    }.bind(this));
-                }
-            })
-            .bind("get_tmpl", function( view_url, url ){
-                // $.log("进入get_tmpl回调")
-                var fn = $.viewsCache[ view_url ]
-                if( fn ){
-                    var data = this.helper[0];
-                    var html = fn( data, this.helper[1]);
-                    if(typeof data.layout == "string"){
-                        data.partial = html;
-                        var layout_url = $.path.join("app","views/layout", data.layout );
-                        this.fire("get_layout", layout_url, url );
-                    }else{
-                        this.fire('cache_page', html, url)
-                    }
-                }else{
-                    $.readFile( view_url,  'utf-8', function(err, text){
-                        if(err){
-                            this.fire( 404 )
-                        }else{
-                            $.viewsCache[ view_url ] = $.ejs( text );
-                            this.fire( "get_tmpl", view_url, url );
-                        }
-                    }.bind(this) );
-                }
 
-            })
-            .bind('cache_page', function( html, url ){
-                //  $.log("进入cache_page回调")
-                html = tidy(html);
-                var cache = {
-                    code: 200,
-                    data: html,
-                    mine: mimes[ "html" ]
-                }
-                var pages_url = $.path.join("app","pages", url );
-                // $.writeFile(pages_url, html )
-                // $.pagesCache[ url ] = cache;
-                this.fire("send_file", cache)
-            })
+           
             .bind("get_layout", function( layout_url, url ){
                 //  $.log("进入get_layout回调")
                 var fn = $.viewsCache[ layout_url ]

@@ -1,4 +1,4 @@
-$.define("httpflow","flow", function(){
+$.define("httpflow","helper,flow, ejs", function( make_helper ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
@@ -21,6 +21,9 @@ $.define("httpflow","flow", function(){
         'manifest': 'text/cache-manifest'
     };
     return $.factory({
+        init: function(){
+            this.helper = make_helper()
+        },
         inherit: $.Flow,
         //Content-Type 相当于content-type
         header : function(name){

@@ -6,9 +6,8 @@ $.define("no_action", function(){
             var url = this.req.url;
             if( /\.(css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
                 url = url.replace(/[?#].*/, '');
-                var cache = $.staticCache[ url ];
+                var cache = $.staticCache[ url ],lm
                 if( cache ){
-                    var lm
                     if(( lm = cache.headers && cache.headers["Last-Modified"] )){
                         if( lm === this.header("if-modified-since")) {
                             this.res.writeHead(304, "Not Modified");
@@ -40,7 +39,6 @@ $.define("no_action", function(){
                     }.bind(this));
                 }
             }else{
-                console.log("fire get_page")
                 this.fire("get_page");
             }
         })
