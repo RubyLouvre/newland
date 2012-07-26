@@ -1,7 +1,7 @@
 //用于设置路由规则
 $.define("routes",function(){
     //支持五种路由:方法路由,资源路由,嵌套路由,命名空间路由,根路由
-    console.log("已加载路由规则模块")
+    // $.log("已加载路由规则模块")
     return function(mapper){
         mapper.get("/","home#index")
      

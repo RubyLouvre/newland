@@ -87,7 +87,7 @@ $.define("status",function(){
         },
         402: {
             en: "Payment Required",
-            zh:"该状态码是为了将来可能的需求而预留的",
+            zh:"该状态码是为了将来可能的需求而预留的"
         },
         403:{
             en: "Forbidden",

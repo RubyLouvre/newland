@@ -8,12 +8,13 @@ $.define("cache_page","../more/tidy_html", function(tidy){
                 data: html,
                 type: this.content_type("html")
             }
-            var page_url = $.path.join("app","pages", url );
-            // $.writeFile(pages_url, html )
+            if( $.configs.write_page ){
+                $.writeFile( $.path.join("app","pages", url ) , html )
+            }
             $.pagesCache[ url ] = cache;
             this.fire("send_file", cache)
         })
     }
-})
+});
 
 

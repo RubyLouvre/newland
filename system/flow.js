@@ -83,7 +83,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
                 try{
                     this.fire.apply(this, arguments);
                 }catch(e){
-                    this.fire.call(this, 500, e);//如果发生异常，抛出500错误
+                    this.fire( "__error__", e);//如果发生异常，抛出500错误
                 }
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {

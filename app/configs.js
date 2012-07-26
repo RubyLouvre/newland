@@ -1,5 +1,5 @@
 $.define("configs", function(){
-    console.log("已加载用户配置模块");
+   // $.log("已加载用户配置模块");
     return $.configs = {
         //栏截器"favicon",
         //"mime","location","static","postData","methodOverride","json","render","matcher"
@@ -7,6 +7,7 @@ $.define("configs", function(){
         http_method: "_method",//用于模拟PUT,DELETE方法
         environments: "development",
         port: 8888,
+        write_page: true,
         maxObjects: 128,
         maxLength: 1024 * 256,
         maxAge: 60*60*24*365,

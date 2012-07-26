@@ -1,5 +1,5 @@
 $.define("mvc", "httpflow,http, more/mapper, hfs, controller, ../app/configs",function( Flow,http ){
-    $.log("已加载mvc模块");
+    $.log("已加载MVC模块");
     //http://guides.rubyonrails.org/action_controller_overview.html
     //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
     ////http://code.google.com/p/raremvc/
@@ -25,7 +25,6 @@ $.define("mvc", "httpflow,http, more/mapper, hfs, controller, ../app/configs",fu
     })
     //当所有控制器与所需拦截器加载完毕后，开始接受HTTP请求
     function resource_ready(intercepters){
-        console.log(intercepters.length)
         http.createServer(function(req, res) {
             var flow = new Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接
             flow.res =  res;
