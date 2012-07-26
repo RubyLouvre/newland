@@ -1,17 +1,16 @@
 $.define("no_action", function(){
     return function(flow){
-        flow.bind("no_action", function( page ){
+        flow.bind("no_action", function( ){
             $.log("已进入no_action栏截器")
             //去掉#？等杂质，如果是符合如下后缀后，则进行静态资源缓存
             var url = this.req.url;
             if( /\.(css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
-                var mine = RegExp.$1
                 url = url.replace(/[?#].*/, '');
                 var cache = $.staticCache[ url ];
                 if( cache ){
                     var lm
                     if(( lm = cache.headers && cache.headers["Last-Modified"] )){
-                        if(lm === this.req.headers["if-modified-since"]){
+                        if( lm === this.header("if-modified-since")) {
                             this.res.writeHead(304, "Not Modified");
                             this.res.end();
                             return;
@@ -21,6 +20,7 @@ $.define("no_action", function(){
                 }else{
                     //从硬盘中读取数据
                     var statics =  $.path.join("app/public/",url);
+
                     $.readFile(statics, function(err, data){
                         if(err){
                             this.fire(404)
@@ -29,7 +29,7 @@ $.define("no_action", function(){
                             cache = {
                                 code: 200,
                                 data: data,
-                                mine: mimes[ mine ],
+                                type: this.content_type(),
                                 headers: {
                                     "Last-Modified":new Date().toGMTString()
                                 }
@@ -40,7 +40,8 @@ $.define("no_action", function(){
                     }.bind(this));
                 }
             }else{
-                this.fire("get_page", url);
+                console.log("fire get_page")
+                this.fire("get_page");
             }
         })
     }

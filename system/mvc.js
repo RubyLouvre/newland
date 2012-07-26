@@ -1,4 +1,4 @@
-$.define("mvc", "flow,http, more/mapper, hfs, controller, ../app/configs",function( Flow,http ){
+$.define("mvc", "httpflow,http, more/mapper, hfs, controller, ../app/configs",function( Flow,http ){
     $.log("已加载mvc模块");
     //http://guides.rubyonrails.org/action_controller_overview.html
     //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
@@ -18,15 +18,18 @@ $.define("mvc", "flow,http, more/mapper, hfs, controller, ../app/configs",functi
             return msgs;
         }
     }
-
+    $.mix({
+        pagesCache: {}, //用于保存静态页面,可能是临时拼装出来的
+        viewsCache: {}, //用于保存模板函数
+        staticCache: {} //用于保存静态资源
+    })
     //当所有控制器与所需拦截器加载完毕后，开始接受HTTP请求
     function resource_ready(intercepters){
         console.log(intercepters.length)
         http.createServer(function(req, res) {
-            var flow = Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接
+            var flow = new Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接
             flow.res =  res;
             flow.req =  req;
-
             intercepters.forEach(function(fn){
                 fn(flow);//将拦截器绑到流程上
             });
@@ -41,9 +44,9 @@ $.define("mvc", "flow,http, more/mapper, hfs, controller, ../app/configs",functi
                     var instance = $.controllers[cname];//取得对应控制器实例
                     if( instance ){
                         console.log("调用控制器")
-                        instance[aname](flow);//到达指定action
+                        instance[aname]( flow );//到达指定action
                     }else{
-                        console.log("不存在此控制器")
+                        console.log( "不存在此控制器" );
                     }
                 }
             }else{ //直接读取
@@ -63,6 +66,7 @@ $.define("mvc", "flow,http, more/mapper, hfs, controller, ../app/configs",functi
         
         });
     })
+//我的路由系统，由路由器，路由映射，路由规则这三模块组成
 
 //   默认路由
 //   match '/:controller(/:action(/:id))'

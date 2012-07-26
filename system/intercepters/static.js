@@ -1,5 +1,10 @@
 $.define("static","fs, mime",function(fs,mime){
-   // 本模块用于处理放到public目录下的静态文件"
+  
+   
+});
+
+/**
+ // 本模块用于处理放到public目录下的静态文件"
    // 即便是动态页面也会生成对应的静态文件缓存起来
     return function(req, res, err){
         console.log("进入static回调");
@@ -25,9 +30,9 @@ $.define("static","fs, mime",function(fs,mime){
                 headers['Date']          = (new Date).toUTCString();
                 headers['Last-Modified'] = stat.mtime.toUTCString();
                 if(cacheObj && cacheObj.mtime >= stat.mtime){//如果服务没有调整
-                    console.log("进入缓存系统") 
+                    console.log("进入缓存系统")
                     //Last-Modified 与If-Modified-Since 都是用于记录页面最后修改时间的 HTTP 头信息，
-                    //只是 Last-Modified 是由服务器往客户端发送的 HTTP 头，而 If-Modified-Since 
+                    //只是 Last-Modified 是由服务器往客户端发送的 HTTP 头，而 If-Modified-Since
                     //则是由客户端往服务器发送的头，可 以看到，再次请求本地存在的 cache 页面时，
                     //客户端会通过 If-Modified-Since 头将先前服务器端发过来的 Last-Modified 最后修改时间戳发送回去，
                     //这是为了让服务器端进行验证，通过这个时间戳判断客户端的页面是否是最新的，如果不是最新的，
@@ -63,6 +68,4 @@ $.define("static","fs, mime",function(fs,mime){
                 }
             }
         });
-    }
-});
-
+ */

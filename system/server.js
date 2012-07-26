@@ -1,44 +1,6 @@
 $.define("server","flow, helper, status, http, more/tidy_html, ejs, mvc",
     function(Flow, Helper, status, http, tidy){
-        $.mix({
-            pagesCache: {}, //用于保存静态页面,可能是临时拼装出来的
-            viewsCache: {}, //用于保存模板函数
-            staticCache: {} //用于保存静态资源
-        })
-        //很怀疑是否要动用到mime模块
-        var mimes = {
-            "css": "text/css",
-            "gif": "image/gif",
-            "html": "text/html",
-            "ico": "image/x-icon",
-            "jpeg": "image/jpeg",
-            "jpg": "image/jpeg",
-            "js": "text/javascript",
-            "json": "application/json",
-            "pdf": "application/pdf",
-            "png": "image/png",
-            "svg": "image/svg+xml",
-            "swf": "application/x-shockwave-flash",
-            "tiff": "image/tiff",
-            "txt": "text/plain",
-            "wav": "audio/x-wav",
-            "wma": "audio/x-ms-wma",
-            "wmv": "video/x-ms-wmv",
-            "xml": "text/xml",
-            'manifest': 'text/cache-manifest'
-        };
-        /**一个请求过来，取其pathname，先进入缓存系统取页面，
-       没有进入pages目录找，再没有到views目录找模板页面，通过ejs系统拼好返回，
-       并放进缓存与pages中，如果views目录没有对应模板，说明是高度动态的页面，
-       进入MVC系统，找到对应controller的action来生成页面，如果没有则返回各种错误页面
-       deploy,http,app/modules/flow,app/modules/ejs,settings
-     */
-        //  $.define("router", function(){
-
-        //将路由规则把"/"切割成字符串数组
-
-        //http://d.hatena.ne.jp/scalar/20120508/1336488868
-        //   });
+  
 
 
       
