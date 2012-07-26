@@ -105,7 +105,9 @@
         },
         path: require("path"),//将原生path模块劫持到命名空间中
         //它的内容由app/configs模块提供
-        configs: {},
+        configs: {
+            intercepters:[]
+        },
         //模块加载的定义函数
         define: function( name, deps, factory ){//模块名,依赖列表,模块本身
         //这里只是一个空接口

@@ -2,7 +2,8 @@ $.define("configs", function(){
     console.log("已加载用户配置模块");
     return $.configs = {
         //栏截器"favicon",
-        intercepters: ["mime","location","static","postData","methodOverride","json","render","matcher"],
+        //"mime","location","static","postData","methodOverride","json","render","matcher"
+        intercepters: ["send_file"],
         http_method: "_method",//用于模拟PUT,DELETE方法
         environments: "development",
         port: 8888,
