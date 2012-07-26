@@ -3,11 +3,12 @@ $.define("configs", function(){
     return $.configs = {
         //栏截器"favicon",
         //"mime","location","static","postData","methodOverride","json","render","matcher"
-        intercepters: ["send_file","no_action","get_page","get_view","cache_page"],
+        intercepters: [],
         http_method: "_method",//用于模拟PUT,DELETE方法
         environments: "development",
         port: 8888,
-        write_page: true,
+        write_page: false,
+        timeout: 3000,
         maxObjects: 128,
         maxLength: 1024 * 256,
         maxAge: 60*60*24*365,

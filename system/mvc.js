@@ -1,4 +1,4 @@
-$.define("mvc", "httpflow,http, more/mapper, hfs, controller, ../app/configs",function( Flow,http ){
+$.define("mvc", "httpflow, http, more/mapper, hfs, controller, ../app/configs",function( Flow,http ){
     $.log("已加载MVC模块");
     //http://guides.rubyonrails.org/action_controller_overview.html
     //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
@@ -42,10 +42,10 @@ $.define("mvc", "httpflow,http, more/mapper, hfs, controller, ../app/configs",fu
                     var aname = match[1];
                     var instance = $.controllers[cname];//取得对应控制器实例
                     if( instance ){
-                        console.log("调用控制器")
+                        $.log("调用控制器")
                         instance[aname]( flow );//到达指定action
                     }else{
-                        console.log( "不存在此控制器" );
+                        $.log( "不存在此控制器" );
                     }
                 }
             }else{ //直接读取
@@ -54,7 +54,9 @@ $.define("mvc", "httpflow,http, more/mapper, hfs, controller, ../app/configs",fu
         }).listen( $.configs.port );
 
     }
-    var inter = $.configs.intercepters
+    var defaults = ["send_file","no_action","get_page","get_view","cache_page",
+        "get_layout","500","send_error", "timeout"]
+    var inter = $.Array.union(defaults, $.configs.intercepters)
     $.walk("app/controllers", function(files){//加载资源
         inter.forEach(function(str){
             files.unshift( "system/intercepters/"+str)
