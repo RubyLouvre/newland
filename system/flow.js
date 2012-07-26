@@ -2,14 +2,12 @@
 //  操作流模块,用于流程控制
 //==========================================
 $.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模块在同一目录
-    function OperateFlow(){ //数据共享,但策略自定
+    function Flow(){ //数据共享,但策略自定
         this.root = {};
         this.uuid = $.getUid({})
-        if(typeof arguments[1] == "function")
-            this.bind.apply(this, arguments);
     }
-    OperateFlow.prototype = {
-        constructor: OperateFlow,
+    Flow.prototype = {
+        constructor: Flow,
         //names 可以为数组，用逗号作为分隔符的字符串
         bind: function(names,callback,reload){
             var  root = this.root, deps = {},args = [];
@@ -107,9 +105,7 @@ $.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模
             return this;
         }
     }
-    return $.flow = function(names,callback,reload){//一个工厂方法
-        return new OperateFlow(names,callback,reload)
-    }
+    return $.Flow
     //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
 })
 //2012.6.8 对fire的传参进行处理

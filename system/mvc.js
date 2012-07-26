@@ -18,19 +18,19 @@ $.define("mvc", "flow,http, more/mapper, hfs, controller, ../app/configs",functi
             return msgs;
         }
     }
-    var resource_flow = new Flow;
-    resource_flow.bind("ok", function(intercepters){
-      console.log(intercepters.length)
+
+    //当所有控制器与所需拦截器加载完毕后，开始接受HTTP请求
+    function resource_ready(intercepters){
+        console.log(intercepters.length)
         http.createServer(function(req, res) {
-            var flow = Flow()
+            var flow = Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接
             flow.res =  res;
             flow.req =  req;
 
             intercepters.forEach(function(fn){
-
-                fn(flow)
+                fn(flow);//将拦截器绑到流程上
             });
-           console.log("xxxxxxxxxxx")
+
             var go = $.router.routeWithQuery(req.method,req.url);
             if( go ){
                 var value = go.value;
@@ -38,20 +38,20 @@ $.define("mvc", "flow,http, more/mapper, hfs, controller, ../app/configs",functi
                     var match = value.split("#");
                     var cname = match[0];
                     var aname = match[1];
-                    var instance = $.controllers[cname];
+                    var instance = $.controllers[cname];//取得对应控制器实例
                     if( instance ){
                         console.log("调用控制器")
-                        instance[aname](flow);
+                        instance[aname](flow);//到达指定action
                     }else{
                         console.log("不存在此控制器")
                     }
                 }
             }else{ //直接读取
-                flow.fire("xxxx")
+                flow.fire("no_action")
             }
         }).listen( $.configs.port );
 
-    })
+    }
     var inter = $.configs.intercepters
     $.walk("app/controllers", function(files){//加载资源
         inter.forEach(function(str){
@@ -59,8 +59,8 @@ $.define("mvc", "flow,http, more/mapper, hfs, controller, ../app/configs",functi
         });
         $.require(files, function(){
             var intercepters = [].slice.call(arguments,0, inter.length);
-            resource_flow.fire( "ok",intercepters )
-            console.log("已加载所有控制器与所需拦截器")
+            resource_ready( intercepters )
+        
         });
     })
 
