@@ -110,21 +110,15 @@ void function( global, DOC ){
          * @param {Number} end  可选。规定从何处结束选取
          * @return {Array}
          */
-    
-        slice:  function ( nodes, start, end ) {
-            var n = nodes.length, from = ~~start,to = ~~end || n, ri = 0;
-            if (from < 0) from += n;
-            if (to < 0)   to   += n;
-            if ( (to > from) && ( from <= n ) ) {
-                if ( from < 0 ) from = 0;
-                if ( to > n ) to = n;
-                var result = new Array(to - from);
-                while(from < to){
-                    result[ ri++ ] = nodes[from++]
-                }
-                return result
+        slice: function ( nodes, start, end ) {
+            for(var i = 0, n = nodes.length, result = []; i < n; i++){
+                result[i] = nodes[i];
             }
-            return [];
+            if ( arguments.length > 1 ) {
+                return result.slice( start , end );
+            } else {
+                return result;
+            }
         },
         /**
          * 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）
@@ -199,21 +193,6 @@ void function( global, DOC ){
                 result[ array[i] ] = value;
             }
             return result;
-        },
-        deferred: function(){//一个简单的异步列队
-            var list = [], self = function(fn){
-                fn && fn.call && list.push( fn );
-                return self;
-            }
-            self.fire = function( fn ){
-                list = self.reuse ? list.concat() : list
-                while( fn = list.shift() ){
-                    fn();
-                }
-                return list.length ? self : self.complete();
-            }
-            self.complete = $.noop;
-            return self;
         }
     });
 
@@ -221,7 +200,75 @@ void function( global, DOC ){
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
     });
-    var errorStack = $.deferred()
+
+    var indexOf = function ( fn ) {
+        for (var i = 0,n = this.length ; i < n ; i++) {
+            if (this[i] === fn) {
+                return i;
+            }
+        }
+        return -1;
+    };
+    // once: 保证回调函数列表只能被 .fire() 一次。(就像延迟对象一样)
+    //  memory: 持续保留前一个值，当fire之后,将保存其context与args，以后再添加一个新回调时，
+    //  立即用这两个东西去调用它，它们只会被下一次的fireWith的参数所改变
+    //  unique: 保证一个回调函数只能被添加一次(也就是说，在回调函数列表中，没有重复的回调函数)。
+    //  stopOnFalse: 当回调函数返回 false 时，中断调用。
+    $.Callbacks  = function(str){//一个简单的异步列队
+        var opts = typeof str == "string" ? $.oneObject(str) : {},list = [];
+        if(!list.indexOf){
+            list.indexOf = indexOf;
+        }
+        var context, args, fired
+        list.has = function( fn ){
+            return list.indexOf( fn ) !== -1
+        }
+        list.add = function(fn){
+            if(!list.locked){//允许在异步fire中添加
+                if( typeof fn == "function"  && ( !opts.unique || !list.has( fn ) )  ){
+                    list.push( fn )
+                }
+            }
+            if( opts.memory && fired){ //这时只影响当前添加的函数
+                fn.apply( context, args )
+            }
+            return list;
+        }
+        list.remove = function( fn ){
+            var i = isFinite( fn ) ? fn :  this.indexOf(fn);
+            if( i > -1 ){
+                list.splice(i,1)
+                var j = this.indexOf(fn);
+                if( j > -1 ){
+                    return this.remove( j )
+                }
+            }
+            return list;
+        }
+        list.lock = function(){//锁住
+            list.locked = true;
+        }
+        list.fire = function(){
+            return  list.fireWith(list, $.slice(arguments))
+        }
+        list.fireWith = function( c, a ){
+            if(list.locked !== true  && (!opts.once || !fired ) ){
+                context = c, args = $.type( a, "Array") ? a : [];
+                var arr = opts.once ? list: list.concat(), fn
+                while( ( fn = arr.shift() ) ){
+                    var ret = fn.apply( context, args);
+                    if( opts.stopOnFalse && ret === false){
+                        break;
+                    }
+                }
+                fired = true;
+            }
+            return list
+        }
+        return list
+    }
+    //deferred的行为,收集
+    var errorStack = $.Callbacks("deferred")
     var mapper = $[ "@modules" ] = {
         "@ready" : { }
     };
@@ -241,7 +288,6 @@ void function( global, DOC ){
      */
     function loadJS( name, url ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
-        console.log(url)
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
         '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
@@ -265,9 +311,6 @@ void function( global, DOC ){
             doc.write( "<body/>" );//清空内容
             HEAD.removeChild( iframe );//移除iframe
         });
-    }
-    $.Callback = function(){
-        
     }
 
     function install( name, deps, fn ){
@@ -321,7 +364,7 @@ void function( global, DOC ){
                 return returns[ token ] = install( token, args, factory );//装配到框架中
             }
             if( errback ){
-                errorStack( errback );//压入错误堆栈
+                errorStack.add( errback );//压入错误堆栈
             }
             mapper[ token ] = {//创建或更新模块的状态
                 callback:factory,
@@ -421,7 +464,7 @@ void function( global, DOC ){
         namespace = DOC.URL.replace(/(#.+|\W)/g,'');
         $.exports();
     });
-    $.exports( "$"+  postfix );//防止不同版本的命名空间冲突
+    $.exports( $["@name"] +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
 }( this, this.document );
@@ -480,6 +523,7 @@ dom.namespace改为dom["mass"]
 2012.6.14 精简innerDefine,更改一些术语
 2012.6.25 domReady后移除绑定事件
 2012.7.23 动态指定mass Framewoke的命名空间与是否调试
+2012.7.27 添加$.Callbacks
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。

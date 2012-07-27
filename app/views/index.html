@@ -1,6 +1,6 @@
 <% set_title("首页") %>
 <% set_layout("layout.html") %>
-<% push_js("/scripts/mass.js") %>
+<% push_js("/scripts/jquery.js") %>
 <% push_css("/styles/doc/common.css") %>
 <h2>Welcome to the newland </h2>
 <style>
@@ -22,14 +22,69 @@
     }
 </style>
 <script>
-  
-</script>
-<h1>UUUUUUUUUUUUUUUU</h1>
-<div class="aaa">
-    <% for(var i = 0; i< 100; i++){ %>
-    <p>XXXXXXXXXXX</p>
-    <% } %>
-    <div class="scrollbar">
+    var hock = ""
+    function fn1( value ){
+        hock += value
+    }
 
-    </div>
-</div>
+    function fn2( value ){
+        hock += "|"+value
+        return false;
+    }
+    //函数保存到一个列表中
+    var callbacks = $.Callbacks();
+    callbacks.add( fn1 );
+    callbacks.fire( "aaa" ); // outputs: foo!
+
+    callbacks.add( fn2 );
+    callbacks.fire( "bbb" );
+
+    console.log(hock)//aaabbb:::bbb
+    hock = ""
+    var callbacks1 = $.Callbacks( "once" );
+    callbacks1.add( fn1 );
+    callbacks1.fire( "foo" );
+    callbacks1.add( fn2 );
+    callbacks1.fire( "bar" );
+
+    console.log(hock)//foo
+    hock = ""
+
+    var callbacks2 = $.Callbacks( 'memory' );
+
+    callbacks2.add( fn1 );
+    callbacks2.fire( "foo" );
+    callbacks2.add( fn2 );
+    callbacks2.fire( "bar" );
+
+    console.log(hock)//foo|foobar|bar
+    hock = ""
+    var callbacks3 = $.Callbacks( "unique" );
+    callbacks3.add( fn1 );
+    callbacks3.fire( "foo" );
+    callbacks3.add( fn1 ); // repeat addition
+    callbacks3.add( fn2 );
+    callbacks3.fire( "bar" );
+    callbacks3.remove( fn2 );
+    callbacks3.fire( "www" );
+
+    console.log(hock)//foobar|barwww
+    hock = ""
+    var callbacks = $.Callbacks( "stopOnFalse");
+    function fn1( value ){
+        hock += value
+        return false;
+    }
+    callbacks.add( fn1 );
+    callbacks.fire( "foo" );
+    callbacks.add( fn2 );
+    callbacks.fire( "bar" );
+    callbacks.remove( fn2 );
+    callbacks.fire( "foobar" );
+    console.log(hock)//foobarfoobar
+
+
+
+
+
+</script>
