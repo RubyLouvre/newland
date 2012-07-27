@@ -16,9 +16,11 @@ $.define("get_view", function(){
             }else{
                 $.readFile( view_url,  'utf-8', function(err, text){
                     if(err){
+                        console.log("404")
                         this.fire( "send_error", 404 )
                     }else{
                         $.viewsCache[ view_url ] = $.ejs( text );
+                        console.log(text)
                         this.fire( "get_view", view_url, url );
                     }
                 }.bind(this) );
