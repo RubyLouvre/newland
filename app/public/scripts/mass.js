@@ -110,32 +110,22 @@ void function( global, DOC ){
          * @param {Number} end  可选。规定从何处结束选取
          * @return {Array}
          */
-        slice: function ( nodes, start, end ) {
-            var j = nodes.length, i = ~~start, n = ~~end || j, ri = 0;
-            if (i < 0) n += j;
-            var result = new Array(n)
-            for (; i < n; i++){
-                result[ ri++ ] = nodes[i]
+    
+        slice:  function ( nodes, start, end ) {
+            var n = nodes.length, from = ~~start,to = ~~end || n, ri = 0;
+            if (from < 0) from += n;
+            if (to < 0)   to   += n;
+            if ( (to > from) && ( from <= n ) ) {
+                if ( from < 0 ) from = 0;
+                if ( to > n ) to = n;
+                var result = new Array(to - from);
+                while(from < to){
+                    result[ ri++ ] = nodes[from++]
+                }
+                return result
             }
-            return result;
+            return [];
         },
-        /*
-          function slice( nodes, start, end ) {
-            var n = nodes.length, i = ~~start, j = ~~end || n, ri = 0;
-            if(i > n){
-               i = n
-            }
-            if ( j < 0)
-               j += n;
-            var result = new Array(j - i);
-            for (; i < n; i++){
-            console.log("=============")
-                result[ri++] =   nodes[i]
-            }
-            return result;
-        }
-
-      slice([1,2,3,4,5],4);
         /**
          * 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）
          * @param {Any} obj 要检测的东西
@@ -164,9 +154,9 @@ void function( global, DOC ){
             return result;
         },
         /**
-         * 用于调试
+         * 打印调试信息到控制台(1个参数的情况)或页面底部(第二参数为true或1的情况下)
          * @param {String} text 要打印的内容
-         * @param {Boolean} force 强逼打印到页面上
+         * @param {Boolean} force 打印到页面上
          */
         log: function ( text, force ){
             if( force ){
@@ -275,6 +265,9 @@ void function( global, DOC ){
             doc.write( "<body/>" );//清空内容
             HEAD.removeChild( iframe );//移除iframe
         });
+    }
+    $.Callback = function(){
+        
     }
 
     function install( name, deps, fn ){

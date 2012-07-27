@@ -8,7 +8,7 @@ $.define("configs", function(){
         environments: "development",
         port: 8888,
         write_page: false,
-        timeout: 3000,
+        timeout: 4000,
         maxObjects: 128,
         maxLength: 1024 * 256,
         maxAge: 60*60*24*365,
