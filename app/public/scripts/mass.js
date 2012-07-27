@@ -111,15 +111,31 @@ void function( global, DOC ){
          * @return {Array}
          */
         slice: function ( nodes, start, end ) {
-            for(var i = 0, n = nodes.length, result = []; i < n; i++){
-                result[i] = nodes[i];
+            var j = nodes.length, i = ~~start, n = ~~end || j, ri = 0;
+            if (i < 0) n += j;
+            var result = new Array(n)
+            for (; i < n; i++){
+                result[ ri++ ] = nodes[i]
             }
-            if ( arguments.length > 1 ) {
-                return result.slice( start , ( end || result.length ) );
-            } else {
-                return result;
-            }
+            return result;
         },
+        /*
+          function slice( nodes, start, end ) {
+            var n = nodes.length, i = ~~start, j = ~~end || n, ri = 0;
+            if(i > n){
+               i = n
+            }
+            if ( j < 0)
+               j += n;
+            var result = new Array(j - i);
+            for (; i < n; i++){
+            console.log("=============")
+                result[ri++] =   nodes[i]
+            }
+            return result;
+        }
+
+      slice([1,2,3,4,5],4);
         /**
          * 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）
          * @param {Any} obj 要检测的东西
