@@ -13,13 +13,12 @@
     , cbi      = 1e5                        //用于生成回调函数的名字
     , uuid     = 1
     , toString = returns.toString
-
-    /**
-     * 糅杂，为一个对象添加更多成员
-     * @param {Object} receiver 接受者
-     * @param {Object} supplier 提供者
-     * @return  {Object} 目标对象
-     */
+    //为[[class]] --> type 映射对象添加更多成员,用于$.type函数
+    "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace(/\w+/g,function(name){
+        class2type[ "[object " + name + "]" ] = name;
+    });
+    //将一个或多个对象合并到第一个参数（它也必须是对象）中，
+    //如果只有一个参数，则合并到mix的调用者上，如果最后一个参数是布尔，则用于判定是否覆盖已有属性
     function mix( receiver, supplier ){
         var args = Array.apply([], arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
@@ -42,19 +41,14 @@
         mix:  mix,
         "@debug" : true,
         isWindows: process.platform === 'win32',//判定当前平台是否为window
-        //切片操作,通常用于处理Arguments对象
+        //将类数组对象转换成真正的数组，并进行切片操作(如果第二第三参数存在的情况下)
         slice: function (nodes, start, end) {
             return Array.prototype.slice.call(nodes, start, end || nodes.length)
         },
         getUid:  function( node ){
             return node.uniqueNumber || ( node.uniqueNumber = uuid++ );
         },
-        /**
-         * 生成键值统一的对象，用于高速化判定
-         * @param {Array|String} array 如果是字符串，请用","或空格分开
-         * @param {Number} val 可选，默认为1
-         * @return {Object}
-         */
+        // 创建一个对象，其键值都为1(如果没有指定)或第二个参数，用于用于高速化判定
         oneObject: function(array, val){
             if(typeof array == "string"){
                 array = array.match($.rword) || [];
@@ -65,12 +59,7 @@
             }
             return result;
         },
-        /**
-         * 用于取得数据的类型或判定数据的类型
-         * @param {Any} obj 要检测的东西
-         * @param {String} str 要比较的类型
-         * @return {String|Boolean}
-         */
+        // 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）
         type: function (obj, str){
             var result = class2type[ (obj == null || obj !== obj )? obj : toString.call(obj) ] || "#";
             if( result.charAt(0) === "#"){
@@ -84,21 +73,6 @@
                 return str === result;
             }
             return result;
-        },
-        deferred: function(){//一个简单的异步列队
-            var list = [], self = function(fn){
-                fn && fn.call && list.push( fn );
-                return self;
-            }
-            self.fire = function( fn ){
-                list = self.reuse ? list.concat() : list
-                while( fn = list.shift() ){
-                    fn();
-                }
-                return list.length ? self : self.complete();
-            }
-            self.complete = $.noop;
-            return self;
         },
         md5: function(str, encoding){
             return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
@@ -207,10 +181,7 @@
     }
     $.path.parse = require("url").parse; //将原生URL模块的parse劫持下来
     $.noop = $.error = $.debug = function(){};//error, debug现在还是空接口
-    //为[[class]] --> type 映射对象添加更多成员,用于$.type函数
-    "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace($.rword,function(name){
-        class2type[ "[object " + name + "]" ] = name;
-    });
+
     //模块加载的加载函数
     function loadJS(  filename ){
         try{
@@ -232,8 +203,63 @@
             }).fire();//打印错误堆栈
         }
     }
+    //  once: 保证回调函数列表只能被 .fire() 一次。(就像延迟对象一样)
+    //  memory: 持续保留前一个值，当fire之后,将保存其context与args，以后再添加一个新回调时，
+    //  立即用这两个东西去调用它，它们只会被下一次的fireWith的参数所改变
+    //  unique: 保证一个回调函数只能被添加一次(也就是说，在回调函数列表中，没有重复的回调函数)。
+    //  stopOnFalse: 当回调函数返回 false 时，中断调用。
+    $.Callbacks  = function(str){//一个简单的异步列队
+        var opts = typeof str == "string" ? $.oneObject(str) : {},list = [];
+        var context, args, fired
+        list.has = function( fn ){
+            return list.indexOf( fn ) !== -1
+        }
+        list.add = function(fn){
+            if(!list.locked){//允许在异步fire中添加
+                if( typeof fn == "function"  && ( !opts.unique || !list.has( fn ) )  ){
+                    list.push( fn )
+                }
+            }
+            if( opts.memory && fired){ //这时只影响当前添加的函数
+                fn.apply( context, args )
+            }
+            return list;
+        }
+        list.remove = function( fn ){
+            var i = isFinite( fn ) ? fn :  this.indexOf(fn);
+            if( i > -1 ){
+                list.splice(i,1)
+                var j = this.indexOf(fn);
+                if( j > -1 ){
+                    return this.remove( j )
+                }
+            }
+            return list;
+        }
+        list.lock = function(){//锁住
+            list.locked = true;
+        }
+        list.fire = function(){
+            return  list.fireWith(list, $.slice(arguments))
+        }
+        list.fireWith = function( c, a ){
+            if(list.locked !== true  && (!opts.once || !fired ) ){
+                context = c, args = $.type( a, "Array") ? a : [];
+                var arr = opts.once ? list: list.concat(), fn
+                while( ( fn = arr.shift() ) ){
+                    var ret = fn.apply( context, args);
+                    if( opts.stopOnFalse && ret === false){
+                        break;
+                    }
+                }
+                fired = true;
+            }
+            return list
+        }
+        return list
+    }
     //用于模块加载失败时的错误回调
-    var errorStack = $.deferred();
+    var errorStack = $.Callback("once memory");
     //实现漂亮的五颜六色的日志打印
     new function(){
         var rformat = /<code\s+style=(['"])(.*?)\1\s*>([\d\D]+?)<\/code>/ig
