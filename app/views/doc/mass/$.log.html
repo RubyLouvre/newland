@@ -1,0 +1,27 @@
+<%  set_title("$.log") %>
+<%  set_layout("doc_layout.html") %>
+<script type="text/javascript">
+    SyntaxHighlighter.all();
+    var exec1 = function(){
+        $.log({}+[],true);
+    }
+</script>
+
+<h3>$.log(s, [ force ])</h3>
+<p><span class="stress">描述：</span></p>
+<p>用于调试，默认是打印到window.console上，但对于不支持window.console的浏览器（如IE6）则会直接打印到页面底部。</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>s</dt>
+    <dd>必需。要打印的内容。如果不是字符串会转换成字符串再打印。</dd>
+    <dt>force</dt>
+    <dd>可选。Boolean。强逼打印到页面上，默认false。</dd>
+</dl>
+
+<fieldset><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.log({}+[],true);
+    </pre>
+    <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
+
+</fieldset>
