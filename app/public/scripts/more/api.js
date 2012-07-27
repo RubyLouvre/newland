@@ -45,7 +45,6 @@ $.define("api", function(){
             "mass": "number",
             "@name": "string",
             "@debug": "boolean",
-            "@bind": "string",
             "@path": "string",
             "exports": "function",
             "slice": "function",
@@ -53,21 +52,13 @@ $.define("api", function(){
             "log": "function",
             "getUid": "function",
             "oneObject": "function",
-            "error": "function",
             "noop": "function",
-            "@modules": "object",
-            "stack": {
-                "method": "string",
-                "fire": "function",
-                "complete": "function"
-            },
+            "Callbacks": "function",
             "mix": "function",
             "bind": "function",
             "unbind": "function",
             "require": "function",
-            "define": "function",
-            "_checkDeps": "function",
-            "_checkFail": "function"
+            "define": "function"
         },
 
         "语言扩展模块": {

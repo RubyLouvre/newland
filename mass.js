@@ -259,7 +259,7 @@
         return list
     }
     //用于模块加载失败时的错误回调
-    var errorStack = $.Callback("once memory");
+    var errorStack = $.Callbacks("once memory");
     //实现漂亮的五颜六色的日志打印
     new function(){
         var rformat = /<code\s+style=(['"])(.*?)\1\s*>([\d\D]+?)<\/code>/ig

@@ -4,11 +4,12 @@
         ).replace($.rword,function(tag){
         document.createElement(tag)
     });
+ 
     if(self.eval !== top.eval){
         window.$ && $.require("ready,node,css",function(){
-            var iheight = parseFloat( $("article").height() ); //取得其高
+            var iheight = parseFloat( document.outerHeight || $("article").outerHeight() ); //取得其高
             if(iheight < 400)
-                iheight = 400;
+                iheight = 500;
             $.log(iheight)
             $("#iframe",parent.document).height(iheight);
         });

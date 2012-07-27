@@ -335,11 +335,12 @@ void function( global, DOC ){
         }
         return list
     }
-
+    //用于模块加载失败时的错误回调
+    var errorStack = $.Callbacks("once memory");
+    //===================================模块加载相关==========================================
     var mapper = $.require.cache = {
         "@ready" : { }
     };
-    //===================================模块加载相关==========================================
     //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
     var innerDefine = function( _, deps, callback ){
         var args = arguments, last = args.length - 1
