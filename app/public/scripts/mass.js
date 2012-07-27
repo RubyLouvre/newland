@@ -29,12 +29,7 @@ void function( global, DOC ){
         function( name ){
             class2type[ "[object " + name + "]" ] = name;
         });
-    /**
-     * @class $
-     * mass Framework拥有两个命名空间,
-     * 第一个是DOC.URL.replace(/(\W|(#.+))/g,'')，根据页面的地址动态生成
-     * 第二个是$，我们可以使用别名机制重写它
-     */
+    //命名空间的对象，至于它在全局作用域下叫什么命名，则@name变量决定，我们也可以通过exports方法修改它
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             $.require( "lang,flow,attr,event,fx,ready", expr );
@@ -44,10 +39,10 @@ void function( global, DOC ){
             return new $.fn.init( expr, context );
         }
     }
-    //多版本共存
+    //===================================多版本共存相关==========================================
     if( typeof commonNs !== "function"){
-        commonNs = $;//公用命名空间对象
-        commonNs.uuid = 1;
+        commonNs = $;//第一个载入页面的mass对象为公用命名空间对象
+        commonNs.uuid = 1;//共用uuid做计数器
     }
     if(commonNs.mass !== mass  ){
         commonNs[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
