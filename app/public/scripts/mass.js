@@ -269,7 +269,7 @@ void function( global, DOC ){
     $.noop = $.error = $.debug = function(){};
 
     //===================================回调列队相关==========================================
-    var indexOf = function ( fn ) {
+    var indexOf = function ( fn ) {//fix 古老浏览器Array没有indexOf方法
         for (var i = 0,n = this.length ; i < n ; i++) {
             if (this[i] === fn) {
                 return i;
@@ -317,7 +317,10 @@ void function( global, DOC ){
             list.locked = true;
         }
         list.fire = function(){
-            return  list.fireWith(list, $.slice(arguments))
+            return  list.fireWith(list, Array.apply([],arguments))
+        }
+        list.disable = function(){//禁止操作
+            list.add = list.remove = list.fireWith = $.noop
         }
         list.fireWith = function( c, a ){
             if(list.locked !== true  && (!opts.once || !fired ) ){

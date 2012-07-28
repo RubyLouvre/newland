@@ -6,6 +6,7 @@ $.define("get_view", function(){
             if( fn ){
                 var data = this.helper[0];
                 var html = fn( data, this.helper[1]);
+
                 if(typeof data.layout == "string"){
                     data.partial = html;
                     var layout_url = $.path.join("app","views/layout", data.layout );

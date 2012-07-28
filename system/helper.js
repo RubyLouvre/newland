@@ -18,7 +18,7 @@ $.define("helper","class", function(){
                     type: 'text/css'
                 };
                 var tag = create_tag( file, opts, arguments );
-                data.links.push( tag );
+                data.links.push( tag+"\n" );
             },
             unshift_css: function( file ){
                 var opts = {
@@ -27,7 +27,7 @@ $.define("helper","class", function(){
                     type: 'text/css'
                 };
                 var tag = create_tag( file, opts, arguments );
-                data.links.unshift( tag );
+                data.links.unshift( tag+"\n" );
             },
             add_css : function ( file ) {
                 var opts = {
@@ -43,14 +43,14 @@ $.define("helper","class", function(){
                     type: 'text/javascript'
                 };
                 var tag = create_tag( file, opts, arguments );
-                data.scripts.push( tag);
+                data.scripts.push( tag+"\n" );
             },
             unshift_js: function( file ){
                 var opts = {
                     type: 'text/javascript'
                 };
                 var tag = create_tag( file, opts, arguments );
-                data.scripts.unshift( tag);
+                data.scripts.unshift( tag+"\n" );
             },
             add_js: function( file ){
                 var opts = {

@@ -13,10 +13,16 @@ $.define("get_layout", function(){
                     }else{
                         var fn = $.ejs( text );
                         if(url){//如果指定了第二个参数才存入缓存系统
+
+
+
                             $.viewsCache[ layout_url ] = fn
                             this.fire("get_layout", layout_url, url)
                         }else{
                             var html = fn( this.helper[0] );
+                            html.replace("")
+
+
                             this.fire('cache_page', html, url)
                         }
 
