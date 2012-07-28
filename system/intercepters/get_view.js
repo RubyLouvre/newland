@@ -1,7 +1,7 @@
 $.define("get_view", function(){
     return function( flow ){
         flow.bind("get_view", function( view_url, url ){
-            $.log( "已进入 get_view 栏截器" );
+            $.log( "已进入get_view栏截器" );
             var fn = $.viewsCache[ view_url ]
             if( fn ){
                 var data = this.helper[0];

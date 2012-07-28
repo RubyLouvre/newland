@@ -16,14 +16,18 @@ $.define("home_controller",function(){
         },
         ajax: function(flow){
             $.log("进入AJAX请求分支!")
-          //  console.log(flow)
-          $.log(flow.params)
             if(flow.xhr){
-              console.log(flow.req);
-              console.log(flow.req.query)
+                var e = flow.params
+                clearTimeout(flow.timeoutID)
+                console.log(e);
+                flow.res.writeHead(200, {
+                    'content-type':'text/json'
+                })
+                flow.res.end(JSON.stringify(e))
+
+            
             }
-        // $.log( flow.get('X-Requested-With') )
-        //   $.log(flow.req)
+
         }
     });
     $.controllers[ "home"] = new klass

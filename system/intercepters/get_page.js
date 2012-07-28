@@ -5,7 +5,7 @@ $.define("get_page", function(){
         flow.bind("get_page", function( ){
             var url = this.req.url;
             var last_char = url[ url.length - 1 ];
-            $.log( "已进入 get_page 栏截器" );
+            $.log( "已进入get_page栏截器" );
             //如果是一个目录则默认加上index.html
             if(last_char === "\\" || last_char == "/" ){
                 url += "index.html"
