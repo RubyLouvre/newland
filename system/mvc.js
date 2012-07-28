@@ -1,4 +1,4 @@
-$.define("mvc", "httpflow, http, more/mapper, hfs, controller, ../app/configs",function( Flow,http ){
+$.define("mvc", "httpflow, http, system",function( Flow,http ){
     $.log("已加载MVC模块");
     //http://guides.rubyonrails.org/action_controller_overview.html
     //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、

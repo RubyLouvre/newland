@@ -178,7 +178,7 @@ $.define( "hfs","fs,path", function(fs, path){
             if(dir){
                 $.mkdirSync(dir, "0755" )
             }
-            fs.writeFileSync( p, data, encoding)
+            fs.writeFileSync( p, data, encoding || "utf-8")
         },
         //上面的异步化版本
         writeFile: function(p, data, cb){
