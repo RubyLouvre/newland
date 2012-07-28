@@ -1,19 +1,26 @@
 $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function(){
     var libs = "mass,lang,lang_fix,support,class,node,query,data,css,css_fix,event,event_fix,attr,flow,ajax"
-    var files = []
+    var files = [];
+    $.mix({
+        pagesCache: {}, //ÓÃÓÚ±£´æ¾²Ì¬Ò³Ãæ,¿ÉÄÜÊÇÁÙÊ±Æ´×°³öÀ´µÄ
+        viewsCache: {}, //ÓÃÓÚ±£´æÄ£°åº¯Êı
+        staticCache: {}, //ÓÃÓÚ±£´æ¾²Ì¬×ÊÔ´,
+        controllers: {}  //ÓÃÓÚ±£´æ¿ØÖÆÆ÷,
+    });
+
     libs.replace($.rword, function( name ){
         try{
             var url =  $.path.join( __dirname, name +".js" );
             var text = $.readFileSync( url, "utf-8")
             files.push(text)
-         //   $.log("åˆå¹¶"+name+"æ¨¡å—")
+         //   $.log("ºÏ²¢"+name+"Ä£¿é")
            //$.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text )
         }catch(e){
             $.log(e);
             $.log(url)
         }
     });
-    //æœ‰ç”¨çš„éƒ¨åˆ†æ˜¯body
+    //ÓĞÓÃµÄ²¿·ÖÊÇbody
     var merge = function(){
         var module_value = {
             state: 2
@@ -34,12 +41,12 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
     .replace("@@@@@",libs);
     replaced = replaced + files.join("\n")
     replaced = first.replace("/*combine modules*/", replaced ).replace(rcomments,"");
-    //å¼€å§‹åˆå¹¶
-    $.writeFile("app/public/scripts/mass_merge.js", replaced,"utf8",function(e){//ç”Ÿæˆæ–°çš„jsæ–‡ä»¶ï¼
+    //¿ªÊ¼ºÏ²¢
+    $.writeFile("app/public/scripts/mass_merge.js", replaced,"utf8",function(e){//Éú³ÉĞÂµÄjsÎÄ¼ş£¡
         if(e) {
-            console.log("å‡ºé”™äº† "+e);
+            console.log("³ö´íÁË "+e);
         }else{
-            console.log("åˆå¹¶æˆåŠŸ")
+            console.log("ºÏ²¢³É¹¦")
         }
     })
 })

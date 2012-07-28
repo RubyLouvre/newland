@@ -332,7 +332,7 @@
     //  $.require("system/server", function(){
     //     $.log($.configs.port)
     //  });
-    $.controllers = {}
+
     $.require("system/deploy,system/mvc", function(deploy){
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
     });
