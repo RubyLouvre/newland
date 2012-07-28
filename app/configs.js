@@ -7,7 +7,7 @@ $.define("configs", function(){
         http_method: "_method",//用于模拟PUT,DELETE方法
         environments: "development",
         port: 8888,
-        write_page: true,
+        write_page: false,
         timeout: 4000,
         maxObjects: 128,
         maxLength: 1024 * 256,

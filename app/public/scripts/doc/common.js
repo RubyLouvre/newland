@@ -6,12 +6,21 @@
     });
  
     if(self.eval !== top.eval){
-        window.$ && $.require("ready,node,css",function(){
+        window.$ && $.require("ready,css,node",function(){
             var iheight = parseFloat( document.outerHeight || $("article").outerHeight() ); //取得其高
             if(iheight < 400)
-                iheight = 500;
+                iheight = 500;  
             $.log(iheight)
             $("#iframe",parent.document).height(iheight);
         });
     }
+    $.require("ready,event",function(){
+        $(".doc_btn").each(function(){
+            var btn =  $(this);
+            var fn = Function( btn.prev("pre").text() );
+            btn.bind("click", fn);
+        });
+        window.SyntaxHighlighter && SyntaxHighlighter.all();
+    });
+
 })();

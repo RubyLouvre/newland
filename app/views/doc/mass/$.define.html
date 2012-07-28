@@ -1,14 +1,5 @@
 <%  set_title("$.define") %>
 <%  set_layout("doc_layout.html") %>
-<%  push_js('/scripts/mass_merge.js' );    %>
-<%  push_js('/scripts/doc/common.js' );    %>
-<%  push_css('/styles/doc/common.css' );  %>
-<%  push_js('/scripts/doc/shCore.js' ) ;   %>
-<%  push_js('/scripts/doc/shBrushJScript.js' ) ;   %>
-<%  push_js('/scripts/doc/shBrushCss.js' ) ;   %>
-<%  push_js('/scripts/doc/shBrushXml.js' ) ;   %>
-<%  push_css('/styles/doc/shCore.css' );  %>
-<%  push_css('/styles/doc/shThemeRDark.css' );  %>
 <h3>$.define(name,[ deps ],callback)</h3>
 
 <p><span class="stress">描述：</span></p>
@@ -25,18 +16,24 @@
 <p>每个模块的定义如下(请确保模块名与文件名要一致，名字不能取名为"ready"，那是一个标识符，表示最后的回调函数要延迟到domReady之外才执行。</p>
 
 <fieldset><legend>例子</legend>
-    <p></p>
-    <pre class="brush:javascript;gutter:false;toolbar:false">
+    <p></p><pre class="brush:javascript;gutter:false;toolbar:false">
 //class.js
     $.define("class","lang",function(){//模块名，依赖列表，模块本身
        $.log("class模块")
     });
 
     </pre>
-    <p>依赖于多个模块时：</p>
+    <p>依赖于多个模块时，每个模块以空格或逗号隔开：</p>
     <pre class="brush:javascript;gutter:false;toolbar:false">
 //node.js
     $.define("node", "class,support,query,data",function(){//第二个参数也可以改成字符串数组
+       $.log("node模块")
+    });
+    </pre>
+    <p>当然我们也可以把依赖列表写成数组的形式</p>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+//node.js
+    $.define("node", ["class","support","query","data"],function(){//第二个参数也可以改成字符串数组
        $.log("node模块")
     });
     </pre>
@@ -73,7 +70,6 @@
      ajax/base.js
      ajax/jxhr.js
      **/
-
           $.define("base","ajax/jxhr", function(){
                     //模块代码
           });
@@ -190,6 +186,6 @@
 
     </pre>
     <p>这时框架内部会做去重操作，这由核心模块的require方法去做。"brower, brower, random,random" --> "brower,randow",
-        因此args0依然为brower模块的返回值，args1依然为random模块的返回值。</p>
+        因此args1依然为brower模块的返回值，args2依然为random模块的返回值。</p>
 
 </fieldset>

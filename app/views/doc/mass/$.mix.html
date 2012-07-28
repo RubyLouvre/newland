@@ -1,15 +1,5 @@
 <%  set_title("$.mix") %>
 <%  set_layout("doc_layout.html") %>
-<script type="text/javascript">
-    SyntaxHighlighter.all();
-    var exec1 = function(){
-        $.require("lang",function(){
-            var ret = $.mix({a:1,b:1,c:1},{aa:2,bb:2},{cc:3,dd:3});
-            ret = $.dump(ret);
-            $.log(ret,true);
-        });
-    }
-</script>
 <h3>$.mix(target,source,[source2],[sourceN],[ride])</h3>
 
 <p><span class="stress">描述：</span></p>
@@ -39,6 +29,5 @@
                     $.log(ret,true);
                 });
     </pre>
-    <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
-
+    <button class="doc_btn" type="button">点我，执行代码</button>
 </fieldset>

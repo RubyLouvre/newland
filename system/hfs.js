@@ -168,7 +168,7 @@ $.define( "hfs","fs,path", function(fs, path){
             fs.readFile.apply(fs, arguments)
         },
         readFileSync: function(){
-            fs.readFileSync.apply(fs, arguments)
+            return fs.readFileSync.apply(fs, arguments)
         },
         //创建文件,并添加内容,如果指定的路径中里面某些目录不存在,也一并创建它们
         writeFileSync: function( p , data, encoding){

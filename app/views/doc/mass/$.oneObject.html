@@ -1,17 +1,5 @@
 <%  set_title("$.oneObject") %>
 <%  set_layout("doc_layout.html") %>
-<script type="text/javascript">
-    SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
-    SyntaxHighlighter.all();
-    var exec1 = function(){
-        $.require("lang",function(){
-            var ret = $.oneObject([1,2,3],false)
-            ret = $.dump(ret);//序列化
-            $.log(ret,true);//打印在页面底部
-        });
-    }
-</script>
-
 <h3>$.oneObject(arr,[ val ])</h3>
 <p><span class="stress">描述：</span></p>
 <p>生成键值统一的对象，用于高速化判定。通常情况下，hash判定是优于switch判定与else if判定。</p>
@@ -50,14 +38,14 @@
                 }
     </pre>
     <p>例2，生成一个值全部为false的对象。</p>
-    <pre class="brush:javascript;gutter:false;toolbar:false">
+    <div>
+        <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("lang",function(){
                     var ret = $.oneObject([1,2,3],false)
                     ret = $.dump(ret);//序列化
                     $.log(ret,true);//打印在页面底部
                 });
-    </pre>
-
-    <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
-
+        </pre>
+        <button class="doc_btn" type="button">点我，执行代码</button>
+    </div>
 </fieldset>

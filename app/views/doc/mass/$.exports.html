@@ -1,7 +1,6 @@
 <%  set_title("$.exports") %>
 <%  set_layout("doc_layout.html") %>
 <script type="text/javascript">
-    SyntaxHighlighter.all();
     $.exports("mass");
     $ = "取消";
     mass.require("ready,support",function(dom,support,spec){
@@ -27,9 +26,8 @@
     <pre class="brush:javascript;gutter:false;toolbar:false">
             $.exports("mass");
             $ = "取消";
-            mass.require("ready,support",function(dom,support,spec){
+            mass.require("ready,support",function(support,spec){
                 var ret = mass.dump(support);//序列化
-                mass.log(dom,true);
                 mass.log($,true);
                 mass.log(ret,true);
                 mass.log("执行最后的回调函数",true)

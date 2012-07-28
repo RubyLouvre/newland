@@ -1,38 +1,5 @@
 <%  set_title("$.require") %>
 <%  set_layout("doc_layout.html") %>
-<script type="text/javascript">
-    SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
-    SyntaxHighlighter.all();
-    $.require("lang,ready",function($$){
-        $.log("这是最后的回调",true);
-        $.log($$("aa").toUpperCase(),true)
-    });
-      
-    $.require("lang,ready",function($$){
-        $.log("它将不会再发出请求",true);
-        $.log($$("aa").pad(7),true);
-        $.require("lang,ready",function($$){
-            $.log("这是内嵌的",true);
-            $.log($$("aa").pad(8),true);
-            $.require("lang,ready",function($$){
-                $.log("这是内嵌的2",true);
-                $.log($$("aa").pad(9),true);
-                $.require("lang,ready",function($$){
-                    $.log("这是内嵌的3",true);
-                    $.log($$("aa").pad(10),true)
-                });
-            });
-        });
-    });
-    $.require("support,class,ready",function(support,factory){
-        $.log("=========================",true);
-        $.log("mix" in $,true)//判定是否来自模块加载模块
-        $.log("cloneAll" in support,true);//判定是否来自support模块
-        $.log($.type(factory),true)//判定是否来自class模块, class模块并没有返回值
-    });
-
-</script>
-
 <h3>$.require(deps,callback,[errback])</h3>
 <p><span class="stress">描述：</span></p>
 <p>mass Framework提供了无以伦比的模块加载机制，成功地解决了前人无法支持负向回调的问题。</p>
@@ -87,5 +54,5 @@
         $.log($.type(factory),true)//判定是否来自class模块, class模块并没有返回值
     });
     </pre>
-
+    <button class="doc_btn" type="button">点我，执行代码</button>
 </fieldset>

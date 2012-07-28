@@ -1,62 +1,5 @@
 <%  set_title("$.type") %>
 <%  set_layout("doc_layout.html") %>
-<script type="text/javascript">
-    SyntaxHighlighter.all();
-    function exec(){
-        var check = [
-            "string",
-            1,
-                !1,
-            NaN,
-            /test/i,
-            $.noop,
-            null,
-            {},
-            [1,2,3],
-            new Date,
-            window,
-            document,
-            document.documentElement,
-            document.body,
-            document.childNodes,
-            document.getElementsByTagName("*")]
-        var table = ["<table style='background:#fff;color:#000;width:90%' border=1>"];
-        for(var i= 0, n = check.length ;i < n; i++){
-            var el = check[i];
-            table.push("<tr><td>",String(el),"</td><td>",$.type(el),"</td></tr>")
-        }
-        table.push("</table>");
-        document.getElementById("output").innerHTML = table.join("");
-        //利用$.type判定对象是否为window
-        var test1 = {};
-        test1.window = test1;
-        test1.document = document;
-        $.log($.type(test1,"Window"),true);//false
-
-        var test2 = {};
-        test2.window = window;
-        test2.document = document;
-        $.log($.type(test2,"Window"),true);//false
-
-        $.log($.type(window,"Window"),true);//true
-        var iframe = document.createElement("iframe");
-        document.body.appendChild(iframe);
-        var iwin = iframe.contentWindow || iframe.contentDocument.parentWindow;
-        $.log($.type(iwin,"Window"),true);//true
-        document.body.removeChild(iframe);
-
-        var wg = { document : {} }, wgdoc = wg.document;
-        wg.window = wg;
-        wgdoc.createElement = function(){return wg; };
-        wgdoc.getElementsByTagName = function(){ return [wg]; };
-        wgdoc.parentWindow = wg;
-        wg.insertBefore = function(){};
-        wg.firstChild = wg.firstChild;
-        wg.removeChild = function(){};
-        $.log($.type(wg,"Window"),true);//false
-    }
-</script>
-
 <h3>$.type(obj,[ Type ])</h3>
 
 <p><span class="stress">描述：</span></p>
@@ -120,7 +63,7 @@
             }
 
     </pre>
-    <button class="doc_btn" onclick="exec()">点我，执行代码</button>
+    <button class="doc_btn" type="button">点我，执行代码</button>
     <div id="output"></div>
 
 </fieldset>

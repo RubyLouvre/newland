@@ -4,7 +4,7 @@ $.define("routes",function(){
     // $.log("已加载路由规则模块")
     return function(mapper){
         mapper.get("/","home#index")
-     
+      mapper.get("/show","home#show")
 
     //方法路由
     //        map.get('/','site#index');

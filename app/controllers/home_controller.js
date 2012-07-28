@@ -8,6 +8,11 @@ $.define("home_controller",function(){
                 data:"<h1>XXXXXXXXXXXXXXXX</h1>",
                 mine:"text/html"
             })
+        },
+        show: function(flow){
+            $.log("已进入home#show action")
+            var view_url = $.path.join("app","views", "home","show.html" );
+            flow.fire("get_view", view_url, flow.req.url )
         }
     });
     $.controllers[ "home"] = new klass
