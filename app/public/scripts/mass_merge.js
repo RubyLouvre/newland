@@ -192,10 +192,11 @@ void function( global, DOC ){
                 dn++;
                 match = url.match( rmodule );
                 name  = "@"+ match[1];//取得模块名
-                if( !mapper[ name ] ){ //防止重复生成节点与请求
-                    mapper[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
+                if( !modules[ name ] ){ //防止重复生成节点与请求
+                    console.log(name)
+                    modules[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
                     loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
-                }else if( mapper[ name ].state === 2 ){
+                }else if( modules[ name ].state === 2 ){
                     cn++;
                 }
                 if( !_deps[ name ] ){
@@ -205,13 +206,13 @@ void function( global, DOC ){
             });
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
             if( dn === cn ){//如果需要安装的等于已安装好的
-                (mapper[ token ] || {}).state = 2;
+                (modules[ token ] || {}).state = 2;
                 return returns[ token ] = collect_rets( token, args, factory );//装配到框架中
             }
             if( errback ){
                 errorStack.add( errback );//压入错误堆栈
             }
-            mapper[ token ] = {//创建或更新模块的状态
+            modules[ token ] = {//创建或更新模块的状态
                 callback:factory,
                 name: token,
                 deps: _deps,
@@ -240,7 +241,7 @@ void function( global, DOC ){
         //检测此JS文件有没有加载下来
         _checkFail : function(  doc, name, error ){
             doc && (doc.ok = 1);
-            if( error || !mapper[ name ].state ){
+            if( error || !modules[ name ].state ){
                 this.log("Failed to load [[ "+name+" ]]");
                 errorStack.fire();//打印错误堆栈
             }
@@ -249,9 +250,9 @@ void function( global, DOC ){
         _checkDeps: function (){
             loop:
             for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
-                var obj = mapper[ name ], deps = obj.deps;
+                var obj = modules[ name ], deps = obj.deps;
                 for( var key in deps ){
-                    if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
+                    if( deps.hasOwnProperty( key ) && modules[ key ].state != 2 ){
                         continue loop;
                     }
                 }
@@ -341,7 +342,7 @@ void function( global, DOC ){
     //用于模块加载失败时的错误回调
     var errorStack = $.Callbacks("once memory");
     //===================================模块加载相关==========================================
-    var mapper = $.require.cache = {
+    var modules = $.require.cache = {
         "@ready" : { }
     };
     //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
@@ -392,7 +393,7 @@ void function( global, DOC ){
     //===================================domReady相关==========================================
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
-        mapper[ "@ready" ].state = 2;
+        modules[ "@ready" ].state = 2;
         $._checkDeps();
         if( readyFn ){
             $.unbind( DOC, ready, readyFn );
@@ -436,11 +437,13 @@ void function( global, DOC ){
     $.exports( $["@name"] +  postfix );//防止不同版本的命名空间冲突
 var module_value = {
             state: 2
-        }
-        "mass,lang,lang_fix,support,class,node,query,css,css_fix,event,event_fix,attr,flow,ajax".match($.rword, function(name){
-            if(name !== "mass")
-                mapper["@"+name] = module_value;
-        });//=========================================
+        };
+        var __core__ =  "mass,lang,lang_fix,support,class,node,query,data,css,css_fix,event,event_fix,attr,flow,ajax".match(/\w+/g)
+        for(var i = 0, n ; n = __core__[i++];){
+            if(n !== "mass"){
+                modules["@"+n] = module_value;
+            }
+        }//=========================================
 // 类型扩展模块v7 by 司徒正美
 //=========================================
 $.define("lang", Array.isArray ? "" : "lang_fix",function(){
@@ -3294,6 +3297,144 @@ $.define("query", function(){
 
 
 
+//==================================================
+// 数据缓存模块
+//==================================================
+$.define("data", "lang", function(){
+    $.log("已加载data模块");
+    var remitter = /object|function/, rtype = /[^3]/
+    function validate(target){
+        return target && remitter.test(typeof target) && rtype.test(target.nodeType)
+    }
+    $.mix( {
+        "@data": {},
+        // 读写数据
+        data : function( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
+            if( validate(target) ){
+                var id = $.getUid(target), isEl = target.nodeType === 1;
+                if(name === "@uuid"){
+                    return id;
+                }
+                var getByName = typeof name === "string",
+                database = isEl ? $["@data"]: target,
+                table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
+                    data:{}
+                });
+                var inner = table;
+                //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
+                //我们可能通过$("#test").data("full-name")或$("#test").data("fullName")访问到
+                if(isEl && !table.parsedAttrs){
+                    var attrs = target.attributes;
+                    //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
+                    for ( var i = 0, attr; attr = attrs[i++];) {
+                        var key = attr.name;
+                        if ( key.indexOf( "data-" ) === 0 && key.length > 5 ) {
+                            $.parseData(target, key.slice(5), inner, attr.value);
+                        }//camelize
+                    }
+                    table.parsedAttrs = true;
+                }
+                //私有数据都是直接放到table中，普通数据放到table.data中
+                if ( !pvt ) {
+                    table = table.data;
+                }
+                if ( name && typeof name == "object" ) {
+                    $.mix( table, name );//写入一组方法
+                }else if(getByName && data !== void 0){
+                    table[ name ] = data;//写入单个方法
+                }
+                if(getByName){
+                    if(name in table){
+                        return table[name]
+                    }else if(isEl && !pvt){
+                        return $.parseData( target, name, inner );
+                    }
+                }else{
+                    return table
+                }
+            }
+            return  void 0
+        },//仅内部调用
+        _data:function(target,name,data){
+            return $.data(target, name, data, true)
+        },
+        parseData: function(target, name, table, value){
+            var data, key = $.String.camelize(name);
+            if(table && (key in table))
+                return table[key];
+            if(arguments.length != 4){
+                var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
+                value = target.getAttribute( attr )
+            }
+            if ( typeof value === "string") {//转换
+                try {
+                    data = eval("0,"+ value );
+                } catch( e ) {
+                    data = value
+                }
+                if(table){
+                    table[ key ] = data
+                }
+            }
+            return data;
+
+        },
+        //移除数据
+        removeData : function(target, name, pvt){
+            if( validate(target) ){
+                var id =  $.getUid(target);
+                if (  !id ) {
+                    return;
+                }
+                var  clear = 1, ret = typeof name == "string",
+                database = target.nodeType === 1  ? $["@data"] : target,
+                table = database["@data_"+id] ;
+                if ( table && ret ) {
+                    if(!pvt){
+                        table = table.data
+                    }
+                    if(table){
+                        ret = table[ name ];
+                        delete table[ name ];
+                    }
+                    var cache = database["@data_"+id];
+                        loop:
+                        for(var key in cache){
+                            if(key == "data"){
+                                for(var i in cache.data){
+                                    clear = 0;
+                                    break loop;
+                                }
+                            }else{
+                                clear = 0;
+                                break loop;
+                            }
+                        }
+                }
+                if(clear){
+                    delete database["@data_"+id];
+                }
+                return ret;
+            }
+        },
+        //合并数据
+        mergeData: function( cur, src){
+            var oldData  = $._data(src), curData  = $._data(cur), events = oldData .events;
+            if(oldData  && curData ){
+                $.Object.merge( curData , oldData  );
+                if(events){
+                    curData .events = [];
+                    for (var i = 0, item ; item =  events[i++]; ) {
+                        $.event.bind.call( cur, item );
+                    }
+                }
+            }
+        }
+    });
+});
+
+
+
 //=========================================
 // 样式操作模块 by 司徒正美
 //=========================================
@@ -5311,6 +5452,7 @@ $.define("ajax","event", function(){
                 callback = data;
                 data = undefined;
             }
+            console.log("xxxxxxxxxxxxxx")
             return $.ajax({
                 type: method,
                 url: url,
@@ -5589,8 +5731,8 @@ $.define("ajax","event", function(){
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
            
             this.fire( eventType, this.responseData, statusText);
-            $.log("xxxxxxxxxxxxxxxxxxxxxxxxx")
-            $.log(this == ajax)
+            //$.log("xxxxxxxxxxxxxxxxxxxxxxxxx")
+            //$.log(this == ajax)
             ajax.fire( eventType );
             this.fire("complete", this.responseData, statusText);
             ajax.fire("complete");

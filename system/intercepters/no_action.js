@@ -9,7 +9,7 @@ $.define("no_action", function(){
                 var cache = $.staticCache[ url ],lm
                 if( cache ){
                     if(( lm = cache.headers && cache.headers["Last-Modified"] )){
-                        if( lm === this.header("if-modified-since")) {
+                        if( lm === this.get("if-modified-since")) {
                             this.res.writeHead(304, "Not Modified");
                             this.res.end();
                             return;

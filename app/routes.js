@@ -4,8 +4,9 @@ $.define("routes",function(){
     // $.log("已加载路由规则模块")
     return function(mapper){
         mapper.get("/","home#index")
-      mapper.get("/show","home#show")
-
+        mapper.get("/show","home#show")
+        mapper.get("/ajax","home#ajax")
+        mapper.post("/ajax","home#ajax")
     //方法路由
     //        map.get('/','site#index');
     //        map.get('/get_comments/:post_id','site#get_comments');

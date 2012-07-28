@@ -20,14 +20,17 @@ $.define("httpflow","helper,flow, ejs", function( make_helper ){
         "xml": "text/xml",
         'manifest': 'text/cache-manifest'
     };
-    return $.factory({
+    HttpFlow = $.factory({
         init: function(){
             this.helper = make_helper()
         },
         inherit: $.Flow,
+        content_type: function( name ){
+            return type_mine[ name ]
+        },
         //Content-Type 相当于content-type
-        header : function(name){
-            var headers = this.req.headers
+        get: function(name){
+            var headers = this.req.headers || {}
             switch (name = name.toLowerCase()) {
                 case 'referer':
                 case 'referrer':
@@ -37,13 +40,29 @@ $.define("httpflow","helper,flow, ejs", function( make_helper ){
                     return headers[ name ];
             }
         },
-        mime : function() {
-            var str = this.header( 'content-type' ) || '';
-            return str.split(';')[0];
+
+        set: function(field, val){
+            var req = this.req
+            if (2 == arguments.length) {
+                req.setHeader(field, '' + val);
+            } else {
+                for (var key in field) {
+                    req.setHeader(key, '' + field[key]);
+                }
+            }
+            return this;
         },
-        content_type: function( type ){
-            type = $.type(type, "String") && ( type.length > 0 ) ? type : this.mime();
-            return type_mine[ type] || "";
+        mime : function() {
+            var str = this.get( 'content-type' ) || '';
+            return str.split(';')[0];
         }
+    });
+    HttpFlow.prototype.__defineGetter__("xhr", function(){
+        if(!this.req)
+            return false;
+        var val = this.get('X-Requested-With') || '';
+        return 'xmlhttprequest' == val.toLowerCase();
     })
+    return HttpFlow
+
 })

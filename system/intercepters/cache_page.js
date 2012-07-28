@@ -29,7 +29,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
             var index = 0
             html = html.replace(/mass_mass/g, function(s){
                 return "\n"+buffer[index++]+"\n"
-            })
+            });
             var cache = {
                 code: 200,
                 data: html,

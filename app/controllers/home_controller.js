@@ -13,6 +13,17 @@ $.define("home_controller",function(){
             $.log("已进入home#show action")
             var view_url = $.path.join("app","views", "home","show.html" );
             flow.fire("get_view", view_url, flow.req.url )
+        },
+        ajax: function(flow){
+            $.log("进入AJAX请求分支!")
+          //  console.log(flow)
+          $.log(flow.params)
+            if(flow.xhr){
+              console.log(flow.req);
+              console.log(flow.req.query)
+            }
+        // $.log( flow.get('X-Requested-With') )
+        //   $.log(flow.req)
         }
     });
     $.controllers[ "home"] = new klass

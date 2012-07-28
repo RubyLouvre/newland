@@ -192,10 +192,11 @@ void function( global, DOC ){
                 dn++;
                 match = url.match( rmodule );
                 name  = "@"+ match[1];//取得模块名
-                if( !mapper[ name ] ){ //防止重复生成节点与请求
-                    mapper[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
+                if( !modules[ name ] ){ //防止重复生成节点与请求
+                    console.log(name)
+                    modules[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
                     loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
-                }else if( mapper[ name ].state === 2 ){
+                }else if( modules[ name ].state === 2 ){
                     cn++;
                 }
                 if( !_deps[ name ] ){
@@ -205,13 +206,13 @@ void function( global, DOC ){
             });
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
             if( dn === cn ){//如果需要安装的等于已安装好的
-                (mapper[ token ] || {}).state = 2;
+                (modules[ token ] || {}).state = 2;
                 return returns[ token ] = collect_rets( token, args, factory );//装配到框架中
             }
             if( errback ){
                 errorStack.add( errback );//压入错误堆栈
             }
-            mapper[ token ] = {//创建或更新模块的状态
+            modules[ token ] = {//创建或更新模块的状态
                 callback:factory,
                 name: token,
                 deps: _deps,
@@ -240,7 +241,7 @@ void function( global, DOC ){
         //检测此JS文件有没有加载下来
         _checkFail : function(  doc, name, error ){
             doc && (doc.ok = 1);
-            if( error || !mapper[ name ].state ){
+            if( error || !modules[ name ].state ){
                 this.log("Failed to load [[ "+name+" ]]");
                 errorStack.fire();//打印错误堆栈
             }
@@ -249,9 +250,9 @@ void function( global, DOC ){
         _checkDeps: function (){
             loop:
             for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
-                var obj = mapper[ name ], deps = obj.deps;
+                var obj = modules[ name ], deps = obj.deps;
                 for( var key in deps ){
-                    if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
+                    if( deps.hasOwnProperty( key ) && modules[ key ].state != 2 ){
                         continue loop;
                     }
                 }
@@ -341,7 +342,7 @@ void function( global, DOC ){
     //用于模块加载失败时的错误回调
     var errorStack = $.Callbacks("once memory");
     //===================================模块加载相关==========================================
-    var mapper = $.require.cache = {
+    var modules = $.require.cache = {
         "@ready" : { }
     };
     //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
@@ -396,7 +397,7 @@ void function( global, DOC ){
     //===================================domReady相关==========================================
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
-        mapper[ "@ready" ].state = 2;
+        modules[ "@ready" ].state = 2;
         $._checkDeps();
         if( readyFn ){
             $.unbind( DOC, ready, readyFn );

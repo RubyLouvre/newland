@@ -126,7 +126,7 @@
             });
             var id = factory.id || "@cb"+ ( cbi++ ).toString(32);
             if( errback ){
-                errorStack( errback );//压入错误堆栈
+                errorStack.add( errback );//压入错误堆栈
             }
             mapper[ id ] = mapper[ id ] || {}
             $.mix( mapper[ id ], {//创建或更新模块的状态
@@ -159,7 +159,7 @@
                     var  ret = collect_rets( id, obj.args ||[], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
-                        $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);
+                     //   $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);
                         $._checkDeps();
                     }
                 }
@@ -198,7 +198,7 @@
             }
             require( filename );
         }catch( e ){
-            errorStack(function(){
+            errorStack.add(function(){
                 $.log("<code style='color:red'>",e , "</code>", true);
             }).fire();//打印错误堆栈
         }
@@ -287,6 +287,9 @@
      */
         $.log = function (s, color){
             var args = Array.apply([],arguments);
+            if(arguments.length === 1){
+                return  console.log( s );
+            }
             if( args.pop() === true){
                 s = args.join("").replace( rformat, function( a, b, style,ret){
                     style.toLowerCase().split(";").forEach(function(arr){

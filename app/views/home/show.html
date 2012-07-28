@@ -6,7 +6,18 @@
         <%=   add_js('/scripts/mass_merge.js' );    %>
     </head>
     <body>
-        TODO write content
+
         <h3>show</h3>
+        <script>
+            $.require("ajax",function(){
+                $.post("/ajax",{
+                    aaa:"bbb"
+                },function(){
+                    $.log(1)
+                })
+            })
+           
+          
+        </script>
     </body>
 </html>

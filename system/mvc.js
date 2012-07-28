@@ -32,9 +32,9 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
             intercepters.forEach(function(fn){
                 fn(flow);//将拦截器绑到流程上
             });
-
             var go = $.router.routeWithQuery(req.method,req.url);
             if( go ){
+              //  console.log(go)
                 var value = go.value;
                 if(typeof value === "string"){
                     var match = value.split("#");
@@ -55,7 +55,7 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
 
     }
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
-        "get_layout","500","send_error", "timeout"]
+        "get_layout","500","send_error", "timeout","post_data"]
     var inter = $.Array.union(defaults, $.configs.intercepters)
     $.walk("app/controllers", function(files){//加载资源
         inter.forEach(function(str){
