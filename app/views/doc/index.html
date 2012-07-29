@@ -212,9 +212,11 @@
             </div>
             <div style="float:left;width:85%">
                 <iframe id="iframe" src="mass/index.html" style="visibility:hidden;width:100%;height:1px;"frameborder="0">
-
+                    <!--用于加载子页面,实现无缝刷新-->
                 </iframe>
-                <article id="holdplace"></article>
+                <article id="holdplace">
+                    <!--加iframe的body部分放到这里--->
+                </article>
             </div>
             <br clear="left"/>
         </div>
