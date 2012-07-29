@@ -1,11 +1,11 @@
 $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function(){
-    var libs = "mass,lang,lang_fix,support,class,node,query,data,css,css_fix,event,event_fix,attr,flow,ajax"
+    var libs = "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx"
     var files = [];
     $.mix({
-        pagesCache: {}, //ÓÃÓÚ±£´æ¾²Ì¬Ò³Ãæ,¿ÉÄÜÊÇÁÙÊ±Æ´×°³öÀ´µÄ
-        viewsCache: {}, //ÓÃÓÚ±£´æÄ£°åº¯Êı
-        staticCache: {}, //ÓÃÓÚ±£´æ¾²Ì¬×ÊÔ´,
-        controllers: {}  //ÓÃÓÚ±£´æ¿ØÖÆÆ÷,
+        pagesCache: {}, //ç”¨äºä¿å­˜é™æ€é¡µé¢,å¯èƒ½æ˜¯ä¸´æ—¶æ‹¼è£…å‡ºæ¥çš„
+        viewsCache: {}, //ç”¨äºä¿å­˜æ¨¡æ¿å‡½æ•°
+        staticCache: {}, //ç”¨äºä¿å­˜é™æ€èµ„æº,
+        controllers: {}  //ç”¨äºä¿å­˜æ§åˆ¶å™¨,
     });
 
     libs.replace($.rword, function( name ){
@@ -13,14 +13,14 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
             var url =  $.path.join( __dirname, name +".js" );
             var text = $.readFileSync( url, "utf-8")
             files.push(text)
-         //   $.log("ºÏ²¢"+name+"Ä£¿é")
+         //   $.log("åˆå¹¶"+name+"æ¨¡å—")
            //$.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text )
         }catch(e){
             $.log(e);
             $.log(url)
         }
     });
-    //ÓĞÓÃµÄ²¿·ÖÊÇbody
+    //æœ‰ç”¨çš„éƒ¨åˆ†æ˜¯body
     var merge = function(){
         var module_value = {
             state: 2
@@ -41,12 +41,12 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
     .replace("@@@@@",libs);
     replaced = replaced + files.join("\n")
     replaced = first.replace("/*combine modules*/", replaced ).replace(rcomments,"");
-    //¿ªÊ¼ºÏ²¢
-    $.writeFile("app/public/scripts/mass_merge.js", replaced,"utf8",function(e){//Éú³ÉĞÂµÄjsÎÄ¼ş£¡
+    //å¼€å§‹åˆå¹¶
+    $.writeFile("app/public/scripts/mass_merge.js", replaced,"utf8",function(e){//ç”Ÿæˆæ–°çš„jsæ–‡ä»¶ï¼
         if(e) {
-            console.log("³ö´íÁË "+e);
+            console.log("å‡ºé”™äº† "+e);
         }else{
-            console.log("ºÏ²¢³É¹¦")
+            console.log("åˆå¹¶æˆåŠŸ")
         }
     })
 })

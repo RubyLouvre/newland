@@ -1,0 +1,25 @@
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+    background: url("../images/grunge.jpg") repeat scroll 0 0 transparent;
+    color: black;
+    font: 14px/1.5 "OpenSansRegular","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+.navbar-inner {
+    background: url("../images/nav-bg.gif") repeat scroll 0 0 #353535;
+}
+.title {
+    font-size: 18px;
+    font-weight: 200;
+    color: #666600;
+}
+
+.highlight_title {
+    font-size: 18px;
+    font-weight: 200;
+    color: #666600;
+}
+
+.feat_hilights {
+    color: #666600;
+}

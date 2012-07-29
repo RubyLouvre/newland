@@ -7,20 +7,22 @@
  
     if(self.eval !== top.eval){
         window.$ && $.require("ready,css,node",function(){
-            var iheight = parseFloat( document.outerHeight || $("article").outerHeight() ); //取得其高
-            if(iheight < 400)
-                iheight = 500;  
-            $.log(iheight)
-            $("#iframe",parent.document).height(iheight);
+            parent.callParent && parent.callParent(document)
         });
     }
+    window.SyntaxHighlighter && SyntaxHighlighter.all();
     $.require("ready,event",function(){
-        $(".doc_btn").each(function(){
-            var btn =  $(this);
-            var fn = Function( btn.prev("pre").text() );
-            btn.bind("click", fn);
+        $("body").delegate(".doc_btn","click",function(){
+            if(this.exec){
+                this.exec.call(window)
+            }else{
+                var btn =  $(this);
+                var fn = Function( $.String.unescapeHTML(btn.prev("pre").text()) );
+                fn();
+                this.exec = fn;
+            }
         });
-        window.SyntaxHighlighter && SyntaxHighlighter.all();
+        
     });
 
 })();

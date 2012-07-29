@@ -18,11 +18,15 @@ $.define("no_action", function(){
                     this.fire("send_file", cache);
                 }else{
                     //从硬盘中读取数据
-                    var statics =  $.path.join("app/public/",url);
+                    var file =  $.path.join("app/public/",url);
 
-                    $.readFile(statics, function(err, data){
+                    $.readFile(file, function(err, data){
                         if(err){
-                            this.fire(404)
+                            if(/\.css$/.test(file)){
+                                var lessfile = file.replace(/\.css$/,".less");
+                                return this.fire("get_less",lessfile)
+                            }
+                            this.fire("send_error", 404)
                         }else{
                             //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，而要用new Date().toGMTString()，因为前者可能出现中文乱码
                             cache = {

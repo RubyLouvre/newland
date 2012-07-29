@@ -1,9 +1,9 @@
 $.define("mvc", "httpflow, http, system",function( Flow,http ){
-    $.log("ÒÑ¼ÓÔØMVCÄ£¿é");
+    $.log("å·²åŠ è½½MVCæ¨¡å—");
     //http://guides.rubyonrails.org/action_controller_overview.html
-    //Ìá¹©ÁË×é¼ş(component)¡¢Ä£°å(layout)¡¢¹ıÂËÆ÷(filter)¡¢Â·ÓÉ(router)¡¢Àà×Ô¶¯¼ÓÔØ(class autoload)¡¢
+    //æä¾›äº†ç»„ä»¶(component)ã€æ¨¡æ¿(layout)ã€è¿‡æ»¤å™¨(filter)ã€è·¯ç”±(router)ã€ç±»è‡ªåŠ¨åŠ è½½(class autoload)ã€
     ////http://code.google.com/p/raremvc/
-    //¾²Ì¬×ÊÔ´°´Ğè¼ÓÔØ¡¢¿ò¼ÜºËĞÄº¯Êı¹³×Ó(hook)£¬ÈÃ´úÂë¸üÈİÒ×¹²ÓÃ£¬Ê¹ÓÃ¸ü¼Ó·½±ã!
+    //é™æ€èµ„æºæŒ‰éœ€åŠ è½½ã€æ¡†æ¶æ ¸å¿ƒå‡½æ•°é’©å­(hook)ï¼Œè®©ä»£ç æ›´å®¹æ˜“å…±ç”¨ï¼Œä½¿ç”¨æ›´åŠ æ–¹ä¾¿!
     var  flash = function(type, msg) {
         var arr, msgs;
         msgs = this.session.flash = this.session.flash || {};
@@ -28,29 +28,29 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
                 var match = value.split("#");
                 var cname = match[0];
                 var aname = match[1];
-                var instance = $.controllers[cname];//È¡µÃ¶ÔÓ¦¿ØÖÆÆ÷ÊµÀı
+                var instance = $.controllers[cname];//å–å¾—å¯¹åº”æ§åˆ¶å™¨å®ä¾‹
                 if( instance ){
-                    $.log("µ÷ÓÃ¿ØÖÆÆ÷")
-                    instance[aname]( flow );//µ½´ïÖ¸¶¨action
+                    $.log("è°ƒç”¨æ§åˆ¶å™¨")
+                    instance[aname]( flow );//åˆ°è¾¾æŒ‡å®šaction
                 }else{
-                    $.log( "²»´æÔÚ´Ë¿ØÖÆÆ÷" );
+                    $.log( "ä¸å­˜åœ¨æ­¤æ§åˆ¶å™¨" );
                 }
             }
-        }else{ //Ö±½Ó¶ÁÈ¡
+        }else{ //ç›´æ¥è¯»å–
             flow.params = $.path.parse(url, true).query
             flow.fire("no_action")
         }
     }
 
-    //µ±ËùÓĞ¿ØÖÆÆ÷ÓëËùĞèÀ¹½ØÆ÷¼ÓÔØÍê±Ïºó£¬¿ªÊ¼½ÓÊÜHTTPÇëÇó
+    //å½“æ‰€æœ‰æ§åˆ¶å™¨ä¸æ‰€éœ€æ‹¦æˆªå™¨åŠ è½½å®Œæ¯•åï¼Œå¼€å§‹æ¥å—HTTPè¯·æ±‚
     function resource_ready(intercepters){
         http.createServer(function(req, res) {
-            var flow = new Flow()//´´½¨Ò»¸öÁ÷³Ì¶ÔÏó£¬´¦ÀíËùÓĞÒì²½²Ù×÷£¬ÈçÊÓÍ¼ÎÄ¼şµÄ¶ÁÈ¡¡¢Êı¾İ¿âÁ¬½Ó
+            var flow = new Flow()//åˆ›å»ºä¸€ä¸ªæµç¨‹å¯¹è±¡ï¼Œå¤„ç†æ‰€æœ‰å¼‚æ­¥æ“ä½œï¼Œå¦‚è§†å›¾æ–‡ä»¶çš„è¯»å–ã€æ•°æ®åº“è¿æ¥
             flow.res =  res;
             flow.req =  req;
             flow.params = {};
             intercepters.forEach(function(fn){
-                fn(flow);//½«À¹½ØÆ÷°óµ½Á÷³ÌÉÏ
+                fn(flow);//å°†æ‹¦æˆªå™¨ç»‘åˆ°æµç¨‹ä¸Š
             });
             if(req.method == "POST"){
                 var buf = ""
@@ -73,9 +73,9 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
 
     }
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
-    "get_layout","500","send_error", "timeout"]
+    "get_layout","500","send_error", "timeout","get_less"]
     var inter = $.Array.union(defaults, $.configs.intercepters)
-    $.walk("app/controllers", function(files){//¼ÓÔØ×ÊÔ´
+    $.walk("app/controllers", function(files){//åŠ è½½èµ„æº
         inter.forEach(function(str){
             files.unshift( "system/intercepters/"+str)
         });
@@ -84,24 +84,24 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
             resource_ready( intercepters )
         });
     })
-//ÎÒµÄÂ·ÓÉÏµÍ³£¬ÓÉÂ·ÓÉÆ÷£¬Â·ÓÉÓ³Éä£¬Â·ÓÉ¹æÔòÕâÈıÄ£¿é×é³É
+//æˆ‘çš„è·¯ç”±ç³»ç»Ÿï¼Œç”±è·¯ç”±å™¨ï¼Œè·¯ç”±æ˜ å°„ï¼Œè·¯ç”±è§„åˆ™è¿™ä¸‰æ¨¡å—ç»„æˆ
 
-//   Ä¬ÈÏÂ·ÓÉ
+//   é»˜è®¤è·¯ç”±
 //   match '/:controller(/:action(/:id))'
 
-//ÕıÔòÂ·ÓÉ
+//æ­£åˆ™è·¯ç”±
 //match 'products/:id', :to => 'catalog#view'
-//ÃüÃûÂ·ÓÉ
+//å‘½åè·¯ç”±
 //match 'logout', :to => 'sessions#destroy', :as => 'logout'
-   
+
 
 })
     /*
- ÓÃcookieÔÚ±¾µØ´«ÊäÊı¾İ
+ ç”¨cookieåœ¨æœ¬åœ°ä¼ è¾“æ•°æ®
 
-×î½üÔÚÑĞ¾¿ÈçºÎ²âÊÔÍøÒ³µÄ¼ÓÔØËÙ¶È£¬·¢ÏÖÁËÒ»¸öhtml5ÓĞÒ»¸ö½ĞperformanceµÄÀà¿ÉÒÔ»ñÈ¡ÖîÈçÍøÂçÑÓ³Ù£¬Ò³Ãæ¼ÓÔØÒÔ¼°onload event´¦ÀíÊ±¼äµÈĞÅÏ¢¡£
-ÎªÁË×Ô¶¯»¯Õâ¸ö²âÊÔ£¬ÎÒĞèÒªÔÚÓÃjavascript»ñÈ¡ÕâĞ©ĞÅÏ¢Ö®ºóÓÃÆäËû¹¤¾ß°ÑËû¼ÇÂ¼ÏÂÀ´£¬ÎÒ²»Ïë×Ô¼º´î½¨Ò»¸öwebserverÓÃjavascriptÍùweb server·¢ËÍÊı¾İ¡£Ò»¸ö±È½Ï¼òµ¥µÄ°ì·¨¾ÍÊÇ°ÑÕâĞ©ĞÅÏ¢ÓÃcookieµÄĞÎÊ½¼ÇÂ¼ÏÂÀ´£¬È»ºóÔÚÆäËû³ÌĞò¶ÁÈ¡cookieĞÅÏ¢¼´¿É¡£
-ÒÔÏÂÊÇJavascript²Ù×÷cookieµÄ´úÂë£º
+æœ€è¿‘åœ¨ç ”ç©¶å¦‚ä½•æµ‹è¯•ç½‘é¡µçš„åŠ è½½é€Ÿåº¦ï¼Œå‘ç°äº†ä¸€ä¸ªhtml5æœ‰ä¸€ä¸ªå«performanceçš„ç±»å¯ä»¥è·å–è¯¸å¦‚ç½‘ç»œå»¶è¿Ÿï¼Œé¡µé¢åŠ è½½ä»¥åŠonload eventå¤„ç†æ—¶é—´ç­‰ä¿¡æ¯ã€‚
+ä¸ºäº†è‡ªåŠ¨åŒ–è¿™ä¸ªæµ‹è¯•ï¼Œæˆ‘éœ€è¦åœ¨ç”¨javascriptè·å–è¿™äº›ä¿¡æ¯ä¹‹åç”¨å…¶ä»–å·¥å…·æŠŠä»–è®°å½•ä¸‹æ¥ï¼Œæˆ‘ä¸æƒ³è‡ªå·±æ­å»ºä¸€ä¸ªwebserverç”¨javascriptå¾€web serverå‘é€æ•°æ®ã€‚ä¸€ä¸ªæ¯”è¾ƒç®€å•çš„åŠæ³•å°±æ˜¯æŠŠè¿™äº›ä¿¡æ¯ç”¨cookieçš„å½¢å¼è®°å½•ä¸‹æ¥ï¼Œç„¶ååœ¨å…¶ä»–ç¨‹åºè¯»å–cookieä¿¡æ¯å³å¯ã€‚
+ä»¥ä¸‹æ˜¯Javascriptæ“ä½œcookieçš„ä»£ç ï¼š
 
 function createCookie(name, value, days)
 {
@@ -131,14 +131,14 @@ function eraseCookie(name)
   createCookie(name, "", -1);
 }
 
-IEÏÂ¶ÁÈ¡cookieÓÃwininet APIÖĞµÄInternetGetCookie¼´¿É¡£ĞèÒª×¢ÒâµÄÊÇµÚÒ»¸ö²ÎÊılpszUrl¡£ÎÒ×ö²âÊÔµÄÊ±ºòÊÇÔÚ±¾»úÉÏÃæĞ´ÁËÒ»¸ö htmlÒ³Ãæ£¬ÔÚÕâ¸öÒ³ÃæÀïÃæÓÃjavascriptÉèÖÃÁËcookie¡£´ÓieÁÙÊ±ÎÄ¼ş¼Ğ¿ÉÒÔ¿´µ½£¬cookieÎÄ¼şµÄÃû×Ö½Ğcookie:zhijun.peizj@~~local~~/¡£ÆäËûµÄÍøÕ¾µÄcookieÎÄ¼şÃû½Ğcookie:zhijun.peizj@163.com/¡£ ÈçÏÂÍ¼ËùÊ¾£º
+IEä¸‹è¯»å–cookieç”¨wininet APIä¸­çš„InternetGetCookieå³å¯ã€‚éœ€è¦æ³¨æ„çš„æ˜¯ç¬¬ä¸€ä¸ªå‚æ•°lpszUrlã€‚æˆ‘åšæµ‹è¯•çš„æ—¶å€™æ˜¯åœ¨æœ¬æœºä¸Šé¢å†™äº†ä¸€ä¸ª htmlé¡µé¢ï¼Œåœ¨è¿™ä¸ªé¡µé¢é‡Œé¢ç”¨javascriptè®¾ç½®äº†cookieã€‚ä»ieä¸´æ—¶æ–‡ä»¶å¤¹å¯ä»¥çœ‹åˆ°ï¼Œcookieæ–‡ä»¶çš„åå­—å«cookie:zhijun.peizj@~~local~~/ã€‚å…¶ä»–çš„ç½‘ç«™çš„cookieæ–‡ä»¶åå«cookie:zhijun.peizj@163.com/ã€‚ å¦‚ä¸‹å›¾æ‰€ç¤ºï¼š
 
-ËùÒÔÎÒ²Â²âÕâ¸öurl²ÎÊıÓ¦¸ÃÊ¹ÓÃ~~local~~£¬ µ«ÊÇ·¢ÏÖº¯Êıµ÷ÓÃÊ§°Ü£¬·µ»ØÖµÊÇ12006£¬Ò²¾ÍÊÇERROR_INTERNET_UNRECOGNIZED_SCHEME¡£³¢ÊÔÊ¹ÓÃÁËlocal, 127.0.0.1¶¼ÎŞĞ§¡£ºóÀ´·¢ÏÖÕâÆªÎÄÕÂhttp://www.cnblogs.com/huqingyu/archive/2008/11/27/1342256.html£¬ ÖªµÀĞèÒª¼ÓÉÏhttpÍ·£¬ÓÚÊÇÊÔ¹ıhttp:// ~~local~~, http://local, http://local.com, http://127.0.0.1 ¶¼·¢ÏÖÎŞĞ§¡£×îºóÔÙ´Î¶ÁÉÏÃæÄÇÆªÎÄÕÂ£¬·¢ÏÖÏÂÃæÓĞÒ»¸öÎ¢ÈíµÄÔ±¹¤µÄ»Ø´ğ£ºthat the URL field is the url that the user navigates to when browsing to a site. ÓÚÊÇÏëÆğÔÙ´ÎÓÃieÈ¥´ò¿ªÄÇ¸öhtmlÎÄ¼ş£¬·¢ÏÖµØÖ·À¸ÊÇfile:///C:/Users/zhijun.peizj/Desktop/performance.html¡£ ÖØĞÂÊ¹ÓÃfile:///×÷ÎªURL£¬·¢ÏÖº¯Êıµ÷ÓÃ³É¹¦£¡
+æ‰€ä»¥æˆ‘çŒœæµ‹è¿™ä¸ªurlå‚æ•°åº”è¯¥ä½¿ç”¨~~local~~ï¼Œ ä½†æ˜¯å‘ç°å‡½æ•°è°ƒç”¨å¤±è´¥ï¼Œè¿”å›å€¼æ˜¯12006ï¼Œä¹Ÿå°±æ˜¯ERROR_INTERNET_UNRECOGNIZED_SCHEMEã€‚å°è¯•ä½¿ç”¨äº†local, 127.0.0.1éƒ½æ— æ•ˆã€‚åæ¥å‘ç°è¿™ç¯‡æ–‡ç« http://www.cnblogs.com/huqingyu/archive/2008/11/27/1342256.htmlï¼Œ çŸ¥é“éœ€è¦åŠ ä¸Šhttpå¤´ï¼Œäºæ˜¯è¯•è¿‡http:// ~~local~~, http://local, http://local.com, http://127.0.0.1 éƒ½å‘ç°æ— æ•ˆã€‚æœ€åå†æ¬¡è¯»ä¸Šé¢é‚£ç¯‡æ–‡ç« ï¼Œå‘ç°ä¸‹é¢æœ‰ä¸€ä¸ªå¾®è½¯çš„å‘˜å·¥çš„å›ç­”ï¼šthat the URL field is the url that the user navigates to when browsing to a site. äºæ˜¯æƒ³èµ·å†æ¬¡ç”¨ieå»æ‰“å¼€é‚£ä¸ªhtmlæ–‡ä»¶ï¼Œå‘ç°åœ°å€æ æ˜¯file:///C:/Users/zhijun.peizj/Desktop/performance.htmlã€‚ é‡æ–°ä½¿ç”¨file:///ä½œä¸ºURLï¼Œå‘ç°å‡½æ•°è°ƒç”¨æˆåŠŸï¼
 http://www.mikealrogers.com/
 
 https://github.com/substack/tilemap
 
 http://substack.net/
-http://vertx.io/ Ò»¸öÆ¯ÁÁµÄÍøÕ¾
+http://vertx.io/ ä¸€ä¸ªæ¼‚äº®çš„ç½‘ç«™
      *
      */

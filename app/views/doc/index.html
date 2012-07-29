@@ -4,10 +4,16 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>mass Framework</title>
-        <%=   add_js('/scripts/mass_merge.js' );    %>
-        <%=   add_js('/scripts/doc/common.js' );    %>
-        <%=   add_js('/scripts/doc/suggest.js' ) ;   %>
-
+        <%=  add_js('/scripts/mass_merge.js' );    %>
+        <%=  add_js('/scripts/doc/shCore2.js' ) ;   %>
+        <%=  add_js('/scripts/doc/common.js' );    %>
+        <%=  add_js('/scripts/doc/suggest.js' ) ;   %>
+        <%=  add_js('/scripts/doc/shBrushJScript.js' ) ;   %>
+        <%=  add_js('/scripts/doc/shBrushCss.js' ) ;   %>
+        <%=  add_js('/scripts/doc/shBrushXml.js' ) ;   %>
+        <%=  add_css('/styles/doc/common.css' );  %>
+        <%=  add_css('/styles/doc/shCore.css' );  %>
+        <%=  add_css('/styles/doc/shThemeRDark.css' );  %>
         <style type="text/css">
             html,body{
                 background:#ddc;
@@ -94,11 +100,21 @@
                 background:#f36100!important;
                 color:black;
             }
+            #holdplace {
+                width:90%;
+            }
         </style>
         <script>
         </script>
         <script type="text/javascript">
-
+            function callParent(doc){
+                if(doc){
+                    var el = doc.getElementsByTagName("article")[0];
+                    var text = el.innerHTML
+                    $("#holdplace").html(text)
+                    window.SyntaxHighlighter && SyntaxHighlighter.highlight();
+                }
+            }
             $.require("ready,more/menu,more/api",function( _,_,api ){
                 var pathMap = {
                     "模块加载模块":  "mass/$",
@@ -147,6 +163,8 @@
                     }
                 });
                 var iframe = $("#iframe")[0];
+             
+               
                 var rskip = /\._|\\_|\:|\@|Map|Adapter|^Object|Array|Number|String/
                 menu.delegate(".menu_item", "click", function(){
                     var path = $(this).attr("path");
@@ -155,6 +173,8 @@
                     }else if(path){
                         iframe.src = path
                     }
+
+        
 
                     $(this).parent(".sub_menu").hide();
                 });
@@ -186,13 +206,17 @@
                 <ul id="suggest_list"></ul>
             </div>
         </div>
-        <div style="float:left;width:14%" id="leftsection" class="bright">
+        <div >
+            <div style="float:left;width:14%" id="leftsection" class="bright">
 
-        </div>
-        <div style="float:left;width:85%">
-            <iframe id="iframe" src="mass/index.html" width="100%" frameborder="0">
+            </div>
+            <div style="float:left;width:85%">
+                <iframe id="iframe" src="mass/index.html" style="visibility:hidden;width:100%;height:1px;"frameborder="0">
 
-            </iframe>
+                </iframe>
+                <article id="holdplace"></article>
+            </div>
+            <br clear="left"/>
         </div>
     </body>
 </html>

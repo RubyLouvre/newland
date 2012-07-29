@@ -1,15 +1,18 @@
 <%  set_title("$.exports") %>
 <%  set_layout("doc_layout.html") %>
 <script type="text/javascript">
-    $.exports("mass");
-    $ = "取消";
-    mass.require("ready,support",function(dom,support,spec){
-        var ret = mass.dump(support);//序列化
-        mass.log(dom,true);
-        mass.log($,true);
-        mass.log(ret,true);
-        mass.log("执行最后的回调函数",true)
-    });
+    (function(){
+        $.exports("mass");
+        var $ = "取消";
+        mass.require("ready,support",function(dom,support,spec){
+            var ret = mass.dump(support);//序列化
+            mass.log(dom,true);
+            mass.log($,true);
+            mass.log(ret,true);
+            mass.log("执行最后的回调函数",true)
+        });
+    })()
+   
 </script>
 
 <h3>$.exports( name )</h3>
@@ -24,13 +27,16 @@
 </dl>
 <fieldset><legend>例子</legend>
     <pre class="brush:javascript;gutter:false;toolbar:false">
-            $.exports("mass");
-            $ = "取消";
-            mass.require("ready,support",function(support,spec){
-                var ret = mass.dump(support);//序列化
-                mass.log($,true);
-                mass.log(ret,true);
-                mass.log("执行最后的回调函数",true)
-            });
+    (function(){
+        $.exports("mass");
+        var $ = "取消";
+        mass.require("ready,support",function(dom,support,spec){
+            var ret = mass.dump(support);//序列化
+            mass.log(dom,true);
+            mass.log($,true);
+            mass.log(ret,true);
+            mass.log("执行最后的回调函数",true)
+        });
+    })()
     </pre>
 </fieldset>
