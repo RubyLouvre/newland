@@ -3,11 +3,8 @@ $.define("home_controller",function(){
         inherit: $.base_controller,
         index: function(flow){
             $.log("已进入home#index action")
-            flow.fire("send_file",{
-                code: 200,
-                data:"<h1>XXXXXXXXXXXXXXXX</h1>",
-                mine:"text/html"
-            })
+            var view_url = $.path.join("app","views", "home","index.html" );
+            flow.fire("get_view", view_url, flow.req.url )
         },
         show: function(flow){
             $.log("已进入home#show action")
