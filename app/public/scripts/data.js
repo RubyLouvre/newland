@@ -65,9 +65,7 @@ $.define("data", "lang", function(){
                 return table[key];
             if(arguments.length != 4){
                 var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
-                console.log(attr)
                 value = target.getAttribute( attr );
-
             }
             if ( typeof value === "string") {//转换
                 try {

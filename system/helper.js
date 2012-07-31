@@ -38,10 +38,11 @@ $.define("helper","class", function(){
                 };
                 return create_tag( file, opts, arguments );
             },
-            push_js: function( file ) {
+            push_js: function( file, more ) {
                 var opts = {
                     type: 'text/javascript'
                 };
+                $.mix(opts, more || {})
                 var tag = create_tag( file, opts, arguments );
                 data.scripts.push( tag+"\n" );
             },
@@ -52,11 +53,12 @@ $.define("helper","class", function(){
                 var tag = create_tag( file, opts, arguments );
                 data.scripts.unshift( tag+"\n" );
             },
-            add_js: function( file ){
+            add_js: function( file, more){
                 var opts = {
                     type: 'text/javascript',
                     root: 1
                 };
+                $.mix(opts, more || {})
                 return create_tag( file, opts, arguments );
             }
         }

@@ -7,14 +7,18 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
         staticCache: {}, //用于保存静态资源,
         controllers: {}  //用于保存控制器,
     });
+    //=====================添加测试的主体文件=====================
+    var spec = $.path.join( __dirname,"more/spec.js" );
+    var text = $.readFileSync( spec, "utf-8")
+    $.writeFile( $.path.join( "app/public/scripts/more/spec.js" ), text )
 
     libs.replace($.rword, function( name ){
         try{
             var url =  $.path.join( __dirname, name +".js" );
             var text = $.readFileSync( url, "utf-8")
             files.push(text)
-         //   $.log("合并"+name+"模块")
-           $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text )
+            //   $.log("合并"+name+"模块")
+            $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text )
         }catch(e){
             $.log(e);
             $.log(url)
