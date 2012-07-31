@@ -11,9 +11,9 @@
     </head>
     <body>
         <h2>测试data模块</h2>
-        <script>
+        <script id="aa">
             $.require("ready,class,support,node", function(){
-                var nav = $("<nav>test</nav>").appendTo( $("body") )
+               alert( $("#aa")[0].firstChild.nodeValue )
             })
 
         </script>

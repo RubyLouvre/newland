@@ -53,7 +53,7 @@ $.define("spec","lang", function(){
     //取得元素节点
     var get = function(id) {
         return DOC.getElementById(id);
-    };
+    }
     //用于生成元素节点，注意第一层只能用一个元素
     var parseHTML = function() {
         var div = DOC.createElement("div");
@@ -281,7 +281,7 @@ $.define("spec","lang", function(){
                     try{
                         assert(title+"#"+name);//执行测试套件
                     }catch(err){
-                        $.log("error : "+err)
+                        $.log("error : "+err.message ,true)
                         bag.status = "error"
                         var el = node.getElementsByTagName("kbd")[ bag.count + 1];
                         if(el){

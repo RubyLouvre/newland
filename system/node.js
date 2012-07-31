@@ -3,7 +3,7 @@
 //==================================================
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     $.log("已加载node模块");
-    var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
+    var rtag = /^[a-zA-Z]+$/, rtext =/option|script/i, TAGS = "getElementsByTagName"
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){
             if( el = arguments[ i ] ){
@@ -494,16 +494,16 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
-        var bool //!undefined === true;
-        //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
-        if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
-            var outerHTML = document.createElement(node.nodeName).outerHTML;
-            bool = outerHTML.indexOf( unknownTag ) // !0 === true;
-        }
-        //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
-        var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if( node.nodeType === 1 ){
+            var bool //!undefined === true;
+            //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
+            if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
+                var outerHTML = document.createElement(node.nodeName).outerHTML;
+                bool = outerHTML.indexOf( unknownTag ) // !0 === true;
+            }
+            //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
+            var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
             if(!support.cloneNode ){
                 fixNode( neo, node );
                 src = node[ TAGS ]( "*" );
@@ -524,8 +524,10 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 }
             }
             src = neos = null;
+            return neo;
+        }else{
+            return node.cloneNode(true)
         }
-        return neo;
     }
     //修正IE下对数据克隆时出现的一系列问题
     function fixNode( clone, src ) {
