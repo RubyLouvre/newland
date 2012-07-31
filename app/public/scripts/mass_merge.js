@@ -1476,7 +1476,7 @@ $.define("support", function(){
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-    $.log("已加载class模块")
+    // $.log("已加载class模块")
     var
     unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),
     rconst = /constructor|_init|_super/,
@@ -3293,7 +3293,9 @@ $.define("data", "lang", function(){
                 return table[key];
             if(arguments.length != 4){
                 var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
-                value = target.getAttribute( attr )
+                console.log(attr)
+                value = target.getAttribute( attr );
+
             }
             if ( typeof value === "string") {//转换
                 try {
