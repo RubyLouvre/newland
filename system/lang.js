@@ -526,6 +526,14 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return $.Array.removeAt(target, index);
             return false;
         },
+        merge: function( first, second ) {
+            var i = ~~first.length, j = 0;
+            for ( var n = second.length; j < n; j++ ) {
+                first[ i++ ] = second[ j ];
+            }
+            first.length = i;
+            return first;
+        },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
         shuffle: function ( target ) {

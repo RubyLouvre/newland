@@ -150,7 +150,7 @@ void function( global, DOC ){
          * @param {Boolean} force 强逼打印到页面上
          */
         log: function ( text, force ){
-            if( force ){
+            if( force === true ){
                 $.require( "ready", function(){
                     var div =  DOC.createElement("pre");
                     div.className = "mass_sys_log";

@@ -122,7 +122,7 @@ void function( global, DOC ){
         },
         
         log: function ( text, force ){
-            if( force ){
+            if( force === true ){
                 $.require( "ready", function(){
                     var div =  DOC.createElement("pre");
                     div.className = "mass_sys_log";
@@ -1149,6 +1149,14 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return $.Array.removeAt(target, index);
             return false;
         },
+        merge: function( first, second ) {
+            var i = ~~first.length, j = 0;
+            for ( var n = second.length; j < n; j++ ) {
+                first[ i++ ] = second[ j ];
+            }
+            first.length = i;
+            return first;
+        },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
         shuffle: function ( target ) {
@@ -1609,11 +1617,7 @@ $.define("class", "lang",function(){
 //==================================================
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     $.log("已加载node模块");
-    var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", 
-    merge = function(a, b){
-        Array.prototype.push.apply(a, b)
-        return a;
-    }
+    var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){
             if( el = arguments[ i ] ){
@@ -1637,9 +1641,10 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             if($.isArrayLike(context)){//typeof context === "string"
                 return $( context ).find( expr );
             }
+           
             if ( expr.nodeType ) { //分支3:  处理节点参数
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
-                return merge( this, [expr] );
+                return $.Array.merge( this, [ expr ] );
             }
             this.selector = expr + "";
             if ( typeof expr === "string" ) {
@@ -1647,16 +1652,16 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 var scope = context || doc;
                 if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
                     nodes = $.parseHTML( expr, doc );//分支5: 动态生成新节点
-                    nodes = nodes.childNodes;
+                    nodes = nodes.childNodes
                 } else if( rtag.test( expr ) ){//分支6: getElementsByTagName
                     nodes  = scope[ TAGS ]( expr ) ;
                 } else{//分支7：进入选择器模块
                     nodes  = $.query( expr, scope );
                 }
-                return merge( this, nodes );
+                return $.Array.merge( this, $.slice( nodes) );
             }else {//分支8：处理数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc( expr[0] );
-                merge( this, $.isArrayLike(expr) ? expr : [ expr ]);
+                $.Array.merge( this, $.isArrayLike(expr) ?  expr : [ expr ]);
                 delete this.selector;
             }
         },
@@ -1677,7 +1682,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             neo.context = this.context;
             neo.selector = this.selector;
             neo.ownerDocument = this.ownerDocument;
-            return merge( neo, nodes || [] );
+            return $.Array.merge( neo, nodes || [] );
         },
         slice: function( a, b ){
             return this.labor( $.slice(this, a, b) );
@@ -3407,11 +3412,7 @@ $.define("data", "lang", function(){
 //==================================================
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     $.log("已加载node模块");
-    var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", 
-    merge = function(a, b){
-        Array.prototype.push.apply(a, b)
-        return a;
-    }
+    var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){
             if( el = arguments[ i ] ){
@@ -3435,9 +3436,10 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             if($.isArrayLike(context)){//typeof context === "string"
                 return $( context ).find( expr );
             }
+           
             if ( expr.nodeType ) { //分支3:  处理节点参数
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
-                return merge( this, [expr] );
+                return $.Array.merge( this, [ expr ] );
             }
             this.selector = expr + "";
             if ( typeof expr === "string" ) {
@@ -3445,16 +3447,16 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 var scope = context || doc;
                 if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
                     nodes = $.parseHTML( expr, doc );//分支5: 动态生成新节点
-                    nodes = nodes.childNodes;
+                    nodes = nodes.childNodes
                 } else if( rtag.test( expr ) ){//分支6: getElementsByTagName
                     nodes  = scope[ TAGS ]( expr ) ;
                 } else{//分支7：进入选择器模块
                     nodes  = $.query( expr, scope );
                 }
-                return merge( this, nodes );
+                return $.Array.merge( this, $.slice( nodes) );
             }else {//分支8：处理数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc( expr[0] );
-                merge( this, $.isArrayLike(expr) ? expr : [ expr ]);
+                $.Array.merge( this, $.isArrayLike(expr) ?  expr : [ expr ]);
                 delete this.selector;
             }
         },
@@ -3475,7 +3477,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             neo.context = this.context;
             neo.selector = this.selector;
             neo.ownerDocument = this.ownerDocument;
-            return merge( neo, nodes || [] );
+            return $.Array.merge( neo, nodes || [] );
         },
         slice: function( a, b ){
             return this.labor( $.slice(this, a, b) );
