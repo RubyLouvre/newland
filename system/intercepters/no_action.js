@@ -29,10 +29,11 @@ $.define("no_action", function(){
                             this.fire("send_error", 404)
                         }else{
                             //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，而要用new Date().toGMTString()，因为前者可能出现中文乱码
+                           //chrome 一定要发送Content-Type 请求头,要不样式表没有效果
                             cache = {
                                 code: 200,
                                 data: data,
-                                type: this.content_type(),
+                                type: this.content_type( $.path.extname( file ).slice(1) ),
                                 headers: {
                                     "Last-Modified":new Date().toGMTString()
                                 }

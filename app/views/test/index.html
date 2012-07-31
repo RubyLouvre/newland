@@ -2,10 +2,18 @@
 <% set_layout("layout.html") %>
 <% push_js("/scripts/mass.js") %>
 <% push_css("/styles/test/spec.css") %>
+<link href="/styles/test/spec.css" media="screen" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+    setTimeout(function(){
+       var el = document.getElementsByTagName("link")[0];
+       el.href = el.href;
+       console.log("--------")
+    },4000)
+</script>
 <h2>单元测试 </h2>
-<script>
+<script type="text/javascript">
     var testcases = "",
-    url = "mass";
+    url = "mass,lang";
     url.replace($.rword,function(name){
         testcases += ",test/"+name
     });

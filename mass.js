@@ -125,8 +125,8 @@
                 }
             });
             var id = factory.id || "@cb"+ ( cbi++ ).toString(32);
-            if( errback ){
-                errorStack.add( errback );//压入错误堆栈
+            if( typeof errback == "function" ){
+                errorStack.push( errback );//压入错误堆栈
             }
             mapper[ id ] = mapper[ id ] || {}
             $.mix( mapper[ id ], {//创建或更新模块的状态
@@ -159,7 +159,7 @@
                     var  ret = collect_rets( id, obj.args ||[], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
-                     //   $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);
+                        //   $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);
                         $._checkDeps();
                     }
                 }
@@ -198,68 +198,15 @@
             }
             require( filename );
         }catch( e ){
-            errorStack.add(function(){
-                $.log("<code style='color:red'>",e , "</code>", true);
-            }).fire();//打印错误堆栈
+            $.log("<code style='color:red'>",e , "</code>", true);
+            for(var fn; fn = errorStack.shift(); ){
+                fn();//打印错误堆栈
+            }
         }
     }
-    //  once: 保证回调函数列表只能被 .fire() 一次。(就像延迟对象一样)
-    //  memory: 持续保留前一个值，当fire之后,将保存其context与args，以后再添加一个新回调时，
-    //  立即用这两个东西去调用它，它们只会被下一次的fireWith的参数所改变
-    //  unique: 保证一个回调函数只能被添加一次(也就是说，在回调函数列表中，没有重复的回调函数)。
-    //  stopOnFalse: 当回调函数返回 false 时，中断调用。
-    $.Callbacks  = function(str){//一个简单的异步列队
-        var opts = typeof str == "string" ? $.oneObject(str) : {},list = [];
-        var context, args, fired
-        list.has = function( fn ){
-            return list.indexOf( fn ) !== -1
-        }
-        list.add = function(fn){
-            if(!list.locked){//允许在异步fire中添加
-                if( typeof fn == "function"  && ( !opts.unique || !list.has( fn ) )  ){
-                    list.push( fn )
-                }
-            }
-            if( opts.memory && fired){ //这时只影响当前添加的函数
-                fn.apply( context, args )
-            }
-            return list;
-        }
-        list.remove = function( fn ){
-            var i = isFinite( fn ) ? fn :  this.indexOf(fn);
-            if( i > -1 ){
-                list.splice(i,1)
-                var j = this.indexOf(fn);
-                if( j > -1 ){
-                    return this.remove( j )
-                }
-            }
-            return list;
-        }
-        list.lock = function(){//锁住
-            list.locked = true;
-        }
-        list.fire = function(){
-            return  list.fireWith(list, $.slice(arguments))
-        }
-        list.fireWith = function( c, a ){
-            if(list.locked !== true  && (!opts.once || !fired ) ){
-                context = c, args = $.type( a, "Array") ? a : [];
-                var arr = opts.once ? list: list.concat(), fn
-                while( ( fn = arr.shift() ) ){
-                    var ret = fn.apply( context, args);
-                    if( opts.stopOnFalse && ret === false){
-                        break;
-                    }
-                }
-                fired = true;
-            }
-            return list
-        }
-        return list
-    }
+
     //用于模块加载失败时的错误回调
-    var errorStack = $.Callbacks("once memory");
+    var errorStack = [];
     //实现漂亮的五颜六色的日志打印
     new function(){
         var rformat = /<code\s+style=(['"])(.*?)\1\s*>([\d\D]+?)<\/code>/ig

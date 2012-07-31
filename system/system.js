@@ -14,7 +14,7 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
             var text = $.readFileSync( url, "utf-8")
             files.push(text)
          //   $.log("合并"+name+"模块")
-           //$.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text )
+           $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text )
         }catch(e){
             $.log(e);
             $.log(url)

@@ -103,7 +103,7 @@ $.define("spec","lang", function(){
                 var actual = this.actual;
                 var bool = false;
                 //每一条expect语句都对应一个KBD标签
-                var elem = this.node.getElementsByTagName("kbd")[this.count]
+                var  elem = this.node.getElementsByTagName("kbd")[this.count]
                 switch(method){
                     case "ok"://布尔真测试
                         bool = actual === true;
@@ -201,6 +201,7 @@ $.define("spec","lang", function(){
         $.require("ready",function(){
             //由$.fixture第一个参数改造而成
             var fixtureId = "mass-spec-"+title;
+
             if(!get(fixtureId)){//在主显示区中添加一个版块
                 /** =================每个模块大抵是下面的样子===============
                 <div class="mass-spec-case" id="mass-spec-$.js">
@@ -213,9 +214,12 @@ $.define("spec","lang", function(){
                 var html = ['<div id="#{0}" class="mass-spec-case">',
                 '<p class="mass-spec-slide"><a '+(!"1"[0]? 'href="javascript:void(0);"' : "")+'>#{1}</a></p>',
                 '<ul class="mass-spec-detail" style="display:none;"></ul></div>'].join('');
-                get("mass-spec-cases").appendChild(parseHTML( $.format(html, fixtureId, title)) );
+                get("mass-spec-cases").appendChild( parseHTML( $.format(html, fixtureId, title)) );
+             
             }
+            //取得对象的所有方法名
             var names = Object.keys(asserts), name;
+        
 
             ;(function runTest(){
                 if((name = names.shift())){
@@ -296,7 +300,7 @@ $.define("spec","lang", function(){
         //div#mass-spec-result为整个系统的容器
         //div#mass-spec-summary用于放置各种统计
         //div#mass-spec-cases用于放置测试模块
-        DOC.body.appendChild(parseHTML(html.join("")));
+        DOC.body.appendChild( parseHTML(html.join("")) );
     });
 });
 //2011.8.9    增加getUnpassExpect函数,用于取得没有通过的expect并显示出来

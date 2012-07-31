@@ -496,7 +496,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         }
     });
 
-    if(global.Blob){//不要使用window前缀
+    if(global.netscape && global.Blob){//不要使用window前缀
         $.String.byteLen = function(str){
             return new Blob([str],{
                 type:"text/css"
