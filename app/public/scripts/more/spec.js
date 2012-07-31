@@ -215,7 +215,9 @@ $.define("spec","lang", function(){
                 '<p class="mass-spec-slide"><a '+(!"1"[0]? 'href="javascript:void(0);"' : "")+'>#{1}</a></p>',
                 '<ul class="mass-spec-detail" style="display:none;"></ul></div>'].join('');
                 get("mass-spec-cases").appendChild( parseHTML( $.format(html, fixtureId, title)) );
-             
+                setTimeout(function(){
+                    $.log(" window.frames.length : "+window.frames.length)
+                },400);
             }
             //取得对象的所有方法名
             var names = Object.keys(asserts), name;
@@ -261,7 +263,7 @@ $.define("spec","lang", function(){
                     try{
                         assert(title+"#"+name);//执行测试套件
                     }catch(err){
-                        $.log(err)
+                        $.log("error : "+err)
                         bag.status = "error"
                         var el = node.getElementsByTagName("kbd")[ bag.count + 1];
                         if(el){

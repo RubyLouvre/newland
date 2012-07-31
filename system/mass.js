@@ -316,7 +316,10 @@ void function( global, DOC ){
                 $._checkFail(doc, name, true );//模拟opera的script onerror
             }
             doc.write( "<body/>" );//清空内容
-            HEAD.removeChild( iframe );//移除iframe
+            setTimeout(function(){
+                $.log(" HEAD.removeChild( iframe ) ")
+                HEAD.removeChild( iframe );//移除iframe
+            },18);
         });
     }
     //从returns对象取得依赖列表中的各模块的返回值
