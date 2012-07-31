@@ -9,15 +9,16 @@
     <body>
         <h2>测试data模块</h2>
         <script>
-            $.require("ready,class,support,data", function(){
+            $.require("ready,class,support,node", function(){
                 console.log("============")
                 var body = document.body;
                 $.data( body,"test1",[1,2,3]);
                 $.log($.data(body,"test1"))
+                $.log($(".aaa").html())
 
             })
 
         </script>
-
+        <div class="aaa">XXXXXXX</div>
     </body>
 </html>

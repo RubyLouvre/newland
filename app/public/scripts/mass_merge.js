@@ -1514,7 +1514,7 @@ $.define("support", function(){
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-    // $.log("已加载class模块")
+   $.log("已加载类工厂模块")
     var
     unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),
     rconst = /constructor|_init|_super/,
@@ -2346,7 +2346,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
 
 //$.query v5 开发代号Icarus
 $.define("query", function(){
-    // $.log("已加载选择器模块")
+     $.log("已加载选择器模块")
     var global = this, DOC = global.document;
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
