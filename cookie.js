@@ -1,4 +1,4 @@
-mass.define("helpers",function(){
+mass.define("cookie",function(){
     //https://github.com/viatropos/tower/blob/master/lib/tower/http/cookies.js
     return {
         //转换一个字符串为对象
