@@ -777,4 +777,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.5.4 $.access添加第六个可选参数，用于绑定作用域，因此顺带重构了html, text, outerHTML,data原型方法
 2012.5.21 Remove $("body") case; $(document.body) is 2x faster.
 2012.5.28 cssName支持检测mozMatchesSelector, Fix $.match BUG
+2012.7.31 使用$.Array.merge代替不可靠的[].push,对cloneNode进行重构,只对元素节点进行修复
  */
