@@ -25,7 +25,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                 buffer.push( context )
                 return '<pre class="brush:'+type+';gutter:false;toolbar:false">mass_mass</pre>'
             });
-          //  html = tidy_html(html);
+            html = tidy_html(html);
             var index = 0
             html = html.replace(/mass_mass/g, function(s){
                 return "\n"+buffer[index++]+"\n"

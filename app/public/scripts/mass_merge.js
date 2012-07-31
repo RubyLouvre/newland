@@ -307,14 +307,18 @@ void function( global, DOC ){
         var doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.write( codes.join('') );
         doc.close();
-        $.bind( iframe, "load", function(){
+        var fn = $.bind( iframe, "load", function(){
             if( global.opera && doc.ok == void 0 ){
                 $._checkFail(doc, name, true );//模拟opera的script onerror
             }
             doc.write( "<body/>" );//清空内容
+            $.unbind( iframe, "load", fn)
             setTimeout(function(){
                 $.log(" HEAD.removeChild( iframe ) ")
-                HEAD.removeChild( iframe );//移除iframe
+               var a = document.createElement("div");
+               a.appendChild(iframe);
+               a.innerHTML = ""
+               // HEAD.removeChild( iframe );//移除iframe
             },18);
         });
     }
