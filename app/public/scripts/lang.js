@@ -613,7 +613,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //对两个数组取并集。
         union: function( target, array ){
-            return $.Array.unique( target.concat(array) );
+            return $.Array.unique( $.Array.merge( target, array ) );
         },
         //对两个数组取交集
         intersect: function( target, array ){
@@ -797,6 +797,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
 2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法 v4
 2012.6.29 添加inGroupsOf，去掉last first
+2012.7.31 添加$.Array.merge API
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
 https://gist.github.com/395070

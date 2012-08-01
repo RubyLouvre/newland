@@ -1236,7 +1236,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //对两个数组取并集。
         union: function( target, array ){
-            return $.Array.unique( target.concat(array) );
+            return $.Array.unique( $.Array.merge( target, array ) );
         },
         //对两个数组取交集
         intersect: function( target, array ){
