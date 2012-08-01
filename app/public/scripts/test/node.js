@@ -1,22 +1,25 @@
-$.define("test/node","more/spec,node",function(){
+$.define("test/node","ready,more/spec,node",function($$){
+   $.log("已加载text/node模块");
     var iframe =  $("<iframe id='test_node' frameBorder=0 style='display:none;width:0px;height:0px;' />" ).appendTo("body");//
     var idoc  =  iframe.contents()[0];
-   
+   $.log("XXXXXXXXXXXXXXXXXXXX")
     idoc.write( "<!doctype html><html><script>var a = document.createElement('nav');<\/script><body>" );
     idoc.close();
     //=====================================================================================
     var iframe2 =  $("<iframe id='test_node2' frameBorder=0 style='display:none;width:0px;height:0px;' />" ).appendTo("body");//height=0 width=0 frameBorder=0
     var idoc2  =  iframe2.contents()[0];
+
     idoc2.write( "<!doctype html><html><body>" );
     idoc2.close();
     var ibody2 = idoc2.body;
-    $('<ul id="aaa"><li class="_travel" id="aaaa"><b>foo</b></li><li class="_travel" id="bar">bar</li><li id="baz">baz</li></ul>',idoc2 ).appendTo(ibody2);
+
+    $('<ul id="aaa"><li class="_travel" id="aaaa"><b>foo</b></li><li class="_travel" id="bar">bar</li><li id="baz">baz</li></ul>' ).appendTo(ibody2);
     var ul = $("#aaa",idoc2)
     var li = $("#aaa li",idoc2);
     var first = $("#aaaa",idoc2);
     var html = '<ul id="test_next"> <li>list item 1</li><li>list item 2</li><li class="third-item">list item 3</li><li>list item 4</li><li>list item 5</li></ul>';
-    $( html,idoc2 ).appendTo(ibody2);
-    var thirdItem = $('li.third-item', idoc2);
+    $( html ).appendTo(ibody2);
+    var thirdItem = $('li.third-item',idoc2);
     //添加另一个测试层级的数据
     var html2 =  '<div id="test-children" class="test-parent">\
                               <p id="test-next"><a>1</a></p>\
@@ -25,8 +28,10 @@ $.define("test/node","more/spec,node",function(){
                               <p class="test-p" id="test-prev"><em class="test-em"><span><a id="test-parent4">4</a></span></em></p>\
                           <div>\
                    <div id="test-contains">text node</div>'
-    $( html2, idoc2 ).appendTo(ibody2);
+    $( html2 ).appendTo(ibody2);
     var t = $('#test-parent4',idoc2);
+    // $.addTestModule2 =$.noop;
+    
     $.fixture("节点模块-node",{
         append: function(){
             //先添加两个类为.test_node的P元素
@@ -34,7 +39,7 @@ $.define("test/node","more/spec,node",function(){
             expect( $(".test_node",idoc ).length ).eq(2);
             $("#test_text",idoc ).text("888888888");
             expect( $("#test_text",idoc ).text() ).eq("888888888");
-            var nav = $("<nav>test</nav>",idoc).appendTo( $("body",idoc ) )
+            var nav = $("<nav>test</nav>").appendTo( $("body",idoc ) )
             expect( nav[0].tagName ).eq("NAV");
             nav.remove()
         },
@@ -89,6 +94,7 @@ $.define("test/node","more/spec,node",function(){
 
         },
         "$.fn.data": function(){
+
             var children = ul.children();
             children.data("_test_children","司徒正美");
             //测试批量赋值
@@ -156,11 +162,12 @@ $.define("test/node","more/spec,node",function(){
             expect(node.next()[0].className ).eq('test-next-p');
             expect(node.next().next()[0].className ).eq('test-next');
             expect(node.nextAll(".test-next")[0].tagName ).eq('P');
+    
         },
     
         nextAll: function(){
             var nodes = thirdItem.nextAll();
-            expect(nodes.eq( 1 ).text() ).eq("list item 5");
+            expect(nodes.eq(1 ).text() ).eq("list item 5");
         },
         prev: function(){
             var nodes = thirdItem.prev();
@@ -208,7 +215,7 @@ $.define("test/node","more/spec,node",function(){
                       <dd>definition 3-a</dd>\
                       <dd>definition 3-b</dd>\
                   </dl>'
-            $(html, idoc2 ).appendTo(ibody2);
+            $(html,idoc2 ).appendTo(ibody2);
             expect( $('#term-2',idoc2 ).nextUntil('dt'  ).length ).eq(3);
         },
         prevUntil: function(){
@@ -233,6 +240,7 @@ $.define("test/node","more/spec,node",function(){
           <li class="item-iii">III</li>\
         </ul>'
             $(html, idoc2 ).appendTo("body");
+
             expect( $('li.item-a',idoc2 ).parentsUntil('.level-1'  ).length ).eq(2);
             
         },

@@ -12,8 +12,15 @@
     <body>
         <h2>测试data模块</h2>
         <script id="aa">
-            $.require("ready,class,support,node", function(){
-               alert( $("#aa")[0].firstChild.nodeValue )
+            $.require("more/uiloader,ready,class,support,node", function(loader){
+              
+               loader("/index.html",function(data){
+                   console.log(data)
+                   var data = eval("0,"+data)
+                   console.log(data.script)
+                   eval("0,"+data.script)
+
+               })
             })
 
         </script>
