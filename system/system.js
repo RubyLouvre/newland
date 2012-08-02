@@ -8,7 +8,7 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
         controllers: {}  //用于保存控制器,
     });
     //=====================添加测试的主体文件=====================
-    var more = "spec,random,menu"
+    var more = "spec,random,menu,tab"
     more.replace($.rword, function( name ){
         var path = $.path.join( __dirname,"more", name + ".js" );
         var text = $.readFileSync( path, "utf-8")
