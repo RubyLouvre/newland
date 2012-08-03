@@ -19,6 +19,7 @@ $.define("get_view", function(){
                     if(err){
                         this.fire( "send_error", 404 )
                     }else{
+                        $.log("===============")
                         $.viewsCache[ view_url ] = $.ejs( text );
                         this.fire( "get_view", view_url, url );
                     }

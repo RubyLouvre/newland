@@ -80,7 +80,8 @@ $.define("tab","node,event,attr,css",function(){
             var $this = $(this)
             , data = $this.data('tab')
             if (!data) $this.data('tab', (data = new Tab(this)))
-            if (typeof option == 'string') data[option]()
+            if (typeof option == 'string')
+                data[option]()
         })
     }
 

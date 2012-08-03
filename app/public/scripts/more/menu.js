@@ -80,7 +80,8 @@ $.define("menu","node,event,attr,css",function(){
             , data = $this.data('menu')
             , options = typeof option == 'object' && option
             if (!data) $this.data('menu', (data = new Menu(this, options)))
-            if (typeof option == 'string') data[option]()
+            if (typeof option == 'string')
+                data[option] &&  data[option]()
         })
     }
 /*
