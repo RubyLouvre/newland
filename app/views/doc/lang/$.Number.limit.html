@@ -1,6 +1,6 @@
-<%  set_title("$.Array.limit") %>
+<%  set_title("$.Number.limit") %>
 <%  set_layout("doc_layout.html") %>
-<h3>$.Array.limit( n, n1, n2 )</h3>
+<h3>$.Number.limit( n, n1, n2 )</h3>
 <p><span class="stress">描述：</span></p>
 <p>确保数值n在[n1,n2]闭区间之内，如果超出限界，则置换为离它最近的最大值或最小值。</p>
 <dl>
@@ -12,9 +12,9 @@
 <fieldset><legend>例子</legend>
     <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("lang",function(){
-                    $.log($.Array.limit(6,1,7),true);
-                    $.log($.Array.limit(6,-1,4),true);
-                    $.log($.Array.limit(6,3,4),true);
+                    $.log($.Number.limit(6,1,7),true);
+                    $.log($.Number.limit(6,-1,4),true);
+                    $.log($.Number.limit(6,3,4),true);
                 });
     </pre>
 

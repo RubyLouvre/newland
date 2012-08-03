@@ -36,15 +36,16 @@ $.define("menu","node,event,attr,css",function(){
             });
             menu.mouseleave(function(){
                 ui.flag_close = true;
+                menu.find("."+itemClass).removeClass(hoverClass)
             }).mouseenter(function(){
                 ui.flag_close = false;
             })
             //不要绑在body上，有时body的高度只有几十px，没有占满浏览器的视窗
-            $(document).click(function(){
-                if( ui.flag_close )  {
-                    $("."+itemClass).removeClass(hoverClass)
-                }
-            });
+//            $(document).click(function(){
+//                if( ui.flag_close )  {
+//                    $("."+itemClass).removeClass(hoverClass)
+//                }
+//            });
         },
         addMenu : function( parent, cls ){
             return $("<div />").appendTo( parent ).addClass(cls)
