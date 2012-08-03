@@ -11,7 +11,7 @@
 <p>主要API介绍</p>
 
 
-<table class="table1" width="80%">
+<table class="table-dark" >
     <thead>
         <tr>
             <th>API</th>
@@ -21,18 +21,19 @@
     <tbody>
         <tr>
             <td>
-                html
+                require
             </td>
             <td>
-                返回HTML节点
+                请求一个或N个模块，当它们都加载本地时，执行回调函数（第二个参数），如果有一个没加载回来，
+                执行第三个参数（错误回调，可选）
             </td>
         </tr>
         <tr>
             <td>
-                head
+                define
             </td>
             <td>
-                返回HEAD节点
+                定义一个模块，它有三个参数，第一个为模块名，第二个是依赖列表（可选），第三个是模块本身（为一个函数）
             </td>
         </tr>
         <tr>
@@ -42,30 +43,6 @@
             <td>
                 将一个或多个对象合并到第一个参数（它也必须是对象）中，
                 如果只有一个参数，则合并到mix的调用者上，如果最后一个参数是布尔，则用于判定是否覆盖已有属性
-            </td>
-        </tr>
-        <tr>
-            <td>
-                rword
-            </td>
-            <td>
-                一个有用的正则，将字符串以空白或“,”切割成一个个单词
-            </td>
-        </tr>
-        <tr>
-            <td>
-                mass
-            </td>
-            <td>
-                用于储存框架当前的版本号
-            </td>
-        </tr>
-        <tr>
-            <td>
-                exports
-            </td>
-            <td>
-                多库共存
             </td>
         </tr>
         <tr>
@@ -102,14 +79,6 @@
         </tr>
         <tr>
             <td>
-                noop
-            </td>
-            <td>
-                一个空函数
-            </td>
-        </tr>
-        <tr>
-            <td>
                 bind
             </td>
             <td>
@@ -126,19 +95,51 @@
         </tr>
         <tr>
             <td>
-                require
+                noop
             </td>
             <td>
-                请求一个或N个模块，当它们都加载本地时，执行回调函数（第二个参数），如果有一个没加载回来，
-                执行第三个参数（错误回调，可选）
+                一个空函数
             </td>
         </tr>
         <tr>
             <td>
-                Callbacks
+                html
             </td>
             <td>
-                用于生成一个回调列表
+                返回HTML节点
+            </td>
+        </tr>
+        <tr>
+            <td>
+                head
+            </td>
+            <td>
+                返回HEAD节点
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                rword
+            </td>
+            <td>
+                一个有用的正则，将字符串以空白或“,”切割成一个个单词
+            </td>
+        </tr>
+        <tr>
+            <td>
+                mass
+            </td>
+            <td>
+                用于储存框架当前的版本号
+            </td>
+        </tr>
+        <tr>
+            <td>
+                exports
+            </td>
+            <td>
+                将内部的对象释放到全局作用域下
             </td>
         </tr>
     </tbody>
