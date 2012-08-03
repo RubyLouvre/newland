@@ -1,0 +1,24 @@
+<%  set_title("$.Array.nearer") %>
+<%  set_layout("doc_layout.html") %>
+<h3>$.Array.nearer( num, n1, n2)</h3>
+<p><span class="stress">描述：</span></p>
+<p>求出距离原数最近的那个数</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>number</dt>
+    <dd>必需。Number。最小值或最大值。</dd>
+    <dt>fn</dt>
+    <dd>必需。Number。最大值或最小值。</dd>
+</dl>
+<fieldset><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var a = $.lang(6);
+                    $.log(a.nearer(1,7),true);
+                    $.log(a.nearer(-1,4),true);
+                    $.log(a.nearer(3,4),true);
+                });
+    </pre>
+
+    <button class="doc_btn" type="button">点我，执行代码</button>
+</fieldset>

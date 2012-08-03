@@ -93,6 +93,7 @@ $.define("tab","node,event,attr,css",function(){
 
     $.require("ready", function(){
         $('body').on('click.tab.data-api', '[data-toggle="tab"], [data-toggle="pill"]', function (e) {
+            $.log("=============")
             e.preventDefault()
             $(this).tab('show')
         })

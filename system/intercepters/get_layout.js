@@ -1,7 +1,7 @@
 $.define("get_layout", function(){
     return function( flow ){
         flow.bind("get_layout", function( layout_url, url ){
-           $.log( "已进入get_layout栏截器" );
+          // $.log( "已进入get_layout栏截器" );
             var fn = $.viewsCache[ layout_url ]
             if( fn ){
                 var html = fn( this.helper[0], this.helper[1] );

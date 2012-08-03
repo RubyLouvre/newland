@@ -1,7 +1,7 @@
 $.define("send_file", function(){
     return function(flow){
         flow.bind("send_file", function( page ){
-            $.log( "已进入send_file栏截器" );
+          //  $.log( "已进入send_file栏截器" );
             clearTimeout(this.timeoutID)
             var headers =  page.headers || {}
             $.mix(headers, {

@@ -105,23 +105,25 @@
         <script type="text/javascript">
             function callParent(doc){
                 if(doc){
-                    var el = doc.getElementsByTagName("article")[0];
-                    var text = el.innerHTML
-                    $("#holdplace").html(text);
-                    $("pre").each(function(){
-                        if(this.exec !== "function"){
-                            var self = $(this), btn = self.next("button.doc_btn")
-                            if(/brush:\s*j/i.test(this.className)  && btn.length ){
-                                var code =  $.String.unescapeHTML( self.text() );
-                                var fn = Function( code );
-                                btn[0].exec = fn;
+                    $.require("ready,node",function(){
+                        var el = doc.getElementsByTagName("article")[0];
+                        var text = el.innerHTML
+                        $("#holdplace").html(text);
+                        $("pre").each(function(){
+                            if(this.exec !== "function"){
+                                var self = $(this), btn = self.next("button.doc_btn")
+                                if(/brush:\s*j/i.test(this.className)  && btn.length ){
+                                    var code =  $.String.unescapeHTML( self.text() );
+                                    var fn = Function( code );
+                                    btn[0].exec = fn;
+                                }
                             }
-                        }
-                    });
-                    window.SyntaxHighlighter && SyntaxHighlighter.highlight();
+                        });
+                        window.SyntaxHighlighter && SyntaxHighlighter.highlight();
+                    })
                 }
             }
-            $.require("more/api, more/menu, ready",function( api ){
+            $.require("more/api, node, more/menu, ready",function( api ){
                 var pathMap = {
                     "模块加载模块":  "mass/$",
                     "特征侦探模块":  "support/$",
@@ -168,9 +170,9 @@
                 }).delegate(".mass_menu_item", "click", function(){
                     var path = $(this).attr("path");
                     $(".mass_sys_log").remove();
-                    if(rskip.test(path)){
-                        iframe.src = "public/404.html"
-                    }else if(path){
+                //    if(rskip.test(path)){
+                  //      iframe.src = "public/404.html"
+                    if(path){
                         iframe.src = path;
                     }
                 });

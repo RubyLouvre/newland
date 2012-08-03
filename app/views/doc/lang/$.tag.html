@@ -1,0 +1,28 @@
+<%  set_title("$.tag") %>
+<%  set_layout("doc_layout.html") %>
+
+<h3>$.tag(tag,inner)</h3>
+<p><span class="stress">描述：</span></p>
+<p>用于提供了一种高效拼接多行HTML片断的方式，免去写<与>与结束标签之苦。</p>
+<dl>
+    <dt>tag</dt>
+    <dd>必需。String。开标签除去&lt;与&gt;的部分。如果是文本节点请传入""。</dd>
+    <dt>stop</dt>
+    <dd>必需。String。标签里面的innerHTML，我们可以传入另一个$.tag作为它的参数。</dd>
+</dl>
+<p><span class="stress">返回值：</span></p>
+<p>Object。想要得到HTML片断，需要用String()或+""处理一下。</p>
+<fieldset><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang,node",function(){
+                    var T = $.tag;
+                    var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","两层")))("H1",T("span","33333"))('',"这是纯文本");
+                    $("js_tag_ex1).html(html)
+                });
+    </pre>
+
+    <button class="doc_btn" type="button">点我，执行代码</button>
+    <div id="js_tag_ex1">
+
+    </div>
+</fieldset>
