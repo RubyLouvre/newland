@@ -106,6 +106,9 @@ DELETE     /photos/1      Photos          destroy  用于删除photo的POST请�
         }, mapper)
         callback(sub)
     }
+    mapper.add = function(method, path, value){
+        router.add(method, path, value)
+    }
     curry( mapper );
 
 //    mapper.resources('workers',function(admin){

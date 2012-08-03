@@ -8,6 +8,7 @@ $.define("routes",function(){
         mapper.get("/tabs","home#tabs")
         mapper.get("/ajax","home#ajax")
         mapper.post("/ajax","home#ajax")
+        mapper.add("GET","doc/:modules(/:method)","doc#index")
     //方法路由
     //        map.get('/','site#index');
     //        map.get('/get_comments/:post_id','site#get_comments');

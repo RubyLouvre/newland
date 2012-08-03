@@ -26,8 +26,6 @@ $.define("home_controller",function(){
                     'content-type':'text/json'
                 })
                 flow.res.end(JSON.stringify(e))
-
-            
             }
 
         }

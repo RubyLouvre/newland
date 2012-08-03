@@ -20,6 +20,7 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
     }
 
     function router(flow, method, url){
+        //先经过路由系统
         var go = $.router.routeWithQuery( method, url );
         if( go ){
             flow.params = go.params || {};

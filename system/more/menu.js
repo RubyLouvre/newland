@@ -80,10 +80,11 @@ $.define("menu","node,event,attr,css",function(){
             , data = $this.data('menu')
             , options = typeof option == 'object' && option
             if (!data) $this.data('menu', (data = new Menu(this, options)))
-            if (typeof option == 'string')
+           if (typeof option == 'string')
                 data[option] &&  data[option]()
         })
     }
+    //参数 可以是任何类型的场景， 你要么借助约定 要么借助接口 要么借助防御性代码
 /*
      * <style>
             .mass_main_menu , .mass_sub_menu{

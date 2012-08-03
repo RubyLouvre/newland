@@ -15,26 +15,7 @@
         <%=  add_css('/styles/doc/shCore.css' );  %>
         <%=  add_css('/styles/doc/shThemeRDark.css' );  %>
         <style type="text/css">
-            html,body{
-                background:#ddc;
-            }
-            #leftsection dl,#leftsection dd{
-                margin:0;
-                padding:2px 5px 2px 0;
-                background:#eed;
-                cursor:pointer;
-            }
-            #leftsection dl{
-                padding:0;
-            }
-            #leftsection dt{
-                padding:2px 5px 2px 0;
-                text-indent:5px;
-                margin:0;
-                background:#cc9;
-                color:#770000;
-                cursor:pointer;
-            }
+
             .dhighlight{
                 background:#252d37!important;
                 color:#fff;
@@ -73,21 +54,21 @@
             .glow_suggest {
                 background:#ffff80;
             }
-            #leftsection dl{
-                border-left:1px solid #252d37;
-                border-right:1px solid #252d37;
-                border-bottom:1px solid #252d37;
-            }
-            .first_dl{
-                border-top:1px solid #252d37;
-            }
-            .bright .mass_menu , .bright .sub_menu{
+
+            .api-wrap{zoom:1;}
+            .api-wrap:after{content:' ';clear:both;display:block;height:0;overflow:hidden;}
+            .left-menu{float:left;margin-right:-200px;overflow:visible;}
+            .api-content{float:right;width:100%;}
+            .api-innercontent{margin-left:200px;}
+
+            .mass_main_menu , .mass_sub_menu{
                 width:130px;
-                -moz-box-shadow:0 0 10px #06c;
-                -webkit-box-shadow:0 0 10px #06c;
-                box-shadow:0 0 10px #06c;
+                -moz-box-shadow:0 0 5px #06c;
+                -webkit-box-shadow:0 0 5px #06c;
+                box-shadow:0 0 5px #06c;
             }
-            .bright .menu_item{
+
+            .mass_menu_item{
                 width:120px;
                 padding-left:10px;
                 height:24px;
@@ -96,16 +77,31 @@
                 background:#0088aa;
                 color:#fff;
             }
-            .bright .hover {
-                background:#f36100!important;
+            .mass_menu_item.hover {
+                background:#f36100;
                 color:black;
+            }
+            .mass_sub_menu{
+                display:none;
+            }
+            .mass_menu_item.hover > .mass_sub_menu{
+                display:block
+            }
+            .top-menu, .search-menu{
+                height:40px;
+            }
+            .api-menu{
+                margin:20px 20px 0 20px;
+            }
+            #api-iframe{
+                visibility:hidden;
+                width:100%;
+                height:1px;
             }
             #holdplace {
                 width:90%;
             }
         </style>
-        <script>
-        </script>
         <script type="text/javascript">
             function callParent(doc){
                 if(doc){
@@ -115,7 +111,7 @@
                     window.SyntaxHighlighter && SyntaxHighlighter.highlight();
                 }
             }
-            $.require("ready,more/menu,more/api",function( _,_,api ){
+            $.require("more/api, more/menu, ready",function( api ){
                 var pathMap = {
                     "模块加载模块":  "mass/$",
                     "特征侦探模块":  "support/$",
@@ -153,31 +149,25 @@
                         return ret;
                     },json );
                 }
-                var menu = $("#leftsection").menu({
-                    data: makeData(api, "")
-                }).menu("getUI").target;
-
            
-                var iframe = $("#iframe")[0];
-             
+                var iframe = $(".api-iframe")[0];
                
                 var rskip = /\._|\\_|\:|\@|Map|Adapter|^Object|Array|Number|String/
-                menu.delegate(".menu_item", "click", function(){
+                $(".js-api-menu").menu({
+                    data: makeData(api, "")
+                }).delegate(".mass_menu_item", "click", function(){
                     var path = $(this).attr("path");
+
                     if(rskip.test(path)){
                         iframe.src = "public/404.html"
                     }else if(path){
-                        iframe.src = path
+                        iframe.src = path;
                     }
-
-        
-
-                    $(this).parent(".sub_menu").hide();
                 });
                 //处理演示完例子后返回原文档页面的情况
                 function getParam(name){//获取参数值 by司徒正美
-                    var sUrl = window.location.search.substr(1);
-                    var r = sUrl.match(new RegExp("(^|&)" + name + "=([^&]*)(&|$)"));
+                    var url = window.location.search.substr(1);
+                    var r = url.match(new RegExp("(^|&)" + name + "=([^&]*)(&|$)"));
                     return (r == null ? null : unescape(r[2]));
                 }
                 var iframe_src = getParam("iframe_src");
@@ -195,82 +185,34 @@
         </style>
     </head>
     <body>
-        <div id="search_wrapper">
+        <div class="search-menu" id="search_wrapper">
             <!--<h2>mass framework的文档</h2>-->
             <div> <input id="search"  autocomplete="off" ><a href="plugin.html">点此搜索插件</a></div>
             <div id="suggest_wrapper">
                 <ul id="suggest_list"></ul>
             </div>
         </div>
-        <div >
-            <div style="float:left;width:14%" id="leftsection" class="bright">
+        <div class="api-wrap" >
+            <div class="api-content">
+                <div class="api-innercontent">
+                    <iframe id="api-iframe" src="mass/index.html" frameborder="0">
+                        <!--用于加载子页面,实现无缝刷新-->
+                    </iframe>
+                    <article id="holdplace">
+                        <!--加iframe的body部分放到这里--->
+                    </article>
+                </div>
+            </div>
+            <div class="left-menu" style="width:200px;">
+                <div class="api-menu js-api-menu">
 
+                </div>
             </div>
-            <div style="float:left;width:85%">
-                <iframe id="iframe" src="mass/index.html" style="visibility:hidden;width:100%;height:1px;"frameborder="0">
-                    <!--用于加载子页面,实现无缝刷新-->
-                </iframe>
-                <article id="holdplace">
-                    <!--加iframe的body部分放到这里--->
-                </article>
-            </div>
-            <br clear="left"/>
-            jquery 菜单 http://apycom.com/#
-            http://pupunzi.open-lab.com/mb-jquery-components/mb-_menu/
-            http://users.tpg.com.au/j_birch/plugins/superfish/#
-            http://www.dynamicdrive.com/dynamicindex1/ddsmoothmenu.htm
-            http://www.filamentgroup.com/examples/menus/ipod.php#
-            <div class="ddsmoothmenu-v" id="smoothmenu2">
-<ul>
-<li><a href="http://www.dynamicdrive.com">Item 1</a></li>
-<li style="z-index: 100;"><a href="#" style="padding-right: 23px;" class="">Folder 0<img style="border:0;" class="rightarrowclass" src="right.gif"></a>
-  <ul style="top: 0px; box-shadow: 5px 5px 5px rgb(170, 170, 170); visibility: visible; left: 170px; width: 170px; display: none;">
-  <li><a href="#">Sub Item 1.1</a></li>
-  <li><a href="#">Sub Item 1.2</a></li>
-  <li><a href="#">Sub Item 1.3</a></li>
-  <li><a href="#">Sub Item 1.4</a></li>
-  <li><a href="#">Sub Item 1.2</a></li>
-  <li><a href="#">Sub Item 1.3</a></li>
-  <li><a href="#">Sub Item 1.4</a></li>
-  </ul>
-</li>
-<li style="z-index: 99;"><a href="#" style="padding-right: 23px;" class="">Folder 1<img style="border:0;" class="rightarrowclass" src="right.gif"></a>
-  <ul style="top: 0px; box-shadow: 5px 5px 5px rgb(170, 170, 170); visibility: visible; left: 170px; width: 170px; display: none;">
-  <li><a href="#">Sub Item 1.1</a></li>
-  <li><a href="#">Sub Item 1.2</a></li>
-  <li><a href="#">Sub Item 1.3</a></li>
-  <li><a href="#">Sub Item 1.4</a></li>
-  <li><a href="#">Sub Item 1.2</a></li>
-  <li><a href="#">Sub Item 1.3</a></li>
-  <li><a href="#">Sub Item 1.4</a></li>
-  </ul>
-</li>
-<li><a href="#">Item 3</a></li>
-<li style="z-index: 98;"><a href="#" style="padding-right: 23px;" class="">Folder 2<img style="border:0;" class="rightarrowclass" src="right.gif"></a>
-  <ul style="top: 0px; box-shadow: 5px 5px 5px rgb(170, 170, 170); visibility: visible; left: 170px; width: 170px; display: none;">
-  <li><a href="#">Sub Item 2.1</a></li>
-  <li style="z-index: 97;"><a href="#">Folder 2.1<img style="border:0;" class="rightarrowclass" src="right.gif"></a>
-    <ul style="display: none; top: 0px; box-shadow: 5px 5px 5px rgb(170, 170, 170); visibility: visible;">
-    <li><a href="#">Sub Item 2.1.1</a></li>
-    <li><a href="#">Sub Item 2.1.2</a></li>
-    <li style="z-index: 96;"><a href="#">Folder 3.1.1<img style="border:0;" class="rightarrowclass" src="right.gif"></a>
-		<ul style="display: none; top: 0px; box-shadow: 5px 5px 5px rgb(170, 170, 170); visibility: visible;">
-    		<li><a href="#">Sub Item 3.1.1.1</a></li>
-    		<li><a href="#">Sub Item 3.1.1.2</a></li>
-    		<li><a href="#">Sub Item 3.1.1.3</a></li>
-    		<li><a href="#">Sub Item 3.1.1.4</a></li>
-    		<li><a href="#">Sub Item 3.1.1.5</a></li>
-		</ul>
-    </li>
-    <li><a href="#">Sub Item 2.1.4</a></li>
-    </ul>
-  </li>
-  </ul>
-</li>
-<li><a href="http://www.dynamicdrive.com/style/">Item 4</a></li>
-</ul>
-<br style="clear: left">
-</div>
         </div>
+        jquery 菜单 http://apycom.com/#
+        http://pupunzi.open-lab.com/mb-jquery-components/mb-_menu/
+        http://users.tpg.com.au/j_birch/plugins/superfish/#
+        http://www.dynamicdrive.com/dynamicindex1/ddsmoothmenu.htm
+        http://www.filamentgroup.com/examples/menus/ipod.php#
     </body>
 </html>

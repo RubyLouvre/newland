@@ -1,4 +1,4 @@
-$.define("httpflow","helper,flow, ejs", function( make_helper ){
+$.define("httpflow","helper,flow,more/ejs", function( make_helper ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
