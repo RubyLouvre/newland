@@ -85,7 +85,11 @@ $.define("menu","node,event,attr,css",function(){
         })
     }
     //参数 可以是任何类型的场景， 你要么借助约定 要么借助接口 要么借助防御性代码
-/*
+/*     jquery 菜单 http://apycom.com/# http://pupunzi.open-lab.com/mb-jquery-components/mb-_menu/
+        http://users.tpg.com.au/j_birch/plugins/superfish/# http://www.dynamicdrive.com/dynamicindex1/ddsmoothmenu.htm
+        http://www.filamentgroup.com/examples/menus/ipod.php#</body>
+        https://github.com/bwsewell/tablecloth
+
      * <style>
             .mass_main_menu , .mass_sub_menu{
                 width:130px;

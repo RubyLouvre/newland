@@ -150,14 +150,14 @@
                     },json );
                 }
            
-                var iframe = $(".api-iframe")[0];
+                var iframe = $("#api-iframe")[0];
                
                 var rskip = /\._|\\_|\:|\@|Map|Adapter|^Object|Array|Number|String/
                 $(".js-api-menu").menu({
                     data: makeData(api, "")
                 }).delegate(".mass_menu_item", "click", function(){
                     var path = $(this).attr("path");
-
+                    $(".mass_sys_log").remove();
                     if(rskip.test(path)){
                         iframe.src = "public/404.html"
                     }else if(path){
@@ -209,10 +209,5 @@
                 </div>
             </div>
         </div>
-        jquery 菜单 http://apycom.com/#
-        http://pupunzi.open-lab.com/mb-jquery-components/mb-_menu/
-        http://users.tpg.com.au/j_birch/plugins/superfish/#
-        http://www.dynamicdrive.com/dynamicindex1/ddsmoothmenu.htm
-        http://www.filamentgroup.com/examples/menus/ipod.php#
     </body>
 </html>

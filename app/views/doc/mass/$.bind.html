@@ -1,8 +1,9 @@
 <%  set_title("$.bind") %>
 <%  set_layout("doc_layout.html") %>
 <script type="text/javascript">
-    $.bind(document,"click",function(){
-        $.log("触发了点击事件",true);
+   var fn = $.bind(document,"click",function(){
+        $.log("触发了点击事件并立即卸载它",true);
+        $.unbind(document, "click", fn);
     });
 </script>
 
@@ -25,8 +26,9 @@
 
 <fieldset><legend>例子</legend>
     <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.bind(document,"click",function(){
-                    $.log("触发了点击事件",true);//打印在页面底部
-                });
+   var fn = $.bind(document,"click",function(){
+        $.log("触发了点击事件并立即卸载它",true);
+        $.unbind(document, "click", fn)
+    });
     </pre>
 </fieldset>

@@ -17,6 +17,7 @@
                 this.exec.call(window)
             }else{
                 var btn =  $(this);
+                console.log(btn.prev("pre").text())
                 var fn = Function( $.String.unescapeHTML(btn.prev("pre").text()) );
                 fn();
                 this.exec = fn;
