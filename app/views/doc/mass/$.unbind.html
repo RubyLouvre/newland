@@ -1,16 +1,5 @@
 <%  set_title("$.unbind") %>
 <%  set_layout("doc_layout.html") %>
-<script type="text/javascript">
-    var i = 0;
-    var fn =  $.bind(document,"click",function(){
-        i ++;
-        $.log("触发了第"+i+"点击事件",true);
-        if(i === 4){
-            $.unbind(document,"click",fn);
-            $.log("已移除点击事件",true);
-        }
-    })
-</script>
 
 <h3>$.unbind(obj,type,fn,[ phase ])</h3>
 <p><span class="stress">描述：</span></p>
@@ -39,5 +28,5 @@
                 }
             })
     </pre>
-
+    <button class="doc_btn" type="button">点我，执行代码</button>
 </fieldset>

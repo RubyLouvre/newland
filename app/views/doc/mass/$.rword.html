@@ -7,7 +7,7 @@
     <p>$.type的实现依赖于内部一个叫class2type的hash，它的部分键值是通过以下方式快速添加上去的：</p>
     <pre class="brush:javascript;gutter:false;toolbar:false">
     "Boolean,Number,String,Function,Array,Date,RegExp,Window".replace($.rword,function(name){
-        $.log(name)
+        $.log(name, true)
     });
     </pre>
     <button class="doc_btn" type="button">点我，执行代码</button>

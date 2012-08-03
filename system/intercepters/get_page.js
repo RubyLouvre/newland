@@ -16,6 +16,9 @@ $.define("get_page", function(){
                 this.fire("send_file", cache);
             }else{
                 var page_url = $.path.join("app","pages", url );
+                if(!$.configs.get_in_pages){
+                    page_url = page_url.replace("pages","XXX")
+                }
                 $.readFile( page_url, 'utf-8', function (err, html) {//读取内容
                     if (err){
                         //如果不存在就从view目录中寻找相应模板来拼装

@@ -25,34 +25,48 @@
 <p>target</p>
 
 <fieldset><legend>例子</legend>
+    <p>加载单个模块。</p>
     <pre class="brush:javascript;gutter:false;toolbar:false">
-    $.require("lang,ready",function($$){
-        $.log("这是最后的回调",true);
-        $.log($$("aa").toUpperCase(),true)
-    });
-
-    $.require("lang,ready",function($$){
-        $.log("它将不会再发出请求",true);
-        $.log($$("aa").pad(7),true);
-        $.require("lang,ready",function($$){
-            $.log("这是内嵌的",true);
-            $.log($$("aa").pad(8),true);
-            $.require("lang,ready",function($$){
-                $.log("这是内嵌的2",true);
-                $.log($$("aa").pad(9),true);
-                $.require("lang,ready",function($$){
-                    $.log("这是内嵌的3",true);
-                    $.log($$("aa").pad(10),true)
-                });
-            });
-        });
-    });
-    $.require("support,class,ready",function(support,factory){
-        $.log("=========================",true);
-        $.log("mix" in $,true)//判定是否来自模块加载模块
-        $.log("cloneAll" in support,true);//判定是否来自support模块
-        $.log($.type(factory),true)//判定是否来自class模块, class模块并没有返回值
+    $.require("lang",function(){
+        alert( $.String.toUpperCase("aa") )
     });
     </pre>
     <button class="doc_btn" type="button">点我，执行代码</button>
 </fieldset>
+<fieldset><legend>例子</legend>
+    <p>加载多个模块。需要注意的是，涉及DOM操作时必须要待到DOM树建完才能进入，因此我们在这里指定了一个标识，叫ready，
+        它并不一个模块，用户自定义模块，也不要起名叫ready。</p>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+    $.require("ready,node,attr",function(){
+        alert( $.fn.attr +"" );//这两个方法都循环生成出来,源码上看不出区别
+        alert( $.fn.prop +"" );
+    });
+    </pre>
+    <button class="doc_btn" type="button">点我，执行代码</button>
+</fieldset>
+
+<fieldset><legend>例子</legend>
+    <p>加载多个模块，使用字符串数组形式的依赖列表。</p>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+    $.require(["ready","node","css"], function(){
+        $("#js_require_ex3").toggle();
+    });
+    </pre>
+    <button class="doc_btn" type="button">点我，执行代码</button>
+    <div id="js_require_ex3" style="display:none;width:300px;height:40px;background:purple;">这是隐藏的，现在把它显示出来</div>
+</fieldset>
+
+<fieldset><legend>例子</legend>
+    <p>加载远程模块。</p>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+    $.require("random(http://files.cnblogs.com/rubylouvre/random.js),ready,node,css", function(random){
+         $("#js_require_ex4").css("bgc", random.hex() );//每点一次随机变换颜色
+    });
+    </pre>
+    <button class="doc_btn" type="button">点我，执行代码</button>
+    <div id="js_require_ex4" style="width:300px;height:40px;background:white">
+    </div>
+   
+</fieldset>
+
+

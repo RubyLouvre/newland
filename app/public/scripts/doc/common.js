@@ -7,23 +7,15 @@
  
     if(self.eval !== top.eval){
         window.$ && $.require("ready,css,node",function(){
-            parent.callParent && parent.callParent(document)
+            parent.callParent && parent.callParent(document);
         });
     }
     window.SyntaxHighlighter && SyntaxHighlighter.all();
     $.require("ready,event",function(){
         $("body").delegate(".doc_btn","click",function(){
-            if(this.exec){
+            if(typeof this.exec == "function"){
                 this.exec.call(window)
-            }else{
-                var btn =  $(this);
-                console.log(btn.prev("pre").text())
-                var fn = Function( $.String.unescapeHTML(btn.prev("pre").text()) );
-                fn();
-                this.exec = fn;
             }
         });
-        
     });
-
 })();

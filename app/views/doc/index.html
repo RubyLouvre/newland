@@ -5,7 +5,7 @@
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>mass Framework</title>
         <%=  add_js('/scripts/mass_merge.js' );    %>
-        <%=  add_js('/scripts/doc/shCore2.js' ) ;   %>
+        <%=  add_js('/scripts/doc/shCore.js' ) ;   %>
         <%=  add_js('/scripts/doc/common.js' );    %>
         <%=  add_js('/scripts/doc/suggest.js' ) ;   %>
         <%=  add_js('/scripts/doc/shBrushJScript.js' ) ;   %>
@@ -107,7 +107,17 @@
                 if(doc){
                     var el = doc.getElementsByTagName("article")[0];
                     var text = el.innerHTML
-                    $("#holdplace").html(text)
+                    $("#holdplace").html(text);
+                    $("pre").each(function(){
+                        if(this.exec !== "function"){
+                            var self = $(this), btn = self.next("button.doc_btn")
+                            if(/brush:\s*j/i.test(this.className)  && btn.length ){
+                                var code =  $.String.unescapeHTML( self.text() );
+                                var fn = Function( code );
+                                btn[0].exec = fn;
+                            }
+                        }
+                    });
                     window.SyntaxHighlighter && SyntaxHighlighter.highlight();
                 }
             }
