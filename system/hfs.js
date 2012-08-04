@@ -1,4 +1,5 @@
 //height level file system
+//高级文件系统操作API
 $.define( "hfs","fs,path", function(fs, path){
     // console.log("已加载了hfs模块")
     $.mix( {
@@ -164,6 +165,7 @@ $.define( "hfs","fs,path", function(fs, path){
             }
             inner("", array, cb)
         },
+        //读取某个文件的内容
         readFile: function(){
             fs.readFile.apply(fs, arguments)
         },
@@ -191,6 +193,7 @@ $.define( "hfs","fs,path", function(fs, path){
             }
             dir ? $.mkdir(dir, fn) : fn();
         },
+        //比较两个文件的内容,如果前者与后者不一致,则用后者的更新前者,前两个参数为它们的路径名
         updateFileSync: function(target_path, source_path){
             var source = fs.statSync.readFile(source_path,"utf-8");
             var update = true;
@@ -207,6 +210,7 @@ $.define( "hfs","fs,path", function(fs, path){
                 $.writeFileSync(target_path, source, "utf-8");
             }
         },
+         //上面的异步化版本
         updateFile: function(target_path, source_path, cb){
             var pending = 2, object = {}
             function callback(){
@@ -368,64 +372,5 @@ $.define( "hfs","fs,path", function(fs, path){
     //fs.rmdir("files/45643/aara/", function(){
     //    console.log("dd")
     //})
-    /*There's basically two ways of accomplishing this. In an async environment you'll notice that there are two kinds of loops: serial and parallel. A serial loop waits for one iteration to complete before it moves onto the next iteration - this guarantees that every iteration of the loop completes in order. In a parallel loop, all the iterations are started at the same time, and one may complete before another, however, it is much faster than a serial loop. So in this case, it's probably better to use a parallel loop because it doesn't matter what order the walk completes in, just as long as it completes and returns the results (unless you want them in order).
-
-A parallel loop would look like this:
-
-var fs = require('fs');
-var walk = function(dir, done) {
-  var results = [];
-  fs.readdir(dir, function(err, list) {
-    if (err) return done(err);
-    var pending = list.length;
-    if (!pending) return done(null, results);
-    list.forEach(function(file) {
-      file = dir + '/' + file;
-      fs.stat(file, function(err, stat) {
-        if (stat && stat.isDirectory()) {
-          walk(file, function(err, res) {
-            results = results.concat(res);
-            if (!--pending) done(null, results);
-          });
-        } else {
-          results.push(file);
-          if (!--pending) done(null, results);
-        }
-      });
-    });
-  });
-};
-A serial loop would look like this:
-
-var fs = require('fs');
-var walk = function(dir, done) {
-  var results = [];
-  fs.readdir(dir, function(err, list) {
-    if (err) return done(err);
-    var i = 0;
-    (function next() {
-      var file = list[i++];
-      if (!file) return done(null, results);
-      file = dir + '/' + file;
-      fs.stat(file, function(err, stat) {
-        if (stat && stat.isDirectory()) {
-          walk(file, function(err, res) {
-            results = results.concat(res);
-            next();
-          });
-        } else {
-          results.push(file);
-          next();
-        }
-      });
-    })();
-  });
-};
-And to test it out on your home directory (WARNING: the results list will be huge if you have a lot of stuff in your home directory):
-
-walk(process.env.HOME, function(err, results) {
-  if (err) throw err;
-  console.log(results);
-});
-EDIT: Improved examples.*/
+   
     //
