@@ -3,7 +3,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
         var matchAll = /<pre(?:.)+?class\s*=\s*([\'\"])\s*brush\b(?:.|\n|\r)+?\1\s*>(?:.|\n|\r)+?<\/pre>/gi
         var matchOne = /<pre class="brush:(\w+)(?:[^"]+)">((?:.|\n|\r)+?)<\/pre>/i
         flow.bind('cache_page', function( html, url ){
-           // $.log( "已进入cache_page栏截器" );
+            // $.log( "已进入cache_page栏截器" );
             var buffer = []
             html = html.replace(matchAll, function(ss){
                 var match = ss.match(matchOne)
@@ -36,7 +36,15 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                 type: this.content_type("html")
             }
             if( $.configs.write_page ){
-                $.writeFile( $.path.join("app","pages", url ) , html )
+                var pageurl = $.path.join("app","pages", url );
+                var rubylouvre = $.path.join("D:/rubylouvre/", url )
+                $.writeFile( pageurl , html, function(){
+                    if( /doc\//.test(url) ){//同步到rubylouvre项目
+                        $.updateFile(rubylouvre, pageurl, function(){
+                            $.log(rubylouvre+" 更新成功");
+                        })
+                    }
+                })
             }
             $.pagesCache[ url ] = cache;
             this.fire("send_file", cache)

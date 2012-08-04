@@ -9,6 +9,8 @@ $.define("menu","node,event,attr,css",function(){
         sub_class: "mass_sub_menu",
         direction: "vertical"
     }
+    //IE678中，如果鼠标离开菜单想进入main_menu，它会被认为mouseleave了菜单，需要延迟一下
+    var timeout = $["@bind"] == "attachEvent" ? 100 : 17;
     var Menu = $.factory({
         init: function(el, opts){
             var ui = this;
@@ -36,16 +38,21 @@ $.define("menu","node,event,attr,css",function(){
             });
             menu.mouseleave(function(){
                 ui.flag_close = true;
-                menu.find("."+itemClass).removeClass(hoverClass)
+                setTimeout(function(){
+                    if( ui.flag_close ){//fix IE
+                        menu.find("."+itemClass).removeClass(hoverClass)
+                    }
+                },timeout)
+             
             }).mouseenter(function(){
                 ui.flag_close = false;
             })
-            //不要绑在body上，有时body的高度只有几十px，没有占满浏览器的视窗
-//            $(document).click(function(){
-//                if( ui.flag_close )  {
-//                    $("."+itemClass).removeClass(hoverClass)
-//                }
-//            });
+        //不要绑在body上，有时body的高度只有几十px，没有占满浏览器的视窗
+        //            $(document).click(function(){
+        //                if( ui.flag_close )  {
+        //                    $("."+itemClass).removeClass(hoverClass)
+        //                }
+        //            });
         },
         addMenu : function( parent, cls ){
             return $("<div />").appendTo( parent ).addClass(cls)
@@ -81,11 +88,11 @@ $.define("menu","node,event,attr,css",function(){
             , data = $this.data('menu')
             , options = typeof option == 'object' && option
             if (!data) $this.data('menu', (data = new Menu(this, options)))
-           if (typeof option == 'string')
+            if (typeof option == 'string')
                 data[option] &&  data[option]()
         })
     }
-    //参数 可以是任何类型的场景， 你要么借助约定 要么借助接口 要么借助防御性代码
+//参数 可以是任何类型的场景， 你要么借助约定 要么借助接口 要么借助防御性代码
 /*     jquery 菜单 http://apycom.com/# http://pupunzi.open-lab.com/mb-jquery-components/mb-_menu/
         http://users.tpg.com.au/j_birch/plugins/superfish/# http://www.dynamicdrive.com/dynamicindex1/ddsmoothmenu.htm
         http://www.filamentgroup.com/examples/menus/ipod.php#</body>

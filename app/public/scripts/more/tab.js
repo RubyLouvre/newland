@@ -9,8 +9,7 @@ $.define("tab","node,event,attr,css",function(){
             , $ul = $this.closest('ul:not(.dropdown-menu)')
             , selector = $this.attr('data-target')
             , previous
-            , $target
-            , e
+            , $target;
 
             if (!selector) {
                 selector = $this.attr('href')
@@ -21,8 +20,6 @@ $.define("tab","node,event,attr,css",function(){
                 return
 
             previous = $ul.find('.active a').last()[0]
-
-  
 
             $this.fire("show",previous)
 
@@ -93,7 +90,6 @@ $.define("tab","node,event,attr,css",function(){
 
     $.require("ready", function(){
         $('body').on('click.tab.data-api', '[data-toggle="tab"], [data-toggle="pill"]', function (e) {
-            $.log("=============")
             e.preventDefault()
             $(this).tab('show')
         })

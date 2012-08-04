@@ -11,7 +11,11 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
     var more = $.configs.third_modules
     more.replace($.rword, function( name ){
         var path = $.path.join( __dirname,"more", name + ".js" );
-        var text = $.readFileSync( path, "utf-8")
+        var text = $.readFileSync( path, "utf-8");
+        var rubylouvre = $.path.join( "D:/rubylouvre/scripts/more",name+ ".js")
+        $.updateFile( rubylouvre, path, function(){
+            $.log(rubylouvre+" 更新成功");
+        });
         $.writeFile( $.path.join( "app/public/scripts/more", name+ ".js" ), text )
     })
 
@@ -22,7 +26,8 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
             var text = $.readFileSync( url, "utf-8")
             files.push(text)
             //   $.log("合并"+name+"模块")
-            $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text )
+            $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text);
+
         }catch(e){
             $.log(e);
             $.log(url)
@@ -50,11 +55,15 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
     replaced = replaced + files.join("\n")
     replaced = first.replace("/*combine modules*/", replaced ).replace(rcomments,"");
     //开始合并
-    $.writeFile("app/public/scripts/mass_merge.js", replaced,"utf8",function(e){//生成新的js文件！
+    var merge_url = "app/public/scripts/mass_merge.js"
+    $.writeFile( merge_url, replaced,"utf8",function(e){//生成新的js文件！
         if(e) {
-            console.log("出错了 "+e);
+            $.log("出错了 "+e);
         }else{
-            console.log("合并成功")
+            $.log("合并成功");
+            $.updateFile(  "D:/rubylouvre/scripts","mass_merge.js", merge_url, function(){
+                $.log("mass_merge.js 更新成功");
+            });
         }
     })
 })

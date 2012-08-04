@@ -170,6 +170,7 @@ $.define( "hfs","fs,path", function(fs, path){
         readFileSync: function(){
             return fs.readFileSync.apply(fs, arguments)
         },
+
         //创建文件,并添加内容,如果指定的路径中里面某些目录不存在,也一并创建它们
         writeFileSync: function( p , data, encoding){
             p = path.normalize(p);
@@ -189,6 +190,50 @@ $.define( "hfs","fs,path", function(fs, path){
                 fs.writeFile( p, data, "utf-8", cb)
             }
             dir ? $.mkdir(dir, fn) : fn();
+        },
+        updateFileSync: function(target_path, source_path){
+            var source = fs.statSync.readFile(source_path,"utf-8");
+            var update = true;
+            try{
+                var stat = fs.statSync(target_path);
+                if(stat.isFile()){
+                    var target = fs.statSync.readFile(source_path,"utf-8");
+                    if(source+"" == target+""){
+                        update = false;
+                    }
+                }
+            }catch(e){};
+            if( update && target ){
+                $.writeFileSync(target_path, source, "utf-8");
+            }
+        },
+        updateFile: function(target_path, source_path, cb){
+            var pending = 2, object = {}
+            function callback(){
+                if(!pending){
+                    if(object.err || object.target != object.source){
+                        $.writeFile(target_path, object.source, cb);
+                    }
+                }
+            }
+            fs.readFile(target_path, "utf-8", function(e, data ){
+                pending--;
+                if(e){
+                    object.err = true;
+                }else{
+                    object.target = data + "";
+                }
+                callback()
+            })
+            fs.readFile(source_path, "utf-8", function(e, data){
+                pending--;
+                if(e){
+                    cb(e)
+                }else{
+                    object.source = data + "";
+                }
+                callback();
+            })
         },
         //目录对拷,可以跨分区拷贝
         cpdirSync: new function(old, neo, cb) {
@@ -273,54 +318,114 @@ $.define( "hfs","fs,path", function(fs, path){
 
     })
 });
-// walk, delSync, del, mkdirSync, mkdir, writeFileSync, writeFile, cpdirSync, cpdir
+    // walk, delSync, del, mkdirSync, mkdir, writeFileSync, writeFile, cpdirSync, cpdir
 
-//var cp = function(src, dst, callback) {//将一个文件的内容拷到另一个文件中，如果原来有东西，将被清掉再拷
-//    var is = fs.createReadStream(src); //因此这方法只用于文件间的内容转移
-//    var os = fs.createWriteStream(dst);//使用之前，要自己确保这两个文件是否存在
-//    require("util").pump(is, os, callback);
-//}
-//var a = 4
-//switch(a){
-//    case 1 ://create
-//        $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
-//            $.writeFile("files/45643/aaa.js", "alert(1)",function(){
-//                console.log("创建文件与目录成功")
-//            })
-//        });
-//        $.mkdir("aaerewr",function(){
-//            console.log("创建目录成功")
-//        });
-//        break;
-//    case 2 ://walk
-//        $.walk("files",{
-//            cb:function(files,dirs){
-//                console.log(files);
-//                console.log(dirs)
-//                console.log("收集文件与目录，包括自身")
-//            },
-//            sync: true
-//        })
-//        break;
-//    case 3: //delete
-//        $.remove("files",function(files,dirs){
-//            console.log("删除文件与目录，包括自身")
-//        });
-//        $.remove("aaerewr",function(files,dirs){
-//            console.log("删除文件与目录，包括自身")
-//        });
-//        break;
-//    case 4:
-//        console.log( path.resolve(process.cwd(), "E:\\aaa.js") +"!" )
-//        fs.writeFileSync("E:\\aaa.js","alert(1)");
-//        cp("helpers.js","neer/ee.txt",function(){
-//            console.log("ok")
-//        })
-//        $.cpdir("nbproject","E:\\neer");
-//        break;
-//}
-//
-//fs.rmdir("files/45643/aara/", function(){
-//    console.log("dd")
-//})
-//
+    //var cp = function(src, dst, callback) {//将一个文件的内容拷到另一个文件中，如果原来有东西，将被清掉再拷
+    //    var is = fs.createReadStream(src); //因此这方法只用于文件间的内容转移
+    //    var os = fs.createWriteStream(dst);//使用之前，要自己确保这两个文件是否存在
+    //    require("util").pump(is, os, callback);
+    //}
+    //var a = 4
+    //switch(a){
+    //    case 1 ://create
+    //        $.writeFile("files/45643/aara/test.js",'alert(88)', function(){
+    //            $.writeFile("files/45643/aaa.js", "alert(1)",function(){
+    //                console.log("创建文件与目录成功")
+    //            })
+    //        });
+    //        $.mkdir("aaerewr",function(){
+    //            console.log("创建目录成功")
+    //        });
+    //        break;
+    //    case 2 ://walk
+    //        $.walk("files",{
+    //            cb:function(files,dirs){
+    //                console.log(files);
+    //                console.log(dirs)
+    //                console.log("收集文件与目录，包括自身")
+    //            },
+    //            sync: true
+    //        })
+    //        break;
+    //    case 3: //delete
+    //        $.remove("files",function(files,dirs){
+    //            console.log("删除文件与目录，包括自身")
+    //        });
+    //        $.remove("aaerewr",function(files,dirs){
+    //            console.log("删除文件与目录，包括自身")
+    //        });
+    //        break;
+    //    case 4:
+    //        console.log( path.resolve(process.cwd(), "E:\\aaa.js") +"!" )
+    //        fs.writeFileSync("E:\\aaa.js","alert(1)");
+    //        cp("helpers.js","neer/ee.txt",function(){
+    //            console.log("ok")
+    //        })
+    //        $.cpdir("nbproject","E:\\neer");
+    //        break;
+    //}
+    //
+    //fs.rmdir("files/45643/aara/", function(){
+    //    console.log("dd")
+    //})
+    /*There's basically two ways of accomplishing this. In an async environment you'll notice that there are two kinds of loops: serial and parallel. A serial loop waits for one iteration to complete before it moves onto the next iteration - this guarantees that every iteration of the loop completes in order. In a parallel loop, all the iterations are started at the same time, and one may complete before another, however, it is much faster than a serial loop. So in this case, it's probably better to use a parallel loop because it doesn't matter what order the walk completes in, just as long as it completes and returns the results (unless you want them in order).
+
+A parallel loop would look like this:
+
+var fs = require('fs');
+var walk = function(dir, done) {
+  var results = [];
+  fs.readdir(dir, function(err, list) {
+    if (err) return done(err);
+    var pending = list.length;
+    if (!pending) return done(null, results);
+    list.forEach(function(file) {
+      file = dir + '/' + file;
+      fs.stat(file, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+          walk(file, function(err, res) {
+            results = results.concat(res);
+            if (!--pending) done(null, results);
+          });
+        } else {
+          results.push(file);
+          if (!--pending) done(null, results);
+        }
+      });
+    });
+  });
+};
+A serial loop would look like this:
+
+var fs = require('fs');
+var walk = function(dir, done) {
+  var results = [];
+  fs.readdir(dir, function(err, list) {
+    if (err) return done(err);
+    var i = 0;
+    (function next() {
+      var file = list[i++];
+      if (!file) return done(null, results);
+      file = dir + '/' + file;
+      fs.stat(file, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+          walk(file, function(err, res) {
+            results = results.concat(res);
+            next();
+          });
+        } else {
+          results.push(file);
+          next();
+        }
+      });
+    })();
+  });
+};
+And to test it out on your home directory (WARNING: the results list will be huge if you have a lot of stuff in your home directory):
+
+walk(process.env.HOME, function(err, results) {
+  if (err) throw err;
+  console.log(results);
+});
+EDIT: Improved examples.*/
+    //

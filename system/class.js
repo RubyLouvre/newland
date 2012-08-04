@@ -2,7 +2,7 @@
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-   $.log("已加载类工厂模块")
+   //$.log("已加载类工厂模块")
     var
     unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),
     rconst = /constructor|_init|_super/,
