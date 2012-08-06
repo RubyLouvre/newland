@@ -234,7 +234,7 @@ $.define( "hfs","fs,path", function(fs, path){
             });
             if(isText){
                 pending--;
-                object.source = data + "";
+                object.source = source_path + "";
             }else{
                 fs.readFile(source_path, "utf-8", function(e, data){
                     pending--;
