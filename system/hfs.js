@@ -1,7 +1,7 @@
 //height level file system
 //高级文件系统操作API
 $.define( "hfs","fs,path", function(fs, path){
-    $.log("已加载了hfs模块")
+    $.log("已加载了hfs模块!!")
     $.mix( {
         //遍历文件树,收集目录与文件,并包含自身
         //p为路径，
@@ -197,8 +197,8 @@ $.define( "hfs","fs,path", function(fs, path){
         //target_path:要更新的文件路径，
         //source_path:原文件的路径（或者原文件的内容，当第四个参数为真正的情况下),
         //isText:决定第二个参数是路径还是文本内容，如果是文本内容就不用再读取了
-        updateFileSync: function(target_path, source_path, isText){
-            var source = isText ? source_path : fs.statSync.readFile(source_path,"utf-8");
+        updateFileSync: function(target_path, source_path, is_text){
+            var source = is_text ? source_path : fs.statSync.readFile(source_path,"utf-8");
             var update = true;
             try{
                 var stat = fs.statSync(target_path);
@@ -214,7 +214,14 @@ $.define( "hfs","fs,path", function(fs, path){
             }
         },
         //上面的异步化版本，
-        updateFile: function(target_path, source_path, cb, isText){
+        /*
+         * var view_url = 'D:\newland\app\views\doc\query\query.attribute.html'
+         * var page_url = view_url.replace("\\views","\\pages");
+         *  $.updateFile(page_url, view_url, function(){
+         *       $.log(page_url+"  同步完成")
+         *  });
+         */
+        updateFile: function(target_path, source_path, cb, is_text){
             var pending = 2, object = {}
             function callback(){
                 if(!pending){
@@ -226,15 +233,16 @@ $.define( "hfs","fs,path", function(fs, path){
             fs.readFile(target_path, "utf-8", function(e, data ){
                 pending--;
                 if(e){
-                    object.err = true;
+                    object.err = true;//如果不存在
                 }else{
                     object.target = data + "";
                 }
                 callback()
             });
-            if(isText){
+            if(is_text){
                 pending--;
                 object.source = source_path + "";
+                callback();
             }else{
                 fs.readFile(source_path, "utf-8", function(e, data){
                     pending--;
@@ -329,7 +337,8 @@ $.define( "hfs","fs,path", function(fs, path){
             }
         }
 
-    })
+    });
+
 });
     // walk, delSync, del, mkdirSync, mkdir, writeFileSync, writeFile, cpdirSync, cpdir, updateFile
 
