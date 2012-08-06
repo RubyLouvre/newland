@@ -194,13 +194,16 @@ $.define( "hfs","fs,path", function(fs, path){
             dir ? $.mkdir(dir, fn) : fn();
         },
         //比较两个文件的内容,如果前者与后者不一致,则用后者的更新前者,前两个参数为它们的路径名
-        updateFileSync: function(target_path, source_path){
-            var source = fs.statSync.readFile(source_path,"utf-8");
+        //target_path:要更新的文件路径，
+        //source_path:原文件的路径（或者原文件的内容，当第四个参数为真正的情况下),
+        //isText:决定第二个参数是路径还是文本内容，如果是文本内容就不用再读取了
+        updateFileSync: function(target_path, source_path, isText){
+            var source = isText ? source_path : fs.statSync.readFile(source_path,"utf-8");
             var update = true;
             try{
                 var stat = fs.statSync(target_path);
                 if(stat.isFile()){
-                    var target = fs.statSync.readFile(source_path,"utf-8");
+                    var target = fs.statSync.readFile(target_path,"utf-8");
                     if(source+"" == target+""){
                         update = false;
                     }
@@ -210,8 +213,8 @@ $.define( "hfs","fs,path", function(fs, path){
                 $.writeFileSync(target_path, source, "utf-8");
             }
         },
-         //上面的异步化版本
-        updateFile: function(target_path, source_path, cb){
+        //上面的异步化版本，
+        updateFile: function(target_path, source_path, cb, isText){
             var pending = 2, object = {}
             function callback(){
                 if(!pending){
@@ -228,16 +231,22 @@ $.define( "hfs","fs,path", function(fs, path){
                     object.target = data + "";
                 }
                 callback()
-            })
-            fs.readFile(source_path, "utf-8", function(e, data){
+            });
+            if(isText){
                 pending--;
-                if(e){
-                    cb(e)
-                }else{
-                    object.source = data + "";
-                }
-                callback();
-            })
+                object.source = data + "";
+            }else{
+                fs.readFile(source_path, "utf-8", function(e, data){
+                    pending--;
+                    if(e){
+                        cb(e)
+                    }else{
+                        object.source = data + "";
+                    }
+                    callback();
+                })
+            }
+
         },
         //目录对拷,可以跨分区拷贝
         cpdirSync: new function(old, neo, cb) {
