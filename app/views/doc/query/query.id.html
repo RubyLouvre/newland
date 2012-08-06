@@ -1,0 +1,35 @@
+<%  set_title("query.id") %>
+<%  set_layout("query_layout.html") %>
+<p>并联选择器，也是CSS表达式中的逗号。</p>
+<fieldset><legend>例子</legend>
+    <table class="clicktable" cellspacing="0" width="700" rules="cols" >
+        <thead>
+            <tr>
+                <th>
+                    请点击下面表格
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    $("#fanalfantasy").css("bgc","red");
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <pre class="brush:xml;gutter:false;toolbar:false">
+  <div id="games">
+        <p id="fanalfantasy"class="bbb"> 最终幻想 | <span class="aaa">勇者斗恶龙 |</span><span class="ccc">女神转生| </span><span class="bbb">传说系列 </span></p>
+        <p class="aaa">荒野兵器 |<span title="hello">北欧女神 </span></p>
+        <p title="aaa">浪漫沙加|<span title="bye">王国之心 </span></p>
+        <p id="legend ">圣剑传说 |<span class="ccc eee" title="goodbye">幻想水浒传| </span><em>影之心 |<span class="aaa">格兰蒂亚 </span></em></p>
+    </div>
+    </pre>
+    <div id="games">
+        <p id="fanalfantasy"class="bbb"> 最终幻想 | <span class="aaa">勇者斗恶龙 |</span><span class="ccc">女神转生| </span><span class="bbb">传说系列 </span></p>
+        <p class="aaa">荒野兵器 |<span title="hello">北欧女神 </span></p>
+        <p title="aaa">浪漫沙加|<span title="bye">王国之心 </span></p>
+        <p id="legend ">圣剑传说 |<span class="ccc eee" title="goodbye">幻想水浒传| </span><em>影之心 |<span class="aaa">格兰蒂亚 </span></em></p>
+    </div>
+</fieldset>

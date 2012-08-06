@@ -126,11 +126,6 @@ $.define("api", function(){
             "lang": "function"
         },
         "类工厂模块": {
-            "mutators": {
-                "inherit": "function",
-                "implement": "function",
-                "extend": "function"
-            },
             "factory": "function"
         },
         "选择器模块": {
@@ -138,7 +133,6 @@ $.define("api", function(){
             "contains": "function",
             "getText": "function",
             "unique": "function",
-            "@bools": "string",
             "query": "function"
         },
         "数据缓存模块": {

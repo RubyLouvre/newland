@@ -93,10 +93,12 @@
             .api-menu{
                 margin:20px 20px 0 20px;
             }
+
             #api-iframe{
-                visibility:hidden;
                 width:100%;
-                height:1px;
+                position:relative;
+                top:-1000px;
+                height:10px;
             }
             #holdplace {
                 width:90%;
@@ -105,6 +107,10 @@
         <script type="text/javascript">
             function callParent(doc){
                 if(doc){
+			/**
+			*浏览器有个策略，如果你是用隐藏的iframe来加载页面，而页面又调用父页面的函数，
+            *就有一定的几率弹出"For security reasons, framing is not allowed
+            */
                     $.require("ready,node",function(){
                         var el = doc.getElementsByTagName("article")[0];
                         var text = el.innerHTML

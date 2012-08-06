@@ -1,0 +1,29 @@
+
+<%  set_title("query.target") %>
+<%  set_layout("query_layout.html") %>
+<p>目标伪类。选出其name或id等于地址栏中#后的字符串（location.hash）的元素。</p>
+
+<fieldset><legend>例子</legend>
+    <table class="clicktable" cellspacing="0" width="700" rules="cols" >
+        <thead>
+            <tr>
+                <th>
+                    请点击下面表格
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    $("fieldset :target").css("bgc","red");
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <pre class="brush:xml;gutter:false;toolbar:false">
+    <p id="show_url">这个用于动态显示location.href</p>
+    <p id="target">这个会被选中</p>
+    </pre>
+    <p id="show_url">这个用于动态显示location.href</p>
+    <p id="target">这个会被选中</p>
+</fieldset>

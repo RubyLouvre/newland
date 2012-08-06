@@ -1,7 +1,7 @@
 //height level file system
 //高级文件系统操作API
 $.define( "hfs","fs,path", function(fs, path){
-    // console.log("已加载了hfs模块")
+    $.log("已加载了hfs模块")
     $.mix( {
         //遍历文件树,收集目录与文件,并包含自身
         //p为路径，
@@ -322,7 +322,7 @@ $.define( "hfs","fs,path", function(fs, path){
 
     })
 });
-    // walk, delSync, del, mkdirSync, mkdir, writeFileSync, writeFile, cpdirSync, cpdir
+    // walk, delSync, del, mkdirSync, mkdir, writeFileSync, writeFile, cpdirSync, cpdir, updateFile
 
     //var cp = function(src, dst, callback) {//将一个文件的内容拷到另一个文件中，如果原来有东西，将被清掉再拷
     //    var is = fs.createReadStream(src); //因此这方法只用于文件间的内容转移

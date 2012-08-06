@@ -67,4 +67,4 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
         }
     })
 })
-
+//http://www.elmerzhang.com/2011/09/nodejs-module-develop-publish/

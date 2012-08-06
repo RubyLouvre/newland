@@ -1,4 +1,4 @@
-$.define("ejs", "../lang",function(){
+$.define("ejs", "lang",function(){
     //用法如如ASP，JSP，ruby的ERB, 完全没有入门难度
     //不过太过自由写意，让用户任意在HTML镶嵌逻辑容易造成维护灾难
     //使用者请自行约束
@@ -12,55 +12,78 @@ $.define("ejs", "../lang",function(){
             return '$.ejs.filters.' + name + '(' + js + args + ')';
         });
     };
-    $.log("添加过滤器")
-    $.ejs = function( str ){
-        var ropen = /\s*<%\s*/
-        var rclose = /\s*%>\s*/
-        var rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g
-        var rlastSemi = /[,;]\s*$/
-        var openHTML = "\t__views.push("
-        var closeHTML = ");\n"
-        var arr = (str||"").trim().split(ropen);
-        var quote =  this.JSON ? JSON.stringify : $.quote;
-        var buff = ["var __views = [];\n"];
-        for(var i = 0, n = arr.length; i < n ; i++){
-            var segment = arr[i];
-            //  els = segment.split(rright);
-            if( ~segment.indexOf( '%>') ){//这里不使用els.length === 2是为了避开IE的split bug
-                var els = segment.split(rclose);
-                switch ( els[0].charAt(0) ) {
-                    case "="://处理后台返回的变量（输出到页面的);
-                        var js = els[0].slice(1);
-                        js = js.replace(rAt,"$1data.").replace(rlastSemi,'')
-                        if(js.charAt(0) == ":"){
-                            js = filtered(js)
-                        }
-                        buff.push( openHTML, js , closeHTML );
-                        break;
-                    case "#"://处理注释
-                        break;
-                    default://处理逻辑
-                        js = els[0];
-                        if(js.indexOf("@")!==-1){
-                            buff.push( js.replace(rAt,"$1data."), "\n" );
-                        }else{
-                            buff.push( js, "\n" );
-                        }
-                }
-                //处理静态HTML片断
-                if( els[1]){
-                    buff.push(openHTML, quote( els[1] ), closeHTML);
-                }
-            }else{
-                //处理静态HTML片断
-                segment && buff.push(openHTML, quote( segment ), closeHTML);
+    $.ejs = function( id,data,doc){
+        var el, source
+        if( !this.cache[ id] ){
+            doc = doc || document;
+            el = $.query ? $(id, doc)[0] : doc.getElementById(id.slice(1));
+            if(! el )
+                throw "can not find the target element";
+            source = el.innerHTML;
+            if(!(/script|textarea/.test(el.tagName))){
+                source = $.String.unescapeHTML(source);
             }
+            var fn = $.ejs.compile( source );
+            this.cache[ id ] = fn;
         }
-        return new Function("data", "helper",
-            "data = data || {};\nhelper = helper || {};\n"+
-            "with(helper){\n"
-            + buff.join("")+'\t;return __views.join(""); \n}');
+        return this.cache[ id ]( data );
     }
+    var isNodejs = typeof exports == "object";
+    $.ejs.cache = {};
+    $.ejs.filters = {};
+    $.ejs.compile = function( source, opts){
+        opts = opts || {}
+        var open  = opts.open  || isNodejs ? "<%" : "<&";
+        var close = opts.close || isNodejs ? "%>" : "&>";
+        var flag = true;//判定是否位于前定界符的左边
+        var codes = []; //用于放置源码模板中普通文本片断
+        var time = new Date * 1;// 时间截,用于构建codes数组的引用变量
+        var prefix = " r += s"+ time +"[" //渲染函数输出部分的前面
+        var postfix = "];"//渲染函数输出部分的后面
+        var t = "return function(data){ var r = ''; ";//渲染函数的最开始部分
+        var rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g;
+        var rlastSemi = /[,;]\s*$/;
+        var pre = 0, cur, code
+        for(var i = 0, n = source.length; i < n; ){
+            cur = source.indexOf( flag ? open : close, i);
+            if( cur < pre){
+                if( cur ){//取得最末尾的HTML片断
+                    t += prefix + codes.length + postfix
+                    codes.push( source.slice( pre ) );
+                }else{
+                    $.error("发生错误了");
+                }
+                break;
+            }
+            code = source.slice(i, cur );//截取前后定界符之间的片断
+            pre = cur;
+            if( flag ){//取得HTML片断
+                t += prefix + codes.length + postfix;
+                codes.push( code );
+                i = cur + open.length;
+            }else{//取得javascript罗辑
+                switch(code.charAt(0)){
+                    case ":"://使用过滤器的输出
+                        code = code.replace(rAt,"$1data.").replace(rlastSemi,'');
+                        code = filtered(code);
+                    case "="://直接输出
+                        t += " r +" +code +";"
+                        break;
+                    case "#"://注释,不输出
+                        break
+                    default://普通逻辑,不输出
+                        t += code.replace(rAt,"$1data.");
+                        break
+                }
+                i = cur + close.length;
+            }
+            flag = !flag;
+        }
+        t += " return r;}"
+        // console.log(t)
+        return Function("s"+time, "filters", t)(codes, $.ejs.filters)
+    }
+
     return $.ejs;
 })
 
