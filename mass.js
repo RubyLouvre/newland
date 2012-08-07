@@ -282,9 +282,9 @@
     $.require("system/page_generate", function(){
         $.log("测试页面生成器")
     });
-//    $.require("system/deploy,system/mvc", function(deploy){
-//        deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
-//    });
+    $.require("system/deploy,system/mvc", function(deploy){
+        deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
+    });
 //http://localhost:8888/index.html
 //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
 

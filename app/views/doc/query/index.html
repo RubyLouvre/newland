@@ -9,25 +9,6 @@
                    cursor:pointer; }
     .sample1 p { color:red; margin:0; clear:left; }
 </style>
-<script type="text/javascript">
-    $.require("ready,event,css,attr",function(){
-     /*       var n = 0;
-        var divs = $(".sample1 div").one("click", function(){
-            var index = divs.index(this);
-            $(this).css({ borderStyle:"inset",cursor:"auto" });
-            $(".sample1 p").text("Div at index #" + index + " clicked." +
-                "  That's " + ++n + " total clicks.");
-        });
-        */
-        $("#js-query-table td a").click(function(e){
-            e.preventDefault();
-            var href = $(this).prop("href");
-            $.log(href)
-            href = href.replace("/doc/","/doc/query/");
-            location.href = href
-        })
-    });
-</script>
 
 <h3>选择器模块</h3>
 <p><span class="stress">描述：</span></p>
@@ -79,7 +60,7 @@
             <td colspan="3">伪类选择器(W3C标准部分)</td>
         </tr>
         <tr>
-            <td><a href="query.child.html">子元素过滤选择器</a></td><td>
+            <td><a href="query/query.child.html">子元素过滤选择器</a></td><td>
                 :nth-child(an+b),<br/>
                 :nth-of-type(an+b),<br/>
                 :nth-last-child(an+b),<br/>
@@ -93,40 +74,40 @@
             </td><td></td>
         </tr>
         <tr>
-            <td><a href="query.target.html#target">目标伪类选择器</a></td><td>:target</td><td>指id或name等于location.hash的元素</td>
+            <td><a href="query/query.target.html#xxxx">目标伪类选择器</a></td><td>:target</td><td>指id或name等于location.hash的元素</td>
         </tr>
         <tr>
-            <td><a href="query.state.html">disabled属性伪类选择器</a></td><td>:disabled</td><td>指表单元素的disabled为true</td>
+            <td><a href="query/query.state.html">disabled属性伪类选择器</a></td><td>:disabled</td><td>指表单元素的disabled为true</td>
         </tr>
         <tr>
-            <td><a href="query.state.html">enabled属性伪类选择器</a></td><td>:enabled</td><td>指表单元素的disabled为false</td>
+            <td><a href="query/query.state.html">enabled属性伪类选择器</a></td><td>:enabled</td><td>指表单元素的disabled为false</td>
         </tr>
         <tr>
-            <td><a href="query.state.html">checked属性伪类选择器</a></td><td>:check</td><td>指表单元素的checked为true</td>
+            <td><a href="query/query.state.html">checked属性伪类选择器</a></td><td>:check</td><td>指表单元素的checked为true</td>
         </tr>
         <tr>
-            <td><a href="query.state.html">indeterminate属性伪类选择器</a></td><td>:indeterminate</td><td>指checkbox元素的indeterminate为true</td>
+            <td><a href="query/query.state.html">indeterminate属性伪类选择器</a></td><td>:indeterminate</td><td>指checkbox元素的indeterminate为true</td>
         </tr>
         <tr>
-            <td><a href="query.lang.html">lang伪类选择器</a></td><td>:lang(fr)</td><td>指当前元素或其父元素的lang属性~=括号中的语言种类</td>
+            <td><a href="query/query.lang.html">lang伪类选择器</a></td><td>:lang(fr)</td><td>指当前元素或其父元素的lang属性~=括号中的语言种类</td>
         </tr>
         <tr>
-            <td><a href="query.not.html">反选伪类选择器</a></td><td>:not(.aaa)</td><td>指当前元素不具备括号中所指的特性</td>
+            <td><a href="query/query.not.html">反选伪类选择器</a></td><td>:not(.aaa)</td><td>指当前元素不具备括号中所指的特性</td>
         </tr>
         <tr>
-            <td><a href="query.empty.html">empty子元素过滤选择器</a></td><td>:empty</td><td>此元素不存在任何子节点</td>
+            <td><a href="query/query.empty.html">empty子元素过滤选择器</a></td><td>:empty</td><td>此元素不存在任何子节点</td>
         </tr>
         <tr>
             <td>link子元素过滤选择器</td><td>:link</td><td>如果没有前缀，则返回document.links，否则要求为链接</td>
         </tr>
         <tr>
-            <td><a href="query.root.html">root伪类选择器</a></td><td>:root</td><td>返回根节点html</td>
+            <td><a href="query/query.root.html">root伪类选择器</a></td><td>:root</td><td>返回根节点html</td>
         </tr>
         <tr>
             <td colspan="3">伪类选择器(自定义扩展部分，灵感来自jQuery)</td>
         </tr>
         <tr>
-            <td><a href="query.tags.html">标签伪类选择器</a></td>
+            <td><a href="query/query.tags.html">标签伪类选择器</a></td>
             <td>:text,<br/>
                 :file,<br/>
                 :radio,<br/>
@@ -143,22 +124,22 @@
             </td>
         </tr>
         <tr>
-            <td><a href="query.state.html">selected属性伪类选择器</a></td><td>:selected</td><td>返回选中的option元素</td>
+            <td><a href="query/query.state.html">selected属性伪类选择器</a></td><td>:selected</td><td>返回选中的option元素</td>
         </tr>
         <tr>
-            <td><a href="query.visibility.html">hidden伪类选择器</a></td><td>:hidden</td><td>此元素不可见，如本身为hidden表单元素，或display为hidden</td>
+            <td><a href="query/query.visibility.html">hidden伪类选择器</a></td><td>:hidden</td><td>此元素不可见，如本身为hidden表单元素，或display为hidden</td>
         </tr>
         <tr>
-            <td><a href="query.visibility.html">visible伪类选择器</a></td><td>:visible</td><td>与上面相反</td>
+            <td><a href="query/query.visibility.html">visible伪类选择器</a></td><td>:visible</td><td>与上面相反</td>
         </tr>
         <tr>
-            <td><a href="query.parent.html">parent伪类选择器</a></td><td>:parent</td><td>此元素存在子元素</td>
+            <td><a href="query/query.parent.html">parent伪类选择器</a></td><td>:parent</td><td>此元素存在子元素</td>
         </tr>
         <tr>
-            <td><a href="query.contains.html">contains伪类</a></td><td>p:contains("司徒正美")</td><td>元素的文本包含括号中的内容</td>
+            <td><a href="query/query.contains.html">contains伪类</a></td><td>p:contains("司徒正美")</td><td>元素的文本包含括号中的内容</td>
         </tr>
         <tr>
-            <td><a href="query.has.html">has伪类</a></td><td>p:has(a)</td><td>如果p元素有孩子匹配a的这个选择器</td>
+            <td><a href="query/query.has.html">has伪类</a></td><td>p:has(a)</td><td>如果p元素有孩子匹配a的这个选择器</td>
         </tr>
     </tbody>
 </table>
