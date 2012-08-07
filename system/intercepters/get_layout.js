@@ -1,31 +1,26 @@
 $.define("get_layout", function(){
+    function cache_page(fn, url){
+        var html = fn( this.helper[0], this.helper[1] );
+        this.fire('cache_page', html, url);
+    }
     return function( flow ){
         flow.bind("get_layout", function( layout_url, url ){
-          // $.log( "已进入get_layout栏截器" );
+            // $.log( "已进入get_layout栏截器" );
             var fn = $.viewsCache[ layout_url ]
             if( fn ){
-                var html = fn( this.helper[0], this.helper[1] );
-                this.fire('cache_page', html, url);
+                cache_page.call(this, fn, url);
             }else{
-                $.readFile( layout_url,  'utf-8', function(err, text){
+                $.readFile( layout_url,  'utf-8', function(err, source){
                     if(err){
                         this.fire( "send_error", 404 )
                     }else{
-                        var fn = $.ejs( text );
-                        if(url){//如果指定了第二个参数才存入缓存系统
-
-
-
+                        var fn = $.ejs.compile(source, this.helper[1] );
+                        if( url ){//如果指定了第二个参数才存入缓存系统
                             $.viewsCache[ layout_url ] = fn
                             this.fire("get_layout", layout_url, url)
                         }else{
-                            var html = fn( this.helper[0] );
-                            html.replace("")
-
-
-                            this.fire('cache_page', html, url)
+                            cache_page.call(this, fn, url);
                         }
-
                     }
                 }.bind(this))
             }

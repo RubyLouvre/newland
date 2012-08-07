@@ -4,7 +4,7 @@ $.define("helper","class", function(){
             links : [],
             scripts : []
         }
-        var context = {
+        var helpers = {
             set_layout: function( str ){
                 data.layout = str
             },
@@ -62,7 +62,7 @@ $.define("helper","class", function(){
                 return create_tag( file, opts, arguments );
             }
         }
-        return [data, context]    
+        return [data, helpers]
     }
 
     var reg_full_path = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/

@@ -19,7 +19,8 @@ $.define("get_view", function(){
                     if(err){
                         this.fire( "send_error", 404 )
                     }else{
-                        $.viewsCache[ view_url ] = $.ejs( text );
+                        //将helpers编译进模板函数
+                        $.viewsCache[ view_url ] = $.ejs.compile( text, this.helper[1] );
                         this.fire( "get_view", view_url, url );
                     }
                 }.bind(this) );

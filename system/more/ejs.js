@@ -20,6 +20,12 @@ $.define("ejs", "../lang",function(){
         return $.ejs.cache[ id ]( data );
     }
     var isNodejs = typeof exports == "object";
+    if(isNodejs){
+        $.ejs = function( source,data,opts){
+            var fn = $.ejs.compile( source, opts );
+            return fn( data )
+        }
+    }
 
     $.ejs.compile = function( source, opts){
         opts = opts || {}
