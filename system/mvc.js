@@ -31,7 +31,7 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
                 var aname = match[1];
                 var instance = $.controllers[cname];//取得对应控制器实例
                 if( instance ){
-                   // $.log("调用控制器")
+                    clearTimeout( flow.timeoutID );
                     instance[aname]( flow );//到达指定action
                 }else{
                     $.log( "不存在此控制器" );

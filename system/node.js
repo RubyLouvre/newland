@@ -595,18 +595,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         not: function( expr ){
             return this.labor( filterhElement(this.valueOf(), expr, this.ownerDocument, true) );
         },
-        //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
-        is: function( expr ){
-            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
-            for( var i = 0 , node; node = nodes[ i++ ];){
-                uid = $.getUid(node);
-                obj[uid] = 1;
-            }
-            return $.slice(this).some(function( el ){
-                return  obj[ $.getUid(el) ];
-            });
-        },
-        //取得匹配节点中那些后代中能匹配给定CSS表达式的节点，组成新mass实例返回。
+
+        //在当前的节点中，往下遍历他们的后代，收集匹配给定的CSS表达式的节点，封装成新mass实例返回
         has: function( expr ) {
             var nodes = $( expr, this.ownerDocument );
             return this.filter(function() {
@@ -617,6 +607,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 }
             });
         },
+        // 在当前的节点中，往上遍历他们的祖先，收集最先匹配给定的CSS表达式的节点，封装成新mass实例返回
         closest: function( expr, context ) {
             var nodes = $( expr, context || this.ownerDocument ).valueOf();
             //遍历原mass对象的节点
@@ -638,6 +629,18 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             //将节点集合重新包装成一个新jQuery对象返回
             return this.labor( ret );
         },
+                //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
+        is: function( expr ){
+            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
+            for( var i = 0 , node; node = nodes[ i++ ];){
+                uid = $.getUid(node);
+                obj[uid] = 1;
+            }
+            return $.slice(this).some(function( el ){
+                return  obj[ $.getUid(el) ];
+            });
+        },
+        //返回指定节点在其所有兄弟中的位置
         index: function( expr ){
             var first = this[0]
             if ( !expr ) {//如果没有参数，返回第一元素位于其兄弟的位置
