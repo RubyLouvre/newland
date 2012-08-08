@@ -524,7 +524,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
             return val
         };
-        var method = "scroll" + name;//scrollTop,scrollLeft只有读方法
+        var method = "scroll" + name;
         $.fn[ method ] = function( val ) {
             var node, win, t = name == "Top";
             if ( val === void 0 ) {

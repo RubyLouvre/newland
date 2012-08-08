@@ -1,6 +1,6 @@
 $.define("page_generate","helper,ejs,hfs",function(get_hepler){
 
-    var url = "D:/newland/app/views/doc/node"
+    var url = "D:/newland/app/views/doc/css"
     var layouts = {};
 
     $.walk(url, function(files){
