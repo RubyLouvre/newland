@@ -26,10 +26,13 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                 return '<pre class="brush:'+type+';gutter:false;toolbar:false">mass_mass</pre>'
             });
             html = tidy_html(html);
-            var index = 0
-            html = html.replace(/mass_mass/g, function(s){
-                return "\n"+buffer[index++]+"\n"
-            });
+            if(buffer.length){
+                var index = 0
+                html = html.replace(/mass_mass/g, function(s){
+                    return "\n"+buffer[index++]+"\n"
+                });
+            }
+          
             var cache = {
                 code: 200,
                 data: html,
@@ -41,7 +44,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                 $.writeFile( pageurl , html, function(){
                     if( /doc\//.test(url) ){//同步到rubylouvre项目
                         $.updateFile(rubylouvre, pageurl, function(){
-                            $.log(rubylouvre+" 更新成功");
+                            $.log(rubylouvre+" 同步成功");
                         })
                     }
                 })

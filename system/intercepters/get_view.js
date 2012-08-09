@@ -5,12 +5,12 @@ $.define("get_view", function(){
             var fn = $.viewsCache[ view_url ]
             if( fn ){
                 var data = this.helper[0];
-                var html = fn( data, this.helper[1]);
+                var html = fn( data, this.helper[1] );
                 if(typeof data.layout == "string"){
                     data.partial = html;
                     var layout_url = $.path.join("app","views/layout", data.layout );
                     this.fire("get_layout", layout_url, url );
-                }else{
+                }else{//如果没有layout
                     this.fire('cache_page', html, url)
                 }
             }else{

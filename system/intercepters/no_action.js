@@ -4,7 +4,7 @@ $.define("no_action", function(){
             // $.log("已进入no_action栏截器")
             //去掉#？等杂质，如果是符合如下后缀后，则进行静态资源缓存
             var url = this.req.url;
-            if( /\.(css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
+            if( /\.(html|css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
                 var type = RegExp.$1
                 url = url.replace(/[?#].*/, '');
                 var cache = $.staticCache[ url ],lm
