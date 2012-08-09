@@ -1,4 +1,4 @@
-$.define("page_generate","helper,ejs,hfs",function(get_hepler){
+$.define("page_generate","helper,more/ejs,hfs",function(get_hepler){
 
     var url = "D:/newland/app/views/doc/css"
     var layouts = {};

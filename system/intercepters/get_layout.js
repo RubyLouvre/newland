@@ -14,7 +14,7 @@ $.define("get_layout", function(){
                     if(err){
                         this.fire( "send_error", 404 )
                     }else{
-                        var fn = $.ejs.compile(source, this.helper[1] );
+                        var fn = $.ejs.compile( source, this.helper[1] );
                         if( url ){//如果指定了第二个参数才存入缓存系统
                             $.viewsCache[ layout_url ] = fn
                             this.fire("get_layout", layout_url, url)

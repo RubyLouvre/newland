@@ -211,65 +211,23 @@ $.define("api", function(){
         },
         "样式模块": {
             "fn": {
-                "valueOf": "function",
-                "toString": "function",
                 "css": "function",
-                "innerHeight": "function",
-                "outerHeight": "function",
+                "width": "function",
                 "height": "function",
                 "innerWidth": "function",
+                "innerHeight": "function",
                 "outerWidth": "function",
-                "width": "function",
+                "outerHeight": "function",
                 "offset": "function",
                 "position": "function",
                 "offsetParent": "function",
+                "scrollParent": "function",
                 "scrollLeft": "function",
                 "scrollTop": "function"
             },
-            "cssAdapter": {
-                "_default:get": "function",
-                "_default:set": "function",
-                "height:get": "function",
-                "width:get": "function",
-                "userSelect:set": "function",
-                "left:get": "function",
-                "top:get": "function"
-            },
-            "cssMap": {
-                "c": "string",
-                "h": "string",
-                "o": "string",
-                "r": "string",
-                "w": "string",
-                "x": "string",
-                "y": "string",
-                "fs": "string",
-                "st": "string",
-                "sl": "string",
-                "sx": "string",
-                "sy": "string",
-                "tx": "string",
-                "ty": "string",
-                "bgc": "string",
-                "opacity": "string",
-                "float": "string",
-                "transform": "string",
-                "userSelect": "string"
-            },
             "cssName": "function",
             "scrollbarWidth": "function",
-            "cssNumber": {
-                "fontSizeAdjust": "number",
-                "fontWeight": "number",
-                "lineHeight": "number",
-                "opacity": "number",
-                "orphans": "number",
-                "widows": "number",
-                "zIndex": "number",
-                "zoom": "number"
-            },
-            "css": "function",
-            "Matrix2D": "function"
+            "css": "function"
         },
         "属性模块": {
             "fn": {

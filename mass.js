@@ -279,9 +279,8 @@
     //  $.require("system/server", function(){
     //     $.log($.configs.port)
     //  });
-    $.require("system/page_generate", function(){
-        $.log("测试页面生成器")
-    });
+    //生成mass framework所需要的页面
+    $.require("system/page_generate");
     $.require("system/deploy,system/mvc", function(deploy){
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
     });

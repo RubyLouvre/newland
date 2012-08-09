@@ -6,7 +6,6 @@ $.define("get_view", function(){
             if( fn ){
                 var data = this.helper[0];
                 var html = fn( data, this.helper[1]);
-
                 if(typeof data.layout == "string"){
                     data.partial = html;
                     var layout_url = $.path.join("app","views/layout", data.layout );
@@ -15,12 +14,12 @@ $.define("get_view", function(){
                     this.fire('cache_page', html, url)
                 }
             }else{
-                $.readFile( view_url,  'utf-8', function(err, text){
+                $.readFile( view_url,  'utf-8', function(err, source){
                     if(err){
                         this.fire( "send_error", 404 )
                     }else{
                         //将helpers编译进模板函数
-                        $.viewsCache[ view_url ] = $.ejs.compile( text, this.helper[1] );
+                        $.viewsCache[ view_url ] = $.ejs.compile( source, this.helper[1] );
                         this.fire( "get_view", view_url, url );
                     }
                 }.bind(this) );

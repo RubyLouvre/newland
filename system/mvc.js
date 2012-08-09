@@ -1,48 +1,19 @@
 $.define("mvc", "httpflow, http, system",function( Flow,http ){
-    $.log("已加载MVC模块");
-    //http://guides.rubyonrails.org/action_controller_overview.html
-    //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
-    ////http://code.google.com/p/raremvc/
-    //静态资源按需加载、框架核心函数钩子(hook)，让代码更容易共用，使用更加方便!
-    var  flash = function(type, msg) {
-        var arr, msgs;
-        msgs = this.session.flash = this.session.flash || {};
-        if (type && msg) {
-            return msgs[type] = String(msg);
-        } else if (type) {
-            arr = msgs[type];
-            delete msgs[type];
-            return String(arr || "");
-        } else {
-            this.session.flash = {};
-            return msgs;
-        }
-    }
+    $.log("已加载MVC模块")
 
-    function router(flow, method, url){
-        //先经过路由系统
-        var go = $.router.routeWithQuery( method, url );
-        if( go ){
-            flow.params = go.params || {};
-            var value = go.value;
-            if(typeof value === "string"){
-                var match = value.split("#");
-                var cname = match[0];
-                var aname = match[1];
-                var instance = $.controllers[cname];//取得对应控制器实例
-                if( instance ){
-                    clearTimeout( flow.timeoutID );
-                    instance[aname]( flow );//到达指定action
-                }else{
-                    $.log( "不存在此控制器" );
-                }
-            }
-        }else{ //直接读取
-            flow.params = $.path.parse(url, true).query
-            flow.fire("no_action")
-        }
-    }
-
+    //所有默认要加载的拦截器
+    var defaults = ["send_file","no_action","get_page","get_view","cache_page",
+    "get_layout","500","send_error", "timeout","get_less"]
+    var inter = $.Array.union(defaults, $.configs.intercepters);
+    $.walk("app/controllers", function(files){
+        inter.forEach(function(str){
+            files.unshift( "system/intercepters/"+str)
+        });
+        $.require(files, function(){
+            var intercepters = [].slice.call(arguments,0, inter.length);
+            resource_ready( intercepters )
+        });
+    });
     //当所有控制器与所需拦截器加载完毕后，开始接受HTTP请求
     function resource_ready(intercepters){
         http.createServer(function(req, res) {
@@ -51,10 +22,10 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
             flow.req =  req;
             flow.params = {};
             intercepters.forEach(function(fn){
-                fn(flow);//将拦截器绑到流程上
+                fn(flow);//将拦截器绑到流程对象上
             });
             if(req.method == "POST"){
-                var buf = ""
+                var buf = "";//收集post请求的参数
                 req.setEncoding('utf8');
                 function buildBuffer(chunk){
                     buf += chunk
@@ -73,30 +44,40 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
         }).listen( $.configs.port );
 
     }
-    var defaults = ["send_file","no_action","get_page","get_view","cache_page",
-    "get_layout","500","send_error", "timeout","get_less"]
-    var inter = $.Array.union(defaults, $.configs.intercepters)
-    $.walk("app/controllers", function(files){//加载资源
-        inter.forEach(function(str){
-            files.unshift( "system/intercepters/"+str)
-        });
-        $.require(files, function(){
-            var intercepters = [].slice.call(arguments,0, inter.length);
-            resource_ready( intercepters )
-        });
-    })
-//我的路由系统，由路由器，路由映射，路由规则这三模块组成
 
-//   默认路由
-//   match '/:controller(/:action(/:id))'
+    //newland.js的路由系统，由路由器，路由映射，路由规则这三模块组成
+    //路由器(system/more/router.js)用于定义路由
+    //路由映射(system/more/mapper.js),用上面的提供add方法,将用户请求导向MVC系统
+    //路由规则(app/routes.js),用上面提供的一系列API，对URL究竟导向哪个控制器哪个action进行更细致的制定
+    function router(flow, method, url){
+        var go = $.router.routeWithQuery( method, url );
+        if( go ){//如果当前URL请求匹配路由规则（app/routes）中的某一项，则交由MVC系统去处理
+            flow.params = go.params || {};
+            var value = go.value;
+            if(typeof value === "string"){
+                var match = value.split("#");
+                var cname = match[0];//取得控制器的名字
+                var aname = match[1];//取得action的名字
+                var instance = $.controllers[cname];
+                if( instance && typeof  instance[aname] == "function" ){
+                    clearTimeout( flow.timeoutID );
+                    instance[aname]( flow );//到达指定action
+                }else{  //如果不存在此控制器，报500报错误
+                    flow.fire("send_error",500)
+                }
+            }
+        }else{ //如果没有对应的路由规则可用，则进入拦截器系统，比如绝大多数的静态资源
+            flow.params = $.path.parse(url, true).query
+            flow.fire("no_action")
+        }
+    }
 
-//正则路由
-//match 'products/:id', :to => 'catalog#view'
-//命名路由
-//match 'logout', :to => 'sessions#destroy', :as => 'logout'
+
 
 
 })
+
+
     /*
  用cookie在本地传输数据
 
@@ -140,6 +121,8 @@ http://www.mikealrogers.com/
 https://github.com/substack/tilemap
 
 http://substack.net/
-http://vertx.io/ 一个漂亮的网站
-     *
+    //http://guides.rubyonrails.org/action_controller_overview.html
+    //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
+    //http://code.google.com/p/raremvc/
+    //静态资源按需加载、框架核心函数钩子(hook)，让代码更容易共用，使用更加方便!
      */

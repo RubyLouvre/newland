@@ -1,7 +1,7 @@
 //height level file system
 //高级文件系统操作API
 $.define( "hfs","fs,path", function(fs, path){
-    $.log("已加载了hfs模块!!")
+   // $.log("已加载了hfs模块")
     $.mix( {
         //遍历文件树,收集目录与文件,并包含自身
         //p为路径，
