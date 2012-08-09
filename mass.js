@@ -179,7 +179,8 @@
         $.debug( name );//想办法取得函法中的exports对象
         return ret;
     }
-    $.path.parse = require("url").parse; //将原生URL模块的parse劫持下来
+    $.parseQuery = require("querystring").parse;
+    $.parseUrl = require("url").parse; //将原生URL模块的parse劫持下来
     $.noop = $.error = $.debug = function(){};//error, debug现在还是空接口
 
     //模块加载的加载函数
