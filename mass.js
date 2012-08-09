@@ -296,6 +296,7 @@
 //才能用mass.require("intercepters/favicon",callback)请求得到
 //现在可以直接mass.define("favicon",module)了
 //2012.7.12 重新开始搞后端框架
+//2012.8.9  添加parseUrl, parseQuery API
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
 //一个很好的前端工具 https://github.com/colorhook/att
 /*
