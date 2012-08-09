@@ -1,6 +1,27 @@
-$.define("mvc", "httpflow, http,session,cookie, system",function( Flow,http, session, cookie ){
+$.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
     $.log("已加载MVC模块")
-
+    var res = http.ServerResponse.prototype
+    var setHeader = res.setHeader;
+    //重写setHeader
+    if(!res._setHeader){
+        res._setHeader = true;//标识已被重写
+        res.setHeader = function(field, val){
+            var key = field.toLowerCase() , prev;
+            //允许多次设置Set-Cookie而不相互覆盖,即
+            //res.setHeader("Set-Cookie","aaa=bbb")
+            //res.setHeader("Set-Cookie","aaa=bbb")
+            //会输出eee=ddd; aaa=bbb;
+            if (this._headers && 'set-cookie' == key) {
+                if (prev = this.getHeader(field)) {
+                    val = Array.isArray(prev)  ? prev.concat(val)  : [prev, val];
+                }// charset
+            } else if ('content-type' == key && this.charset) {
+                val += '; charset=' + this.charset;
+            }
+            return setHeader.call(this, field, val);
+        };
+    }
+    
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
     "get_layout","500","send_error", "timeout","get_less"]
@@ -22,7 +43,7 @@ $.define("mvc", "httpflow, http,session,cookie, system",function( Flow,http, ses
             flow.req =  req;
             flow.params = {};
             flow.cookie = new cookie(req, res);
-            flow.session = new session(res, flow.cookie);
+            //  flow.session = new session(res, flow.cookie);
             intercepters.forEach(function(fn){
                 fn(flow);//将拦截器绑到流程对象上
             });
@@ -69,7 +90,7 @@ $.define("mvc", "httpflow, http,session,cookie, system",function( Flow,http, ses
                 }
             }
         }else{ //如果没有对应的路由规则可用，则进入拦截器系统，比如绝大多数的静态资源
-            flow.params = $.path.parse(url, true).query
+            flow.params = $.parseUrl(url, true).query
             flow.fire("no_action")
         }
     }
