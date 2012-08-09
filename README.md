@@ -87,6 +87,8 @@ mass.js 框架的入口
 
 <h3>试用</h3>
 <p>安装node.js,下载newland项目,命令台定位到newland目录下,然后node mass.js.在浏览器下http://localhost:8888/</p>
+<h3>wiki</h3>
+<p>光是一个readme是无法把什么都说明白，更多有用的资料我放到<a href="https://github.com/RubyLouvre/newland/wiki">wiki</a>上了！</p>
 
 
 
