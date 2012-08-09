@@ -3,7 +3,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
         var matchAll = /<pre(?:.)+?class\s*=\s*([\'\"])\s*brush\b(?:.|\n|\r)+?\1\s*>(?:.|\n|\r)+?<\/pre>/gi
         var matchOne = /<pre class="brush:(\w+)(?:[^"]+)">((?:.|\n|\r)+?)<\/pre>/i
         flow.bind('cache_page', function( html, url ){
-             $.log( "已进入cache_page栏截器" );
+            // $.log( "已进入cache_page栏截器" );
             var buffer = []
             html = html.replace(matchAll, function(ss){
                 var match = ss.match(matchOne)
@@ -47,7 +47,6 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                 })
             }
             $.pagesCache[ url ] = cache;
-            console.log(url)
             this.fire("send_file", cache)
         })
     }
