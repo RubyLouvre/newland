@@ -108,3 +108,16 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
 })
 //2012.6.8 对fire的传参进行处理
 //2012.7.13 使用新式的相对路径依赖模块
+/*
+ *一个简单的例子
+ $.require("flow", function(){
+                var node = new $.Flow();
+                node.bind("aaa", function(){
+                    $.log("aaa")
+                });
+                node.bind("aaa", function(){
+                    $.log("bbb")
+                });
+                node.fire("aaa")
+  })
+ */

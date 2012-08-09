@@ -192,7 +192,7 @@ void function( global, DOC ){
             return result;
         }
     });
-   $.log("parent "+$["@path"])
+
     $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;

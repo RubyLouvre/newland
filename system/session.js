@@ -3,8 +3,7 @@ $.define("session", function () {
 
     $.log("已加载session模块");
 
-    function session (res, cookies)
-    {
+    function session (res, cookies){
         this._response = res;
         this._cookies = cookies;
         this._sid = cookies.get(this._cookieName);
