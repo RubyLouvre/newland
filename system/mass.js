@@ -192,7 +192,7 @@ void function( global, DOC ){
             return result;
         }
     });
-
+   $.log("parent "+$["@path"])
     $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
@@ -221,7 +221,7 @@ void function( global, DOC ){
      * @param {String} url  模块的路径
      * @param {String} mass  当前框架的版本号
      */
-    function loadJS( name, url ){
+    function loadJS( name, url, parent ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js"
         url += (url.indexOf('?') > 0 ? '&' : '?') + '_time'+ new Date * 1;
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
@@ -285,7 +285,7 @@ void function( global, DOC ){
                 name  = "@"+ match[1];//取得模块名
                 if( !modules[ name ] ){ //防止重复生成节点与请求
                     modules[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                    loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
+                    loadJS( name, match[2], $["@path"] );//将要安装的模块通过iframe中的script加载下来
                 }else if( modules[ name ].state === 2 ){
                     cn++;
                 }

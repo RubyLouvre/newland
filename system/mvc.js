@@ -1,4 +1,4 @@
-$.define("mvc", "httpflow, http, system",function( Flow,http ){
+$.define("mvc", "httpflow, http,session,cookie, system",function( Flow,http, session, cookie ){
     $.log("已加载MVC模块")
 
     //所有默认要加载的拦截器
@@ -21,6 +21,8 @@ $.define("mvc", "httpflow, http, system",function( Flow,http ){
             flow.res =  res;
             flow.req =  req;
             flow.params = {};
+            flow.cookie = new cookie(req, res);
+            flow.session = new session(res, flow.cookie);
             intercepters.forEach(function(fn){
                 fn(flow);//将拦截器绑到流程对象上
             });
