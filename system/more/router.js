@@ -133,7 +133,7 @@ $.define("router", function(){
     };
 
     Router.prototype.routeWithQuery = function (method, path) {
-        var parsedUrl = $.path.parse(path, true),
+        var parsedUrl = $.parseUrl(path, true),
         dest = this.route(method, parsedUrl.pathname);
         if (dest === undefined) {
             return undefined;
