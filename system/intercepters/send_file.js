@@ -7,7 +7,7 @@ $.define("send_file", function(){
                 "Content-Type": page.type,
                 "mass-mime" :"page.mine"
             });
-            this.fire("se")
+         
             this.res.writeHead(page.code, headers);
             this.res.write(page.data);
             this.res.end();
