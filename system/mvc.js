@@ -1,29 +1,7 @@
 $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
     $.log("已加载MVC模块")
-    var res = http.ServerResponse.prototype
-    var setHeader = res.setHeader;
-    
     $.memory = {}
 
-    //重写setHeader
-    if(!res._setHeader){
-        res._setHeader = true;//标识已被重写
-        res.setHeader = function(field, val){
-            var key = field.toLowerCase() , prev;
-            //允许多次设置Set-Cookie而不相互覆盖,即
-            //res.setHeader("Set-Cookie","aaa=bbb")
-            //res.setHeader("Set-Cookie","aaa=bbb")
-            //会输出eee=ddd; aaa=bbb;
-            if (this._headers && 'set-cookie' == key) {
-                if (prev = this.getHeader(field)) {
-                    val = Array.isArray(prev)  ? prev.concat(val)  : [prev, val];
-                }// charset
-            } else if ('content-type' == key && this.charset) {
-                val += '; charset=' + this.charset;
-            }
-            return setHeader.call(this, field, val);
-        };
-    }
     
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",

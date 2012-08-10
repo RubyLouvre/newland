@@ -6,10 +6,9 @@ $.define("doc_controller",function(){
         
             var view_url = $.path.join("app","views", flow.req.url );
             if(/doc\/index\.html/.test(flow.req.url)){
-                flow.res.setHeader("Set-Cookie","aaa=bbb")
-                flow.res.setHeader("Set-Cookie","eee=ddd")
+                flow.addCookie("js","js")
+                flow.addCookie("ruby","ruby")
             }
-              
             flow.fire("get_view", view_url, flow.req.url )
         }
 

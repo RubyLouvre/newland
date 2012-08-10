@@ -4,13 +4,14 @@ $.define("session","../stores/memory", function( getSession ){
       
         flow.bind("session", function(){
             var opts = $.configs.session;
-            var cookie = flow.cookie || {};
-            var sid = cookie[opts.key];
-            var session = getSession(sid, opts.life)
+            var cookie = flow.cookie 
+            var obj = cookie.get();
+            if(obj.sid == "undefined"){
+                delete obj.sid
+            }
+            var session = getSession(obj.sid, opts.life)
             flow.session = session;
-            var c =  flow.res.getHeader("Set-Cookie");
-            console.log(c)
-            flow.addCookie(opts.key, session._sid )
+        //    flow.removeCookie(opts.key )
         })
     }
 })

@@ -40,10 +40,28 @@ $.define("cookie", function(){
     Cookie.parse = parse;
     Cookie.serialize = serialize;
     Cookie.prototype = {
+        //取得请求中的cookie对象或它的某一个键值
         get: function (key){
-            var obj =  this._resCookies
+            var obj =  this._reqCookies
             return typeof key === "string" ? obj[key] : obj
         },
+        remove: function(name){
+            //移除将要响应给客户端的cookie中的某个键值
+            var ret = [];
+            var array = this._resCookies
+            for(var i = 0; i < array.length; i++){
+                var el = array[i]
+                if( el.split("#")[0] !==  name){
+                    ret.push(el)
+                }
+            }
+            ret[ret.length] =  serialize(name, "", {
+                expires: new Date(0)
+            });
+
+            this._resCookies = array;
+        },
+        //为响应给客户端的cookie数组添加一个键值
         set: function (name, val, opt){
             var ret = serialize(name, val, opt)
             this._resCookies.push(ret);

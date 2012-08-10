@@ -1,4 +1,4 @@
-$.define("httpflow","helper,flow,more/ejs", function( make_helper ){
+$.define("httpflow","helper,cookie,flow,more/ejs", function( make_helper,cookie ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
@@ -28,18 +28,18 @@ $.define("httpflow","helper,flow,more/ejs", function( make_helper ){
         content_type: function( name ){
             return type_mine[ name ]
         },
-        addCookie: function(name,value){
-            this.res.setHeader("Set-Cookie",name+"="+value)
+        addCookie: function(name,val, opt){
+            var res = this.res;
+            var cookie = this.cookie || new cookie(this.req, res)
+            cookie.set(name, val, opt);
+            res.setHeader("Set-Cookie",cookie._resCookies)
         },
         removeCookie: function(name){
-            var ret = []
-            var array = this.res.getHeader("Set-Cookie");
-            for(var i = 0,el; el = array[i++];){
-                if( el.split("#")[0] != name){
-                    ret.push(el)
-                }
-            }
-            this.res.setHeader("Set-Cookie",ret)
+            var res = this.res;
+            var cookie = this.cookie || new cookie(this.req, this.res);
+            cookie.remove(name);
+            console.log(cookie._resCookies)
+            res.setHeader("Set-Cookie",cookie._resCookies)
         },
         //Content-Type 相当于content-type
         get: function(name){

@@ -18,7 +18,7 @@ $.define("memory","../more/random",function(random){
         this._store = store[sid] = store[sid] || {
             data: {}
         };
-        this._store.timestamp = new Date + life;
+        this._store.timestamp = new Date * 1 + life;
     };
     //为一个用户分配一个新的session
     memory.prototype = {
@@ -28,11 +28,11 @@ $.define("memory","../more/random",function(random){
         set: function (key, val){
             this._store.data[key] = val;
             //每次都延长一段时间
-            this._store.timestamp = +new Date + this._life;
+            this._store.timestamp = new Date * 1 + this._life;
         },
         remove: function (key){
             delete this._store.data[key];
-            this._store.timestamp = +new Date + this._life;
+            this._store.timestamp = new Date * 1 + this._life;
         },
         destroy: function (){
             delete this._store;
