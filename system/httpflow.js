@@ -28,6 +28,19 @@ $.define("httpflow","helper,flow,more/ejs", function( make_helper ){
         content_type: function( name ){
             return type_mine[ name ]
         },
+        addCookie: function(name,value){
+            this.res.setHeader("Set-Cookie",name+"="+value)
+        },
+        removeCookie: function(name){
+            var ret = []
+            var array = this.res.getHeader("Set-Cookie");
+            for(var i = 0,el; el = array[i++];){
+                if( el.split("#")[0] != name){
+                    ret.push(el)
+                }
+            }
+            this.res.setHeader("Set-Cookie",ret)
+        },
         //Content-Type 相当于content-type
         get: function(name){
             var headers = this.req.headers || {}

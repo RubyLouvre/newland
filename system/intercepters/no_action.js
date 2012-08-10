@@ -7,7 +7,8 @@ $.define("no_action", function(){
             if( /\.(html|css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
                 var type = RegExp.$1;
                 if(type == "html"){
-                    this.fire("session")
+                    this.fire("session");
+                    this.unbind("session")
                 }
                 url = url.replace(/[?#].*/, '');
                 var cache = $.staticCache[ url ],lm
@@ -49,7 +50,6 @@ $.define("no_action", function(){
                     }.bind(this));
                 }
             }else{
-                this.fire("session")
                 this.fire("get_page");
             }
         })

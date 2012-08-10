@@ -14,7 +14,7 @@ $.define("configs", function(){
         maxLength: 1024 * 256,
         maxAge: 60*60*24*365,
         //默认session配置,如果没有,则不使用session
-        sessions: {
+        session: {
             store: 'memory',
             key: 'mass.sid',
             life: 14 * 24 * 60 * 60

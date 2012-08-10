@@ -1,4 +1,5 @@
-$.define("memory_store","../more/uuid",function(){
+$.define("memory","../more/random",function(random){
+    $.log("使用内存来保存session")
     var store = $.memory
     function sweep (){//清理过期的session
         var now = +new Date;
@@ -10,13 +11,9 @@ $.define("memory_store","../more/uuid",function(){
     }
     // 每 24 分钟执行一次
     setInterval(sweep, 1440 * 1000);
-    getSession = function(sid, life){
-        if(store[sid])
-            return store[sid]
-        return new memory (sid, life)
-    }
+
     function memory (sid, life) {
-        this._sid = sid || uuid()
+        this._sid = sid || random.uuid()
         this._life = life;
         this._store = store[sid] = store[sid] || {
             data: {}
@@ -42,6 +39,10 @@ $.define("memory_store","../more/uuid",function(){
             delete store[this._sid];
         }
     }
-    return memory
+    return  function(sid, life){
+        if(store[sid])
+            return store[sid]
+        return new memory (sid, life)
+    }
 
 })
