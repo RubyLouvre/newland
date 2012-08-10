@@ -1,15 +1,18 @@
 $.define("no_action", function(){
     return function(flow){
+        var url = flow.req.url, type
+        if( /\.(html|css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
+            type = RegExp.$1;
+            flow._page = type == "html" ? 1 : 0
+        }else{
+            flow._page = 2;//通过模板生成的页面
+        }
         flow.bind("no_action", function( ){
             // $.log("已进入no_action栏截器")
             //去掉#？等杂质，如果是符合如下后缀后，则进行静态资源缓存
-            var url = this.req.url;
-            if( /\.(html|css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
+             var url = flow.req.url;
+            if( flow._page !== 2 ){
                 var type = RegExp.$1;
-                if(type == "html"){
-                    this.fire("session");
-                    this.unbind("session")
-                }
                 url = url.replace(/[?#].*/, '');
                 var cache = $.staticCache[ url ],lm
                 if( cache ){

@@ -15,10 +15,10 @@ $.define("memory","../more/random",function(random){
     function memory (sid, life) {
         this._sid = sid || random.uuid()
         this._life = life;
-        this._store = store[sid] = store[sid] || {
-            data: {}
+        this._store = {
+            data: {},
+            timestamp: new Date * 1 + life
         };
-        this._store.timestamp = new Date * 1 + life;
     };
     //为一个用户分配一个新的session
     memory.prototype = {
@@ -40,9 +40,13 @@ $.define("memory","../more/random",function(random){
         }
     }
     return  function(sid, life){
-        if(store[sid])
-            return store[sid]
-        return new memory (sid, life)
+        var obj = store[sid];
+        if(!obj){
+            obj = new memory (sid, life)
+            return  store[obj._sid] = obj;
+        }else{
+            return obj
+        }
     }
 
 })

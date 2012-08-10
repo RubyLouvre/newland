@@ -1,19 +1,20 @@
 $.define("session","../stores/memory", function( getSession ){
 
     return function(flow){
-      
-       // flow.bind("session", function(){
+     
+       
+        if( flow._page ){
+                $.log("已进入session栏截器")
             var opts = $.configs.session;
-            console.log("====================")
             var cookie = flow.cookie
-            var obj = cookie.get();
-            var session = getSession(obj.sid, opts.life)
+            var sid = cookie.get(opts.sid);
+            var session = getSession(sid, opts.life)
             flow.session = session;
-            if( !obj.sid ){
+            if( sid !== session._sid){
                 $.log("没有sessionID则创建一个新的")
-                flow.removeCookie(opts.key,session._sid )
+                flow.addCookie(opts.sid, session._sid )
             }
-     //   })
+        }
     }
 })
 

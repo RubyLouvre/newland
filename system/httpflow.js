@@ -32,6 +32,8 @@ $.define("httpflow","helper,cookie,flow,more/ejs", function( make_helper,cookie 
             var res = this.res;
             var cookie = this.cookie || new cookie(this.req, res)
             cookie.set(name, val, opt);
+            console.log("\\\\\\\\\\\\\\\\")
+            console.log(cookie._resCookies)
             res.setHeader("Set-Cookie",cookie._resCookies)
         },
         removeCookie: function(name){

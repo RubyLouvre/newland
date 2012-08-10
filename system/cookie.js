@@ -67,6 +67,7 @@ $.define("cookie", function(){
             var array = this._resCookies
             for (var i =  array.length; i >=0 ;i--) {
                 var el = array[i];
+                
                 if( el &&  el.split("#")[0] == name){
                     array.splice(i, 1);
                 }
