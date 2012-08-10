@@ -36,6 +36,7 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
         });
     });
     //当所有控制器与所需拦截器加载完毕后，开始接受HTTP请求
+    var rmethod =   /(^|&)_method=([^&]*)(&|$)/i
     function resource_ready(intercepters){
         http.createServer(function(req, res) {
             var flow = new Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接
@@ -48,6 +49,8 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
                 fn(flow);//将拦截器绑到流程对象上
             });
             if(req.method == "POST"){
+                // POSTs may be overridden by the _method param
+
                 var buf = "";//收集post请求的参数
                 req.setEncoding('utf8');
                 function buildBuffer(chunk){
@@ -58,6 +61,17 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
                     var url = req.url
                     if(buf !== ""){
                         url += (/\?/.test( req.url ) ? "&" : "?")  + buf;
+                    }
+                    //重写method!
+                    var match =  url.match(rmethod), method
+                    if (match) {
+                        method = unescape(match[2])
+                    } else if (req.headers['x-http-method-override']) {
+                        method = req.headers['x-http-method-override'];
+                    }
+                    if(method){
+                        req._method = "POST";
+                        req.method = method.toUpperCase();
                     }
                     router(flow, "POST", url)
                 })
