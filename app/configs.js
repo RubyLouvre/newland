@@ -16,8 +16,8 @@ $.define("configs", function(){
         //默认session配置,如果没有,则不使用session
         sessions: {
             store: 'memory',
-            key: 'sid',
-            expiry: 14 * 24 * 60 * 60
+            key: 'mass.sid',
+            life: 14 * 24 * 60 * 60
         },
         //session在Cookie中的键名
         cookieSessionKey: 'sdata',

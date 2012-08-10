@@ -2,6 +2,9 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
     $.log("已加载MVC模块")
     var res = http.ServerResponse.prototype
     var setHeader = res.setHeader;
+    
+    $.memory = {}
+
     //重写setHeader
     if(!res._setHeader){
         res._setHeader = true;//标识已被重写
@@ -43,14 +46,12 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
             flow.res =  res;
             flow.req =  req;
             flow.params = {};
-          
-            //  flow.session = new session(res, flow.cookie);
+        
             intercepters.forEach(function(fn){
                 fn(flow);//将拦截器绑到流程对象上
             });
             if(req.method == "POST"){
                 // POSTs may be overridden by the _method param
-
                 var buf = "";//收集post请求的参数
                 req.setEncoding('utf8');
                 function buildBuffer(chunk){

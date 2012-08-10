@@ -5,7 +5,10 @@ $.define("no_action", function(){
             //去掉#？等杂质，如果是符合如下后缀后，则进行静态资源缓存
             var url = this.req.url;
             if( /\.(html|css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
-                var type = RegExp.$1
+                var type = RegExp.$1;
+                if(type == "html"){
+                    this.fire("session")
+                }
                 url = url.replace(/[?#].*/, '');
                 var cache = $.staticCache[ url ],lm
                 if( cache ){
@@ -46,6 +49,7 @@ $.define("no_action", function(){
                     }.bind(this));
                 }
             }else{
+                this.fire("session")
                 this.fire("get_page");
             }
         })
