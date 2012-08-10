@@ -1,8 +1,9 @@
-$.define("session", function(){
+$.define("session","../session", function(sessions ){
     return function(flow){
-        flow.bind("bind_session", function(){
-            
-        })
+        var sessionsConfig = $.configs.sessions;
+        if (sessionsConfig) {
+            sessions.createStore(sessionsConfig.store);
+        }
     }
 })
 
