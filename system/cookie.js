@@ -58,12 +58,19 @@ $.define("cookie", function(){
             ret[ret.length] =  serialize(name, "", {
                 expires: new Date(0)
             });
-
+            //console.log( this._resCookies)
             this._resCookies = array;
         },
         //为响应给客户端的cookie数组添加一个键值
         set: function (name, val, opt){
-            var ret = serialize(name, val, opt)
+            var ret = serialize(name, val, opt);
+            var array = this._resCookies
+            for (var i =  array.length; i >=0 ;i--) {
+                var el = array[i];
+                if( el &&  el.split("#")[0] == name){
+                    array.splice(i, 1);
+                }
+            }
             this._resCookies.push(ret);
         }
     }

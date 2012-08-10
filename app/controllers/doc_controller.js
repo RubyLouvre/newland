@@ -9,6 +9,7 @@ $.define("doc_controller",function(){
                 flow.addCookie("js","js")
                 flow.addCookie("ruby","ruby")
             }
+             console.log( flow.session.get("show"))
             flow.fire("get_view", view_url, flow.req.url )
         }
 

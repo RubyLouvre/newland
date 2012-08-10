@@ -6,12 +6,12 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
     "get_layout","500","send_error","cookie","session", "timeout","get_less"]
-    var inter = $.Array.union(defaults, $.configs.intercepters);
+    var inter = $.Array.union(defaults, $.configs.intercepters).map(function(str){
+        return "system/intercepters/"+str
+    })
     $.walk("app/controllers", function(files){
-        inter.forEach(function(str){
-            files.unshift( "system/intercepters/"+str)
-        });
-        $.require(files, function(){
+        $.require( inter.concat( files ), function(){
+            //拦截器放在最前面
             var intercepters = [].slice.call(arguments,0, inter.length);
             resource_ready( intercepters )
         });
@@ -52,6 +52,8 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
                         req._method = "POST";
                         req.method = method.toUpperCase();
                     }
+                    flow.fire("session");
+                    flow.unbind("session")
                     router(flow, "POST", url)
                 })
             }else{

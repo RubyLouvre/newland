@@ -38,7 +38,6 @@ $.define("httpflow","helper,cookie,flow,more/ejs", function( make_helper,cookie 
             var res = this.res;
             var cookie = this.cookie || new cookie(this.req, this.res);
             cookie.remove(name);
-            console.log(cookie._resCookies)
             res.setHeader("Set-Cookie",cookie._resCookies)
         },
         //Content-Type 相当于content-type

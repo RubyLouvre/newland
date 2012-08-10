@@ -9,6 +9,7 @@ $.define("home_controller",function(){
         show: function(flow){
             $.log("已进入home#show action")
             var view_url = $.path.join("app","views", "home","show.html" );
+            flow.session.set("show","111111")
             flow.fire("get_view", view_url, flow.req.url )
         },
         tabs: function(flow){
