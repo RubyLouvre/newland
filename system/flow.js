@@ -32,15 +32,14 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             return this;
         },
         unbind : function(array,fn){//$.multiUnind("aaa,bbb")
+            var names = [];
             if(/string|number|object/.test(typeof array) ){
-                var tmp = []
                 (array+"").replace($.rword,function(name){
-                    tmp.push( "__"+name)
+                    names.push( "__"+name)
                 });
-                array = tmp;
             }
             var removeAll = typeof fn !== "function";
-            for(var i = 0, name ; name = array[i++];){
+            for(var i = 0, name ; name = names[i++];){
                 var obj = this.root[name];
                 if(obj && obj.unfire){
                     obj.state = 1;
