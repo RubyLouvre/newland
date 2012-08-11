@@ -3,9 +3,6 @@ $.define("get_view", function(){
         flow.bind("get_view", function( view_url, url ){
             //$.log( "已进入get_view栏截器" );
             var fn = $.viewsCache[ view_url ];
-            
-            this.fire("session");
-            this.unbind("session");
             if( fn ){
                 var data = this.helper[0];
                 var html = fn( data, this.helper[1] );

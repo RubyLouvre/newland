@@ -16,7 +16,7 @@ $.define("configs", function(){
         //默认session配置,如果没有,则不使用session
         session: {
             store: 'memory',
-            key: 'mass.sid',
+            sid: 'mass.sid',
             life: 14 * 24 * 60 * 60
         },
         //session在Cookie中的键名

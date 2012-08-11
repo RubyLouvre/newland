@@ -24,7 +24,6 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
             flow.res =  res;
             flow.req =  req;
             flow.params = {};
-        
             intercepters.forEach(function(fn){
                 fn(flow);//将拦截器绑到流程对象上
             });
@@ -52,8 +51,6 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
                         req._method = "POST";
                         req.method = method.toUpperCase();
                     }
-                    flow.fire("session");
-                    flow.unbind("session")
                     router(flow, "POST", url)
                 })
             }else{

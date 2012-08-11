@@ -15,27 +15,25 @@ $.define("memory","../more/random",function(random){
     function memory (sid, life) {
         this._sid = sid || random.uuid()
         this._life = life;
-        this._store = {
-            data: {},
-            timestamp: new Date * 1 + life
-        };
+        this._data = {}
+        this._timestamp =  new Date * 1 + life
     };
     //为一个用户分配一个新的session
     memory.prototype = {
-        get: function(key){
-            return this._store.data[key];
+        get: function (key){
+            return this._data[key];
         },
         set: function (key, val){
-            this._store.data[key] = val;
+            this._data[key] = val;
             //每次都延长一段时间
-            this._store.timestamp = new Date * 1 + this._life;
+            this._timestamp = new Date * 1 + this._life;
         },
         remove: function (key){
-            delete this._store.data[key];
-            this._store.timestamp = new Date * 1 + this._life;
+            delete this._data[key];
+            this._timestamp = new Date * 1 + this._life;
         },
         destroy: function (){
-            delete this._store;
+            this._data = {};
             delete store[this._sid];
         }
     }

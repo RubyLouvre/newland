@@ -117,7 +117,6 @@ $.define("plural","../lang",function(){//处理单词的单复数
             var rule = el[0],replacement = el[1];
            
             if ( rule.test(str) ) {
-                console.log("-------------")
                 return str.replace(rule, replacement);
             }
         }
