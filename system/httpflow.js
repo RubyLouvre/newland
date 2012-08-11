@@ -30,13 +30,13 @@ $.define("httpflow","helper,cookie,flow,more/ejs", function( make_helper,cookie 
         },
         addCookie: function(name,val, opt){
             var res = this.res;
-            var cookie = this.cookie || new cookie(this.req, res)
+            var cookie = this.cookie || new cookie(this.req)
             cookie.set(name, val, opt);
             res.setHeader("Set-Cookie",cookie._resCookies)
         },
         removeCookie: function(name){
             var res = this.res;
-            var cookie = this.cookie || new cookie(this.req, this.res);
+            var cookie = this.cookie || new cookie(this.req);
             cookie.remove(name);
             res.setHeader("Set-Cookie",cookie._resCookies)
         },

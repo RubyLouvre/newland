@@ -6,7 +6,7 @@ $.define("cookie", function(){
     //将两个字符串变成一个cookie字段
     var serialize = function(name, val, opt){
         var pairs = [name + '=' + encode(val)];
-        if( isFinite( $.type( opt)  )  ){
+        if( isFinite( $.type( opt ) ) ){
             var expires = new Date(new Date * 1 +  Cookie.expires );
             pairs.push('Expires=' + expires.toUTCString());
         }else{
@@ -38,7 +38,7 @@ $.define("cookie", function(){
         });
         return obj;
     };
-    function Cookie (req, res){
+    function Cookie (req){
         this._resCookies = [];
         this._reqCookies = $.parseQuery(req.headers.cookie, '; ');
     }
