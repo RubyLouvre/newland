@@ -22,15 +22,21 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
 
     libs.replace($.rword, function( name ){
         try{
-            var url =  $.path.join( __dirname, name +".js" );
-            var text = $.readFileSync( url, "utf-8")
-            files.push(text)
+            var url =   $.path.join( __dirname, name +".js" );
+            var text = $.readFileSync( url, "utf-8");
+            var rubylouvre = url.replace(/\\/g,"/").replace("newland/system","rubylouvre/scripts");
+            $.updateFile( rubylouvre, text, function(){
+                $.log(rubylouvre+" 更新成功");
+            }, 1);
+
+
+            files.push( text )
             //   $.log("合并"+name+"模块")
-            $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text);
+            $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text );
 
         }catch(e){
-            $.log(e);
-            $.log(url)
+            $.log( e );
+            $.log( url )
         }
     });
     //有用的部分是body

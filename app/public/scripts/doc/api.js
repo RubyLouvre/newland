@@ -366,7 +366,7 @@ $.define("api", function(){
             "toggle": "function"
         },
         "操作流模块": {
-            "flow": "function"
+            "Flow": "function"
         },
         "特征侦探模块": {}
     }
