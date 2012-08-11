@@ -12,6 +12,16 @@
     }
     window.SyntaxHighlighter && SyntaxHighlighter.all();
     $.require("ready,event",function(){
+        $("pre").each(function(){
+            if(this.exec !== "function"){
+                var self = $(this), btn = self.next("button.doc_btn")
+                if(/brush:\s*j/i.test(this.className)  && btn.length ){
+                    var code =  $.String.unescapeHTML( this.innerHTML );
+                    var fn = Function( code );
+                    btn[0].exec = fn;
+                }
+            }
+        });
         $("body").delegate(".doc_btn","click",function(){
             if(typeof this.exec == "function"){
                 this.exec.call(window)

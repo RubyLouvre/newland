@@ -120,7 +120,6 @@
                                 var self = $(this), btn = self.next("button.doc_btn")
                                 if(/brush:\s*j/i.test(this.className)  && btn.length ){
                                     var code =  $.String.unescapeHTML( this.innerHTML );
-                                    console.log(code)
                                     var fn = Function( code );
                                     btn[0].exec = fn;
                                 }

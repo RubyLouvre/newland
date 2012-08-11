@@ -28,11 +28,8 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
             $.updateFile( rubylouvre, text, function(){
                 $.log(rubylouvre+" 更新成功");
             }, 1);
-
-
             files.push( text )
-            //   $.log("合并"+name+"模块")
-            $.writeFile( $.path.join( "app/public/scripts/", name +".js" ), text );
+            $.updateFile( $.path.join( "app/public/scripts/", name +".js" ), text, $.noop, 1 );
 
         }catch(e){
             $.log( e );
@@ -61,15 +58,16 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
     replaced = replaced + files.join("\n")
     replaced = first.replace("/*combine modules*/", replaced ).replace(rcomments,"");
     //开始合并
+    $.log("开始合并!!!!!!!!!!!!!!!")
     var merge_url = "app/public/scripts/mass_merge.js"
-    $.writeFile( merge_url, replaced,"utf8",function(e){//生成新的js文件！
+    $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
         if(e) {
             $.log("出错了 "+e);
         }else{
             $.log("合并成功");
-            $.updateFile(  "D:/rubylouvre/scripts","mass_merge.js", merge_url, function(){
+            $.updateFile(  "D:/rubylouvre/scripts/mass_merge.js", replaced, function(){
                 $.log("mass_merge.js 更新成功");
-            });
+            },1);
         }
     })
 })
