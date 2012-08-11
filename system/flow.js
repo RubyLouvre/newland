@@ -20,7 +20,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
         //不用着等到四个都触发才执行！只有当reload设置为true时，我们才需要每次把这个步骤都执行了一遍才触发fn。
         bind: function(names,callback,reload){
             var  root = this.root, deps = {},args = []
-            (names +"").replace($.rword,function(name){
+            String(names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
                 if(!root[name]){
                     root[name] ={
