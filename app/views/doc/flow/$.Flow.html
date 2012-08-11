@@ -16,7 +16,8 @@
     <dt>reload</dt>
     <dd>Boolean。布尔值，决定最后回调的第二次触发的条件。比如说最后回调依赖于aaa,bbb,ccc,ddd这四步操作，用代码表示为flow.bind("aaa,bbb,ccc,ddd",fn)。
         当我们先后flow.fire("aaa"),flow.fire("bbb"),flow.fire("ccc"),flow.fire("ddd")，那么fn就会第一次被触发！
-        然后我再调用flow.fire("aaa"),fn就会被第二次触发；反正我们无论是fire上述那个操作，bbb也好，ccc也好，fn都会立即执行，不用着等到四个都触发才执行！
+        然后在reload为false的情况下,我再调用flow.fire("aaa"),fn就会被第二次触发,
+        反正我们无论是fire上述哪个操作，bbb也好，ccc也好，fn都会立即执行，不用着等到四个都触发才执行！
         只有当reload设置为true时，我们才需要每次把这个步骤都执行了一遍才触发fn。reload默认为false。</dd>
 </dl>
 <p><span class="stress">返回值：</span></p>

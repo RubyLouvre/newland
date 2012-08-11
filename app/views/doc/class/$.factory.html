@@ -28,44 +28,45 @@
 <fieldset><legend>例子</legend>
     <p>超类-子类的关系是一种is-a关系。在设计对象继承层次的时候，对象模块使用子类化技术，这样就可以说子类是父类同样的类。例如：</p>
     <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("class,spec",function(){
+$.require("class,spec", function() {
 
     var Shape = $.factory({
-        init:function(len){
+        init: function(len) {
             $.log(len)
             this.length = len || 0;
         },
-        getLength:function(){
+        getLength: function() {
             return this.length;
         },
-        setLength:function(len){
+        setLength: function(len) {
             this.length = len;
         },
-        getArea:function(){
+        getArea: function() {
             throw "Subclasses must implement this method"
         }
     })
 
-    var Triangle =  $.factory({
-        inherit:Shape,
-        init:function(len,hei){//len属性在父类中已定义，这里可以省去
+    var Triangle = $.factory({
+        inherit: Shape,
+        init: function(len, hei) { //len属性在父类中已定义，这里可以省去
             this.height = hei || 0;
         },
-        getArea:function(){
-            return this.length * this.height /2
+        getArea: function() {
+            return this.length * this.height / 2
         }
     })
-    var Square =  $.factory({
-        inherit:Shape,
-        getArea:function(){
+    var Square = $.factory({
+        inherit: Shape,
+        getArea: function() {
             return this.length * this.length;
         }
     });
-    var t = new Triangle(3,4)
-    $.log(t.getArea(),true)
+    var t = new Triangle(3, 4)
+    $.log(t.getArea(), true)
     var s = new Square(4)
-    $.log(s.getArea(),true)
+    $.log(s.getArea(), true)
 });
+
     </pre>
     <p>在上面的例子中，三角形(Triangle)是一种(is-a)形状(Shape)，因此Triangle类子类化了Shape类，
         正方形(Square)也是一种(is-a)形状(Shape)，因此Square类也子类化了Shape类。</p>
@@ -164,7 +165,6 @@ $.require("ready,class",function(){
     $.log(s instanceof Parent,true);
 });
     </pre>
-
    <button class="doc_btn" type="button">点我，执行代码</button>
 
 </fieldset>
