@@ -5,7 +5,7 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
     
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
-    "get_layout","500","send_error","cookie","session", "timeout","get_less"]
+    "get_layout","500","send_error","session", "timeout","get_less"]
     var inter = $.Array.union(defaults, $.configs.intercepters).map(function(str){
         return "system/intercepters/"+str
     })

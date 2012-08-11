@@ -1,8 +1,12 @@
-$.define("session","../stores/memory", function( getSession ){
+$.define("session","../cookie,../stores/memory", function(Cookie, getSession ){
 
     return function(flow){
         if( flow._page ){
             $.log("已进入session栏截器")
+            flow.cookie = new Cookie(flow.req);
+            flow.bind("no_action,get_view",function(){
+                console.log("no_action,get_view")
+            })
             var opts = $.configs.session;
             var cookie = flow.cookie;
             var sid = cookie.get(opts.sid);
@@ -13,9 +17,9 @@ $.define("session","../stores/memory", function( getSession ){
             $.log("old_sid : "+sid)
             $.log("new_sid : "+session._sid)
             flow.session = session;
+            //用于在多个action中便捷通信
             flow.flash = function(type, msg) {
-                var arr, msgs;
-                msgs = this.session.flash || (this.session.flash = {});
+                var arr, msgs = this.session.flash || (this.session.flash = {});
                 if (type && msg) {//保存消息
                     return msgs[type] = String(msg);
                 } else if (type) {//取得消息
