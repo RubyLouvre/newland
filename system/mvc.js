@@ -2,22 +2,34 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
     $.log("已加载MVC模块")
     $.memory = {}
 
-    
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
     "get_layout","500","send_error","session", "timeout","get_less"]
+    //合并默认拦截器与用户自定义拦截，并修正URL地址
     var inter = $.Array.union(defaults, $.configs.intercepters).map(function(str){
         return "system/intercepters/"+str
     })
+    var rcname = /\\(\w+)_controller/;
+    //遍历app/controllers目录下所有控制器模块，并与拦载器模块一起加载它们！
     $.walk("app/controllers", function(files){
         $.require( inter.concat( files ), function(){
-            //拦截器放在最前面
-            var intercepters = [].slice.call(arguments,0, inter.length);
+            //取得放在前面的拦截器
+            var intercepters = [].splice.call(arguments, 0, inter.length);
+            //取得放在后面的控制器
+            var controllers = arguments;
+            //进行控制反转，构建我们所需要的控制器子类与它的实例
+            files.forEach(function(el, i){
+                var match = el.match(rcname);
+                var controller = controllers[i];
+                controller.inherit =  $.base_controller
+                var klass = $.factory(controller);
+                $.controllers[ match[1] ] = new klass;
+            });
             resource_ready( intercepters )
         });
     });
-    //当所有控制器与所需拦截器加载完毕后，开始接受HTTP请求
-    var rmethod =   /(^|&)_method=([^&]*)(&|$)/i
+    //当控制器与拦截器都准备就绪，开始启动HTTP服务，接受请求
+    var rmethod =  /(^|&)_method=([^&]*)(&|$)/i
     function resource_ready(intercepters){
         http.createServer(function(req, res) {
             var flow = new Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接

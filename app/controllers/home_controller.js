@@ -1,11 +1,5 @@
 $.define("home_controller",function(){
-    var klass = $.factory({
-        inherit: $.base_controller,
-        //        index: function(flow){
-        //            $.log("已进入home#index action")
-        //            var view_url = $.path.join("app","views", "home","index.html" );
-        //            flow.fire("get_view", view_url, flow.req.url )
-        //        },
+    return {
         show: function(flow){
             $.log("已进入home#show action")
             var view_url = $.path.join("app","views", "home","test.html" );
@@ -29,7 +23,6 @@ $.define("home_controller",function(){
             }
 
         }
-    });
-    $.controllers[ "home"] = new klass
+    }
 });
 

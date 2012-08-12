@@ -272,7 +272,6 @@
     //暴露到全局作用域下,所有模块可见!!
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-
     //    $.require( "test/loader", function(){
     //        console.log("测试结束!!!!!!!!!!!!!")
     //    });
@@ -282,6 +281,7 @@
     //  });
     //生成mass framework所需要的页面
     $.require("system/page_generate");
+    
     $.require("system/deploy,system/mvc", function(deploy){
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
     });
