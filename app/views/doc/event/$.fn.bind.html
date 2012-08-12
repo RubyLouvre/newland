@@ -15,16 +15,16 @@
 
 <h3>bind，live，delegate方法的区别</h3>
 <p>首先，让我们观察一个很简单的页面，其DOM结构如下：</p>
-<center><img src="../public/styles/event_dom_fn_bind_page.png"/></center>
+<center><img src="/styles/event_dom_fn_bind_page.png"/></center>
 
 <p>然后我们为里面的A链接绑定一个单击事件</p>
 <pre class="brush:js;gutter:false;toolbar:false">
                 $('a').bind('click', function() { alert("发生点击事件!") });
 </pre>
 <p>然后单击它</p>
-<center><img src="../public/styles/event_dom_fn_bind_click.png"/></center>
+<center><img src="/styles/event_dom_fn_bind_click.png"/></center>
 <p>由于没有return false也没有stopPropagation，它就会沿着其祖先，一层层往上冒泡，并尝试触发沿途元素的click事件，如果存在的话</p>
-<center><img src="../public/styles/event_dom_fn_bind_bubbling.png"/></center>
+<center><img src="/styles/event_dom_fn_bind_bubbling.png"/></center>
 <p>好了，我们再看看这几个方法是怎么实现的</p>
 <h4>.bind()</h4>
 <pre class="brush:js;gutter:false;toolbar:false">

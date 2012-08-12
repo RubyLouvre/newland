@@ -23,7 +23,7 @@
     <p>框架内部是使用getBoundingClientRect() 来获取页面元素的位置。</p>
     <p>getBoundingClientRect用于获得页面中某个元素的左，上，右和下分别相对浏览器视窗的位置。该函数返回一个Object对象，该对象有6个属性：top,lef,right,bottom,width,height；这里的top、left和css中的理解很相似，width、height是元素自身的宽高，但是right，bottom和css中的理解有点不一样。right是指元素右边界距窗口最左边的距离，bottom是指元素下边界距窗口最上面的距离。
         具体看示意图：</p>
-    <div><img src="../public/styles/css_offset_getBoundingClientRect.gif" /></div>
+    <div><img src="/styles/css_offset_getBoundingClientRect.gif" /></div>
     <p>getBoundingClientRect()最先是IE的私有属性，现在已经是一个W3C标准。所以你不用当心浏览器兼容问题，不过还是有区别的。
         IE只返回top,lef,right,bottom四个值，不够可以通过以下方法来获取width,height的值： </p>
     <pre class="brush:javascript;gutter:false;toolbar:false">
