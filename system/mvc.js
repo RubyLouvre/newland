@@ -9,7 +9,7 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
     var inter = $.Array.union(defaults, $.configs.intercepters).map(function(str){
         return "system/intercepters/"+str
     })
-    var rcname = /\\(\w+)_controller/;
+    var rcname = /\/(\w+)_controller/;
     //遍历app/controllers目录下所有控制器模块，并与拦载器模块一起加载它们！
     $.walk("app/controllers", function(files){
         $.require( inter.concat( files ), function(){
@@ -19,7 +19,9 @@ $.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
             var controllers = arguments;
             //进行控制反转，构建我们所需要的控制器子类与它的实例
             files.forEach(function(el, i){
-                var match = el.match(rcname);
+                //mac下的路径为     app/controllers/doc_controller.js
+                //window下的路径为  app\\controllers\\doc_controller.js
+                var match = el.replace(/\\/g,"/").match(rcname);
                 var controller = controllers[i];
                 controller.inherit =  $.base_controller
                 var klass = $.factory(controller);
