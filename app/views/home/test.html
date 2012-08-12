@@ -1,0 +1,56 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>首页</title>
+        <%= add_js("/scripts/mass.js",{"debug":1}) %>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="pragma"content="no-cache">
+        <meta http-equiv="cache-control"content="no-cache,must-revalidate">
+        <meta http-equiv="expires"content="0">
+        <style>
+
+        </style>
+    </head>
+    <body>
+        <h2>这页面是用来做各种实现的</h2>
+         <div class="show_d" style="background: #8b0000;padding:5px;">D</div>
+        <script>
+            $.require("ready,event", function() {
+                var d = $.d = {};
+                $.mix(d, $.EventTarget);
+                d.defineEvents("slideUp,resize,destroy");
+                d.onSlideUp(function(e) {
+                    $(".show_d").append("<div>" + e.type + "</div>");
+                    $(".show_d").append("<div>第一个slideUp回调</div>");
+                });
+
+                d.bind("slideUp", function(e) {
+                    $(".show_d").append("<div>" + e.type + "</div>");
+                    $(".show_d").append("<div>第二个slideUp回调</div>");
+                    $(".show_d").append("<div>" + [].slice.call(arguments) + "</div>");
+                });
+                d.onResize(function(e) {
+                    $(".show_d").append("<div>" + e.type + "</div>");
+                    $(".show_d").append("<div>第一个resize回调</div>");
+                });
+                d.onResize(function(e) {
+                    $(".show_d").append("<div>" + e.type + "</div>");
+                    $(".show_d").append("<div>第二个resize回调</div>");
+                });
+                d.onDestroy(function(e) {
+                    $(".show_d").append("<div>" + e.type + "</div>");
+                    $(".show_d").append("<div>第一个destroy回调</div>");
+                });
+                d.fire("slideUp", "收起");
+                d.fire("resize");
+                d.fire("destroy");
+                d.fire("destroy");
+                d.unbind("slideUp,resize,destroy");
+                $(".show_d").append("==========================");
+                delete $.d;
+            });
+        </script>
+
+    </body>
+</html>
