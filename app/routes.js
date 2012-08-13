@@ -5,6 +5,7 @@ $.define("routes",function(){
     return function(mapper){
         // mapper.get("/","home#index")
         mapper.get("/show","home#show")
+        mapper.get("/mongo","mongo#index")
         mapper.get("/tabs","home#tabs")
         mapper.get("/ajax","home#ajax")
         mapper.post("/ajax","home#ajax")

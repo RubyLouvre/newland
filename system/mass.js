@@ -126,14 +126,6 @@ void function( global, DOC ){
                 }
             }
             return ret;
-        //            for(var i = 0, n = nodes.length, result = []; i < n; i++){
-        //                result[i] = nodes[i];
-        //            }
-        //            if ( arguments.length > 1 ) {
-        //                return result.slice( start , ( end || result.length ) );
-        //            } else {
-        //                return result;
-        //            }
         },
         /**
          * 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）

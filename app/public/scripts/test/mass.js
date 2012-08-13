@@ -67,10 +67,22 @@ $.define("mass","more/spec",function(){
         },
 
         slice: function(){
-            var a = [1,2,3,4,5]
-            expect( $.slice(a, 1) ).same([2, 3, 4, 5]);
-            expect( $.slice(a, -1, null) ).same( [ 5 ] );
-            expect( $.slice(a, 0, "a") ).same( a.slice(0,"a") );
+            var a = [1,2,3,4,5,6,7]
+            expect( $.slice(a, 0) ).same( a.slice(0) );
+            expect( $.slice(a, 1, 4) ).same( a.slice(0, 1, 4) );
+            expect( $.slice(a, -1) ).same( a.slice(-1) );
+            expect( $.slice(a, 1, -2) ).same( a.slice(1, -2) );
+            expect( $.slice(a, 1, NaN) ).same( a.slice(1, NaN) );
+            expect( $.slice(a, 1, 2.1) ).same( a.slice(1, 2.1) );
+            expect( $.slice(a, 1.1, 4) ).same( a.slice(1.1, 4) );
+            expect( $.slice(a, 1.2, NaN) ).same( a.slice(1, NaN) );
+            expect( $.slice(a, NaN) ).same( a.slice(NaN) );
+            expect( $.slice(a, 1.3, 3.1) ).same( a.slice(1.3, 3.1) );
+            expect( $.slice(a, 2, "XXX") ).same( a.slice( 2, "XXX") );
+            expect( $.slice(a, -2) ).same( a.slice( -2) );
+            expect( $.slice(a, 1, 9) ).same( a.slice( 1, 9) );
+            expect( $.slice(a, 20, -21) ).same( a.slice( 20, -21) );
+            expect( $.slice(a, -1, null) ).same( a.slice( -1, null) );
         },
         mix: function(){
             var a = {

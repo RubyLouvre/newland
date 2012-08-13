@@ -42,8 +42,26 @@
         "@debug" : true,
         isWindows: process.platform === 'win32',//判定当前平台是否为window
         //将类数组对象转换成真正的数组，并进行切片操作(如果第二第三参数存在的情况下)
+
         slice: function (nodes, start, end) {
-            return Array.prototype.slice.call(nodes, start, end || nodes.length)
+            var ret = [], n = nodes.length
+            if(end === void 0 || typeof end == "number" && isFinite(end)){
+                start = parseInt(start,10) || 0
+                end = end == void 0 ? n : parseInt(end, 10)
+                if(start < 0){
+                    start += n
+                }
+                if(end > n){
+                    end = n
+                }
+                if(end < 0){
+                    end += n
+                }
+                for (var i = start; i < end; ++i) {
+                    ret[i - start] = nodes[i];
+                }
+            }
+            return ret;
         },
         slice: function (args, slice, end) {
             var ret = [], n = args.length, start = slice || 0
@@ -331,10 +349,14 @@
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
     });
 //http://localhost:8888/index.html
+
 //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
 
 
 })();
+//框架要用到mongo数据库，mongo数据库的安装见这里
+////必须要将mongodb安装在当前目录下
+//mongo的node.js数据库连接库安装要用NPM: npm --registry http://42.121.86.107:1984 install mongoose
 //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
 //2011.12.17 $.define再也不用指定模块所在的目录了,
 //如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
@@ -372,41 +394,3 @@
 
 //公开我的答案，请直接贴在firebug中
 
-
-var array = [1,2,3,4,5,6,7]
-function slice(args, slice, end) {
-    var ret = [], n = args.length, start = parseInt(slice,10) || 0
-    if(end === void 0 || typeof end == "number" && isFinite(end)){
-        end = end == void 0 ? n : parseInt(end, 10)
-        if(start < 0){
-            start += n
-        }
-        if(end > n){
-            end = n
-        }
-        if(end < 0){
-            end += n
-        }
-        for (var i = start; i < end; ++i) {
-            ret[i - start] = args[i];
-        }
-    }    return ret;
-}
-function test(a,b){   
-    console.log(  array.slice(a,b)  )
-    console.log(  slice(array,a,b)  )
-    console.log("===================")
-}
-test(0)
-test(1,4)
-test(-1)
-test(1,-2)
-test(1,NaN)
-test(1,2.1)
-test(1.1,4)
-test(NaN)
-test(1,2, 3.1);
-test(2,"XX");
-test(-2);
-test(1,9)
-test(20,-21)

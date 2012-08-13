@@ -1,0 +1,43 @@
+<%  set_title("mongo的文档") %>
+<%  set_layout("doc_layout.html") %>
+<h3>mongo的文档</h3>
+<p>链接数据：</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+//这里的northwind如果不存在就会新建一个，存在就用原来的，后面的格式固定
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    // 如果person这个集合不存在它会新建一个，存在就有原来的，
+    // mongo的回调与node.js保持一致，出错第一个参数是Error对象
+    db.collection("person", function(err, person) {
+     //@@@@
+    });
+});
+</pre>
+<p>往集合里面插入数据，接着上面的例子，将@@@@改成如下代码</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+       person.insert({
+            "name":"111"
+        })
+        person.insert({
+            "name":"222"
+        })
+        person.insert({
+            "name":"333"
+        })
+</pre>
+<p>好了，我们查看刚插入的数据，将@@@@改成如下代码</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+        person.find( function(err, cursor) {
+            cursor.each(function(err,a){
+                console.log(a+"TEST")
+            })
+        })
+</pre>
+<p>竟然是输出：</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+{ name: '111', _id: 5028a6e017a0be5c0c000001 }
+{ name: '333', _id: 5028a6e017a0be5c0c000003 }
+{ name: '222', _id: 5028a6e017a0be5c0c000002 }
+null
+</pre>
