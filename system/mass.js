@@ -108,14 +108,32 @@ void function( global, DOC ){
          * @return {Array}
          */
         slice: function ( nodes, start, end ) {
-            for(var i = 0, n = nodes.length, result = []; i < n; i++){
-                result[i] = nodes[i];
+            var ret = [], n = nodes.length
+            if(end === void 0 || typeof end == "number" && isFinite(end)){
+                start = parseInt(start,10) || 0
+                end = end == void 0 ? n : parseInt(end, 10)
+                if(start < 0){
+                    start += n
+                }
+                if(end > n){
+                    end = n
+                }
+                if(end < 0){
+                    end += n
+                }
+                for (var i = start; i < end; ++i) {
+                    ret[i - start] = nodes[i];
+                }
             }
-            if ( arguments.length > 1 ) {
-                return result.slice( start , ( end || result.length ) );
-            } else {
-                return result;
-            }
+            return ret;
+        //            for(var i = 0, n = nodes.length, result = []; i < n; i++){
+        //                result[i] = nodes[i];
+        //            }
+        //            if ( arguments.length > 1 ) {
+        //                return result.slice( start , ( end || result.length ) );
+        //            } else {
+        //                return result;
+        //            }
         },
         /**
          * 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）
@@ -387,7 +405,7 @@ void function( global, DOC ){
         if( $.html.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
-     var rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/;
+    var rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/;
     function debug(obj, name, module, p){
         var fn = obj[name];
         if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){

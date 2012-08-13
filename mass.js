@@ -45,6 +45,51 @@
         slice: function (nodes, start, end) {
             return Array.prototype.slice.call(nodes, start, end || nodes.length)
         },
+        slice: function (args, slice, end) {
+            var ret = [], n = args.length, start = slice || 0
+            if(end === void 0 || typeof end == "number" && isFinite(end)){
+                end = end == void 0 ? n : parseInt(end, 10)
+                if(start < 0){
+                    start += n
+                }
+                if(end > n){
+                    end = n
+                }
+                if(end < 0){
+                    end += n
+                }
+                for (var i = start; i < end; ++i) {
+                    ret[i - start] = args[i];
+                }
+            }
+            return ret;
+        },
+
+        //        var a = [1,2,3,4]
+        //        args = function (args, slice, sliceEnd) {
+        //            var ret = [];
+        //            var start = slice || 0;
+        //            var end = 3 === arguments.length
+        //                ? sliceEnd
+        //            : args.length;
+        //            if(start < 0){
+        //                start += args.length
+        //            }
+        //            if(end > args.length){
+        //                end = args.length
+        //            }
+        //            if(end < 0){
+        //                end += args.length
+        //            }
+        //
+        //            for (var i = start; i < end; ++i) {
+        //                ret[i - start] = args[i];
+        //            }
+        //
+        //            return ret;
+        //        }
+        //        console.log(a.slice(-1))
+        //        args(a,-1)
         getUid:  function( node ){
             return node.uniqueNumber || ( node.uniqueNumber = uuid++ );
         },
@@ -228,11 +273,11 @@
             return '\x1b[' + arr[0] + 'm' + str + '\x1b[' + arr[1] + 'm';
         }
         /**
-     * 用于调试
-     * @param {String} s 要打印的内容
-     * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
-     * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
-     */
+         * 用于调试
+         * @param {String} s 要打印的内容
+         * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
+         * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
+         */
         $.log = function (s, color){
             var args = Array.apply([],arguments);
             if(arguments.length === 1){
@@ -324,3 +369,44 @@
 步骤4 —— ViewResolver
 结合之前我们对流程组件化的解释，这些接口的定义不正是处理流程组件化的步骤嘛？这些接口，就是组件。 
  */
+
+//公开我的答案，请直接贴在firebug中
+
+
+var array = [1,2,3,4,5,6,7]
+function slice(args, slice, end) {
+    var ret = [], n = args.length, start = parseInt(slice,10) || 0
+    if(end === void 0 || typeof end == "number" && isFinite(end)){
+        end = end == void 0 ? n : parseInt(end, 10)
+        if(start < 0){
+            start += n
+        }
+        if(end > n){
+            end = n
+        }
+        if(end < 0){
+            end += n
+        }
+        for (var i = start; i < end; ++i) {
+            ret[i - start] = args[i];
+        }
+    }    return ret;
+}
+function test(a,b){   
+    console.log(  array.slice(a,b)  )
+    console.log(  slice(array,a,b)  )
+    console.log("===================")
+}
+test(0)
+test(1,4)
+test(-1)
+test(1,-2)
+test(1,NaN)
+test(1,2.1)
+test(1.1,4)
+test(NaN)
+test(1,2, 3.1);
+test(2,"XX");
+test(-2);
+test(1,9)
+test(20,-21)

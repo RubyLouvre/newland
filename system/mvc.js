@@ -1,4 +1,4 @@
-$.define("mvc", "httpflow, http, cookie, system",function( Flow, http, cookie ){
+$.define("mvc", "httpflow, http, system",function( Flow, http ){
     $.log("已加载MVC模块")
     $.memory = {}
 
