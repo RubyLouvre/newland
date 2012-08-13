@@ -1,7 +1,7 @@
 <%  set_title("collection.find") %>
 <%  set_layout("doc_layout.html") %>
-<h3>collection.find</h3>
-<p>此方法会根据最后一个参数是否为回调函数决定是同步方法或还异步方法，如果是异步方法，那么回调的第二个参数则是cursor对象。
+<h3>查询相关</h3>
+<p>find方法会根据最后一个参数是否为回调函数决定是同步方法或还异步方法，如果是异步方法，那么回调的第二个参数则是cursor对象。
     同步方法不用说也是cursor对象
 </p>
 <br/>
@@ -35,10 +35,9 @@ page2 = db.things.find().skip(20).limit(20)
 page3 = db.things.find().skip(40).limit(20)
 //更简单的写法
 page3 = db.things.find({}, {}, 20, 40);
-
 </pre>
 <p>注:当数据量很大时，skip操作会变的很慢，应该避免使用。（不止是mongoDb会这样，大部分数据库都是。）
-   可以通过改变查询文档的规则来达到分页效果，避免使用skip来跳过大量的数据。通过计算，得到下次查询应该从什么地方开始
+    可以通过改变查询文档的规则来达到分页效果，避免使用skip来跳过大量的数据。通过计算，得到下次查询应该从什么地方开始
 </p>
 <br/>
 <p>sort排序</p>
@@ -57,7 +56,7 @@ var cursor =  db.users.find({'email':'ixigua@sina.com'},{"sort":"Dt"} )
 <p>distinct操作，对记录进行去重</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
  db.users.distinct('msg')
- </pre>
+</pre>
 <br/>
 <p>对数值类型的属性可以通过比较大小的操作进行过滤</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
@@ -116,5 +115,219 @@ db.users.find({name: {$type: 2}});
 //查询所有age字段是整型的
 db.users.find({age: {$type: 16}});
 </pre>
-
-http://www.mongodb.org/display/DOCS/Advanced+Queries
+<table class="table1" border="1" >
+    <tbody>
+        <tr>
+            <td>
+                Type Name
+            </td>
+            <td>
+                Type Number
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Double
+            </td>
+            <td>
+                1
+            </td>
+        </tr>
+        <tr>
+            <td>
+                String
+            </td>
+            <td>
+                2
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Object
+            </td>
+            <td>
+                3
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Array
+            </td>
+            <td>
+                4
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Binary data
+            </td>
+            <td>
+                5
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Object id
+            </td>
+            <td>
+                7
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Boolean
+            </td>
+            <td>
+                8
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Date
+            </td>
+            <td>
+                9
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Null
+            </td>
+            <td>
+                10
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Regular expression
+            </td>
+            <td>
+                11
+            </td>
+        </tr>
+        <tr>
+            <td>
+                JavaScript code
+            </td>
+            <td>
+                13
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Symbol
+            </td>
+            <td>
+                14
+            </td>
+        </tr>
+        <tr>
+            <td>
+                JavaScript code with scope
+            </td>
+            <td>
+                15
+            </td>
+        </tr>
+        <tr>
+            <td>
+                32-bit integer
+            </td>
+            <td>
+                16
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Timestamp
+            </td>
+            <td>
+                17
+            </td>
+        </tr>
+        <tr>
+            <td>
+                64-bit integer
+            </td>
+            <td>
+                18
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Min key
+            </td>
+            <td>
+                255
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Max key
+            </td>
+            <td>
+                127
+            </td>
+        </tr>
+    </tbody>
+</table>
+<br/>
+<p>each方法</p>
+<p>不过坑爹的方法,如果cursor里面包含三个记录,那么它会遍历四次,最后一次为null.</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var cursor = db.users.find()
+cursor.each(function(err, item) {
+    if(item != null) {
+        console.log(item)
+    };
+});
+</pre>
+<p>toArray方法,带一个不能省略的回调作参数,内部调用上面的each方法，将cursor包含的所有记集变成一个数组放到此回调中</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var cursor = db.users.find()
+cursor.toArray(function(e,array){
+    console.log(array)
+ })
+</pre>
+<p>raw ：让包含的记录变成Buffer</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+        person.insert({
+            name:"aaa"
+        })
+        person.insert({
+            name:"bbb"
+        })
+        person.insert({
+            name:"ccc"
+        });
+        person.find({},{raw:true}).toArray(function(e,array){
+            console.log(array)
+        })
+</pre>
+<p>结果显示如下：</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+[ <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
+0 28 fb f4 5e ec 07 f4 18 00 00 01 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
+0 28 fb f4 5e ec 07 f4 18 00 00 03 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
+0 28 fb f4 5e ec 07 f4 18 00 00 02 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
+0 28 fd ab 58 ac 1e 40 1c 00 00 02 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
+0 28 fd ab 58 ac 1e 40 1c 00 00 03 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
+0 28 fd ab 58 ac 1e 40 1c 00 00 01 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
+0 28 fe 23 f0 2a 89 e0 1f 00 00 01 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
+0 28 fe 23 f0 2a 89 e0 1f 00 00 02 00>,
+  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
+0 28 fe 23 f0 2a 89 e0 1f 00 00 03 00> ]
+                                        </pre>
+                                        <p>nextObject:cursor的原型方法，一个比each, toArray更好用的得到记录的方法</p>
+                                        <pre class="brush:javascript;gutter:false;toolbar:false">
+        cursor.nextObject(function(){
+            console.log( cursor.items)
+        })
+                                        </pre>
