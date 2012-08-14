@@ -42,6 +42,88 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             callback.reload = !!reload;//默认每次重新加载
             return this;
         },
+        //用于取回符合条件的回调 opts = {match：正则,names:字符串,fired: 布尔}
+        find: function(names,opts){
+            names = names || {}
+            if(typeof names == "string"){
+                opts = opts || {}
+                opts.names = names;
+            }else{
+                opts = names;
+            }
+            names = opts.names;
+            var fired = !!opts.fired;//是否包含已经fire过的回调
+            var root = this.root, callbacks = [], sorted = [], uniq = {}
+            if(!names){//取得所有回调并去重
+                for(var i in root){
+                    callbacks = callbacks.concat(root[i].unfire);
+                    if(fired){
+                        callbacks = callbacks.concat(root[i].fired);
+                    }
+                }
+                callbacks = $.Array.unique(callbacks);
+            }else{
+                String(names +"").replace($.rword,function(name){
+                    name = "__"+name;//处理toString与valueOf等属性
+                    callbacks = callbacks.concat(root[name].unfire);
+                    if(!uniq[name]){//去重
+                        sorted.push(name);
+                        uniq[name] = 1;
+                    }
+                    if(fired){
+                        callbacks = callbacks.concat(root[name].fired);
+                    }
+                });
+                callbacks = $.Array.unique(callbacks);
+                sorted = String(sorted.sort());
+                callbacks = callbacks.filter(function(fn){
+                    return String(fn.args.sort()).indexOf(sorted) > -1
+                })
+            }
+            if($.type(opts.match,"RegExp")){
+                var reg = opts.match;
+                callbacks = callbacks.filter(function(fn){
+                    for(var i = 0, n = fn.args.length; i < n ;i++){
+                        var name = fn.args[i].slice(2);
+                        if(reg.test(name)){
+                            return true;
+                        }
+                    }
+                    return false
+                })
+            }
+            return callbacks;
+        },
+        append: function(names, name){
+            var callback = this.find(names);
+            var root = this.root
+            name = "__"+name;
+            callback.forEach(function(fn){
+                if(!(name in fn.deps)){
+                    fn.deps[name] = 1;
+                    fn.args.push(name);
+                    if(!root[name]){
+                        root[name] = {
+                            unfire : [fn],//正在等待解发的回调
+                            fired: [],//已经触发的回调
+                            state : 0
+                        }
+                    }else {
+                        root[name].unfire.unshift(fn)
+                    }
+                }
+            });
+            return this;
+        },
+        reduce: function(names,name){
+            var callback = this.find(names)
+            var released = "__"+name
+            callback.forEach(function(fn){
+                delete fn.deps[released];
+                $.Array.remove(fn.args, released)
+            });
+            return this;
+        },
         /**
         移除某个操作的回调(1)或所有回调(2),或同时移除多个操作（3）
         (1)$.unbind("aaa")
@@ -124,6 +206,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
 /**
  2012.6.8 对fire的传参进行处理
  2012.7.13 使用新式的相对路径依赖模块
+ 2012.8.14 添加find append reduce三个方法
  一个简单的例子
  $.require("flow", function(){
                 var node = new $.Flow();
@@ -136,3 +219,4 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
                 node.fire("aaa")
   })
  */
+

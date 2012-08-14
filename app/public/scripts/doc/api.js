@@ -366,7 +366,13 @@ $.define("api", function(){
             "toggle": "function"
         },
         "操作流模块": {
-            "Flow": "function"
+            "Flow": "function",
+            "flow.bind":"function",
+            "flow.unbind":"function",
+            "flow.fire":"function",
+            "flow.find":"function",
+            "flow.append":"function",
+            "flow.reduce":"function"
         },
         "特征侦探模块": {}
     }

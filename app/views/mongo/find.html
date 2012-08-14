@@ -10,6 +10,16 @@
  var cursor = db.users.find({})
  var cursor = db.users.find()
 </pre>
+<p>它的所有传参形式</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ *  - callback?
+ *  - selector, callback?,
+ *  - selector, fields, callback?
+ *  - selector, options, callback?
+ *  - selector, fields, options, callback?
+ *  - selector, fields, skip, limit, callback?
+ *  - selector, fields, skip, limit, timeout, callback?
+</pre>
 <br/>
 <p>我们可以根据对象某个属性进行过滤.</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
