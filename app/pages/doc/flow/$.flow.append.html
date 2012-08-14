@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.flow.append</title>
+        <script type="text/javascript" src="/scripts/mass_merge.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shCore.js"></script>
+        <script type="text/javascript" src="/scripts/doc/common.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushJScript.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushCss.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushXml.js"></script>
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/common.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shCore.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shThemeRDark.css" />
+
+        
+        
+
+    </head>
+    <body>
+        <article>
+           
+
+<h3>$.flow.append(names,name)</h3>
+<p><span class="stress">描述：</span></p>
+<p>在一个回调执行前追加多一个要执行的操作步骤。</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>names</dt>
+    <dd>必须。如果是字符串,则相当于$.flow.find中的操作名列表，如果是对象，则相等于$.flow.find(opts)，可以添加更多的筛选条件。</dd>
+    <dt>name</dt>
+    <dd>必须。字符串。要追加的操作名。 </dd>
+</dl>
+<fieldset ><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+
+$.require("flow", function(){
+    var node = new $.Flow();
+    node.bind("aaa,bbb", function(){
+        $.log(Array.apply([],arguments),true)
+    });
+
+    node.fire("aaa",1);
+    node.append("aaa","ccc")
+    node.fire("bbb",2);//如果没有上面那一句，这里就已执行回调了
+    node.fire("ccc",3)
+})
+    </pre>
+    <button class="doc_btn" type="button">点我，执行代码</button>
+
+</fieldset>
+        </article>
+   </body>
+</html>

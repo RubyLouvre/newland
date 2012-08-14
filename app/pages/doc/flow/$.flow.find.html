@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.flow.find</title>
+        <script type="text/javascript" src="/scripts/mass_merge.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shCore.js"></script>
+        <script type="text/javascript" src="/scripts/doc/common.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushJScript.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushCss.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushXml.js"></script>
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/common.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shCore.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shThemeRDark.css" />
+
+        
+        
+
+    </head>
+    <body>
+        <article>
+           
+
+<h3>$.flow.find</h3>
+<p><span class="stress">描述：</span></p>
+<p>一个操作流会把用户所有的操作都保存到root对象,因此我们可以通过find方法配以适当参数就可以查看想要的回调了。此方法内部是用于flow.append与flow.reduce。</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>names</dt>
+    <dd>可选。String或对象或不存在。如果是字符串则表示找都同时拥有这几种操作的回调，用逗号隔开。没有则表示将寻找所有操作的回调 </dd>
+    <dt>opts</dt>
+    <dd>可选。对象或不存在。此对象可以包含names属性，作用同上；<br/>
+        可以包含fired属性，如果为真值，表示将包含那些已经触发了的回调，默认是只寻找没有被触发的回调； <br/>
+        可以包含match属性，为一个正则，用于进行模糊匹配
+    </dd>
+</dl>
+<fieldset ><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+        var node = new $.Flow();
+            node.bind("aaa", function(){
+                $.log("aaa")
+            });
+            node.bind("ccc", function(){
+                $.log("bbb")
+            });
+            node.bind("eeaa", function(){
+                $.log("bbb")
+            });
+            node.bind("aaa,ddd", function(){
+                $.log("bbb")
+            });
+            node.bind("ccc,aaa", function(){
+                $.log("bbb")
+            });
+            $.log( node.find().length,true)//5
+            $.log( node.find({}).length, true)//5
+            $.log( node.find({
+                match:/aa$/
+            }).length ,true)//4
+            $.log( node.find("aaa").length ,true)//3
+            $.log( node.find("ccc").length ,true)//2
+            $.log( node.find("aaa,ccc").length ,true)//1
+     })
+    </pre>
+    <button class="doc_btn" type="button">点我，执行代码</button>
+
+</fieldset>
+        </article>
+   </body>
+</html>

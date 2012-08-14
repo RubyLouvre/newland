@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.flow.fire</title>
+        <script type="text/javascript" src="/scripts/mass_merge.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shCore.js"></script>
+        <script type="text/javascript" src="/scripts/doc/common.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushJScript.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushCss.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushXml.js"></script>
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/common.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shCore.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shThemeRDark.css" />
+
+        
+        
+
+    </head>
+    <body>
+        <article>
+           
+
+<h3>$.flow.fire(name,args1,args2,...)</h3>
+<p><span class="stress">描述：</span></p>
+<p>通知操作流，这个操作已经完成，将参数传递给准备触发的最后回调。</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>name</dt>
+    <dd>必须。字符串。单个操作名。你也可以当成是一种自定义事件。 </dd>
+    <dt>args</dt>
+    <dd>可选，个数不受限制 </dd>
+</dl>
+<fieldset ><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("flow",function(){
+    var flow = new $.Flow;
+    flow.bind("aaa,bbb", function(){
+        $.log(Array.apply([],arguments),true)
+    });
+    flow.fire("aaa",1,2,3,4)
+    flow.fire("bbb",333);//到这里上面的回调打印1,2,3,4,333
+    flow.fire("aaa",10,20)//到这里上面的回调打印10,20,333
+})
+    </pre>
+     <button class="doc_btn" type="button">点我，执行代码</button>
+     
+</fieldset>
+        </article>
+   </body>
+</html>

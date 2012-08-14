@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.flow.bind</title>
+        <script type="text/javascript" src="/scripts/mass_merge.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shCore.js"></script>
+        <script type="text/javascript" src="/scripts/doc/common.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushJScript.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushCss.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushXml.js"></script>
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/common.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shCore.css" />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shThemeRDark.css" />
+
+        
+        
+
+    </head>
+    <body>
+        <article>
+           
+
+<h3>$.flow.bind(names,fn,reload)</h3>
+<p><span class="stress">描述：</span></p>
+<p>想执行fn这个回调函数,在这之前需要完成多少操作。</p>
+<p>你也可以配合$.flow.fire方法构建你的自定义事件系统。</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>names</dt>
+    <dd>必须。String或数组。所需的操作的名字的集合。如果是字符串，多个操作请用逗号隔开，如$.bind("aaa,bbb,ccc",function(){}) </dd>
+    <dt>fn</dt>
+    <dd>必须。回调函数。 </dd>
+    <dt>reload</dt>
+    <dd>Boolean。布尔值，决定最后回调的第二次触发的条件。比如说最后回调依赖于aaa,bbb,ccc,ddd这四步操作，用代码表示为flow.bind("aaa,bbb,ccc,ddd",fn)。
+        当我们先后flow.fire("aaa"),flow.fire("bbb"),flow.fire("ccc"),flow.fire("ddd")，那么fn就会第一次被触发！
+        然后在reload为false的情况下,我再调用flow.fire("aaa"),fn就会被第二次触发,
+        反正我们无论是fire上述哪个操作，bbb也好，ccc也好，fn都会立即执行，不用着等到四个都触发才执行！
+        只有当reload设置为true时，我们才需要每次把这个步骤都执行了一遍才触发fn。reload默认为false。</dd>
+</dl>
+<p>例子见<a href="/doc/flow/$.Flow.html">这里</a></p>
+
+        </article>
+   </body>
+</html>
