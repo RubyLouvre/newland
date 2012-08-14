@@ -42,8 +42,7 @@
         "@debug" : true,
         isWindows: process.platform === 'win32',//判定当前平台是否为window
         //将类数组对象转换成真正的数组，并进行切片操作(如果第二第三参数存在的情况下)
-
-        slice: function (nodes, start, end) {
+        slice: function ( nodes, start, end ) {
             var ret = [], n = nodes.length
             if(end === void 0 || typeof end == "number" && isFinite(end)){
                 start = parseInt(start,10) || 0
@@ -63,51 +62,6 @@
             }
             return ret;
         },
-        slice: function (args, slice, end) {
-            var ret = [], n = args.length, start = slice || 0
-            if(end === void 0 || typeof end == "number" && isFinite(end)){
-                end = end == void 0 ? n : parseInt(end, 10)
-                if(start < 0){
-                    start += n
-                }
-                if(end > n){
-                    end = n
-                }
-                if(end < 0){
-                    end += n
-                }
-                for (var i = start; i < end; ++i) {
-                    ret[i - start] = args[i];
-                }
-            }
-            return ret;
-        },
-
-        //        var a = [1,2,3,4]
-        //        args = function (args, slice, sliceEnd) {
-        //            var ret = [];
-        //            var start = slice || 0;
-        //            var end = 3 === arguments.length
-        //                ? sliceEnd
-        //            : args.length;
-        //            if(start < 0){
-        //                start += args.length
-        //            }
-        //            if(end > args.length){
-        //                end = args.length
-        //            }
-        //            if(end < 0){
-        //                end += args.length
-        //            }
-        //
-        //            for (var i = start; i < end; ++i) {
-        //                ret[i - start] = args[i];
-        //            }
-        //
-        //            return ret;
-        //        }
-        //        console.log(a.slice(-1))
-        //        args(a,-1)
         getUid:  function( node ){
             return node.uniqueNumber || ( node.uniqueNumber = uuid++ );
         },
