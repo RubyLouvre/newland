@@ -1,10 +1,7 @@
 <%  set_title("collection.find") %>
 <%  set_layout("doc_layout.html") %>
 <h3>查询相关</h3>
-<p>find方法会根据最后一个参数是否为回调函数决定是同步方法或还异步方法，如果是异步方法，那么回调的第二个参数则是cursor对象。
-    同步方法不用说也是cursor对象
-</p>
-<br/>
+
 <p>find方法支持传入多个对象作为过滤条件得到我们想要的结果，如果想得到所有数据，可以什么都不传或只传个空对象</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
  var cursor = db.users.find({})
@@ -19,6 +16,15 @@
  *  - selector, fields, options, callback?
  *  - selector, fields, skip, limit, callback?
  *  - selector, fields, skip, limit, timeout, callback?
+</pre>
+<p>我们可以认为find方法的传参都为对象与最后面的可选回调，就算不是对象，它内部都会整成对象。</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+db.users.find( { x : 3, y : "abc" } ).sort({x:1});
+//相当于SQL // select * from users where x=3 and y='abc' order by x asc;
+</pre>
+<p>mongodb的find方法是相当灵活,上面的语句也可以写成:</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+db.users.find( { $query : { x : 3, y : "abc" }, $orderby : { x : 1 } } );
 </pre>
 <br/>
 <p>我们可以根据对象某个属性进行过滤.</p>
@@ -106,6 +112,23 @@ db.users.find({name: {$not: /^B.*/}});
 <pre class="brush:javascript;gutter:false;toolbar:false">
 db.users.find({age : {$not: {$mod : [10, 0]}}});
 </pre>
+<p>$in操作符:</p>
+<p>比如下面两个查询是一样的:</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+
+          collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
+            cursor.toArray(function(err, docs) {
+              console.log("Returned #" + docs.length + " documents");
+            });
+          });
+
+          collection.find({'a':/[1|2]/}, function(err, cursor) {
+            cursor.toArray(function(err, docs) {
+              console.log("Returned #" + docs.length + " documents");
+            });
+          });
+</pre>
+
 <p>$where查询 </p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 //查询 age > 18 的记录，以下查询都一样
