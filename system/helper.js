@@ -1,4 +1,4 @@
-$.define("helper","class", function(){
+$.define("helper", function(){
     function make_helper(){
         var data = {
             links : [],
