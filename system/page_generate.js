@@ -1,23 +1,21 @@
-$.define("page_generate","helper,more/ejs,hfs",function(get_hepler){
+$.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
 
     var url = "D:/newland/app/views/"//doc/event
     var layouts = {};
-
     $.walk(url, function(files){
         var pending = files.length;
         for(var i = 0; i < pending; i++){
             (function(view_url){
-           
-                var array = get_hepler();
+
                 $.readFile(view_url,"utf-8", function(e, source){
-                  
+                    var array = get_hepler();
                     var data = array[0]
-                    var fn = $.ejs.compile(source, array[1]);
-                    var html = fn(data);
-                     
-                    data.partial =  fn();
-                    var layout = data.layout;
-                    if( layout ){//如果它需要布局模板
+                    var helpers = array[1]
+                    var fn = $.ejs.compile(source, helpers);
+                    var html = fn(data, helpers);
+                    if( typeof data.layout == "string" ){//如果它需要布局模板
+                        data.partial = html;
+                        var layout = data.layout;
                         html = layouts[layout]
                         if( !html ){
                             try{
