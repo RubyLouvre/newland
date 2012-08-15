@@ -158,6 +158,30 @@ db.open(function() {
     })
 })
 </pre>
+<p>$addToSet,行为类似我的语言模块的$.Array.ensure方法，只有当原来的数组属性不存在此元素才添加给定元素。</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+        users.update({
+            name:"xxx"
+        },{
+            $addToSet:{
+                array1: 3
+            }
+        },true,function(err){
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+
+    })
+})
+</pre>
+
 <p>$pushAll,与$push差不多,不过要来值是一个数组,进行的是concat操作</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 var mongo  = require('mongodb');

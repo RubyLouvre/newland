@@ -92,6 +92,8 @@ $.define("api", function(){
                 "union": "function",
                 "intersect": "function",
                 "unique": "function",
+                "ensure": "function",
+                "inGroupsOf": "function",
                 "flatten": "function"
             },
             "Number": {

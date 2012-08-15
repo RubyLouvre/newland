@@ -641,6 +641,35 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             while (i--) result[i] = cloneOf(target[i]);
             return result;
         },
+        //只有当前数组不存在此元素时只添加它
+        ensure: function( target, el ){
+            if( !~target.indexOf(el) ){
+                target.push( el );
+            }
+            return target;
+        },
+        //将数组划分成N个分组，其中小组有number个数，最后一组可能小于number个数,
+        //但如果第三个参数不为undefine时,我们可以拿它来填空最后一组
+        inGroupsOf : function(target, number, fillWith) {
+            var t = target.length,
+            n = Math.ceil( t / number),
+            fill = fillWith !== void 0,
+            groups = [], value, i, j, cur
+            for (i = 0; i < n; i++) {
+                groups[i] = [];
+                for (j = 0; j < number; j++) {
+                    cur = i * number + j;
+                    if ( cur === t ) {
+                        if ( fill ) {
+                            groups[i][j] = fillWith;
+                        }
+                    } else {
+                        groups[i][j] = target[cur];
+                    }
+                }
+            }
+            return groups;
+        },
         //可中断的forEach迭代器
         each: function( target, fn, scope  ){
             for(var i = 0, n = target.length; i < n; i++){
@@ -688,7 +717,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return $[name].clone(item);
             default:
                 return item;
-        }       
+        }
     }
     //使用深拷贝方法将多个对象或数组合并成一个
     function mergeOne(source, key, current){
@@ -749,7 +778,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return target;
         },
         //去掉与传入参数相同的元素
-        without: function(target, array) {
+        without: function( target, array ) {
             var result = {}, key;
             for (key in target) {//相当于构建一个新对象，把不位于传入数组中的元素赋给它
                 if (!~array.indexOf(key) ) {
@@ -793,4 +822,4 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
 https://gist.github.com/395070
- */
+*/

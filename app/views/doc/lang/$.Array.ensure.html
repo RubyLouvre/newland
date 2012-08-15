@@ -1,15 +1,16 @@
-<%  set_title("$.Array.flatten") %>
+<%  set_title("$.Array.ensure") %>
 <%  set_layout("doc_layout.html") %>
-<h3>$.Array.flatten()</h3>
+<h3>$.Array.flatten(target, el)</h3>
 <p><span class="stress">描述：</span></p>
-<p>返回一个不具有嵌套层次结构的数组，内嵌的数组递归加入到最外层数组中。</p>
+<p>只有当前数组不存在此元素时只添加el。</p>
 
 <fieldset><legend>例子</legend>
     <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("lang",function(){
-                    var ret = $.Array.flatten([1, [2, [3, 4, 5] ],6]);
-                    ret = $.dump(ret);//序列化
-                    $.log(ret,true);
+                    var ret = $.Array.ensure([1,2,3,4], 3)
+                    $.log(ret,true);//1,2,3,4
+                    ret = $.Array.ensure([1,2,3,4], 5)
+                    $.log(ret,true);//1,2,3,4,5
                 });
     </pre>
 
