@@ -134,6 +134,7 @@ db.users.find({age : {$not: {$mod : [10, 0]}}});
 //查询 age > 18 的记录，以下查询都一样
 db.users.find({age: {$gt: 18}});
 db.users.find({$where: "this.age > 18"});
+db.users.find({$where: function(){ return this.age > 18 } });
 db.users.find("this.age > 18");
 var f = function() {return this.age > 18} db.users.find(f);
 </pre>

@@ -42,6 +42,39 @@ db.open(function() {
 { name: '222', _id: 5028a6e017a0be5c0c000002 }
 null
 </pre>
+<p>因此建议改成toArray，具体例子见find页面</p>
+<p>创建一个集合,使用createCollection方法</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.createCollection("users",function(err, collection){
+        console.log(err);//null
+        console.log(collection.collectionName);//users
+    })
+})
+</pre>
+<p>连接一个集合,如果不存在就创建此集合</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, collection){
+        console.log(err);//null
+        console.log(collection.collectionName);//users
+    })
+})
+</pre>
+<p>删除一个集合,使用dropCollection方法</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.dropCollection("posts",function(err, ok){
+        console.log(err)//null
+        console.log(ok)//true
+    })
+})
 
-
+</pre>
 http://www.cnblogs.com/huangxincheng/archive/2012/02/18/2356595.html

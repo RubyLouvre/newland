@@ -1,0 +1,239 @@
+<%  set_title("collection.update") %>
+<%  set_layout("doc_layout.html") %>
+<h3>更新相关</h3>
+<p>update方法</p>
+<p>它的第一参数是查询对象</p>
+<p>它的第二参数是更新对象,包含$inc ,$unset, $set, $push, $pushAll, $pop, $pull操作</p>
+<p>它的第三参数是可先对象,包含$inc , $set, upsert操作</p>
+<dl>
+    <dt>$inc</dt>
+    <dd> $inc也就是increase的缩写，学过sql server 的同学应该很熟悉，比如我们做一个在线用户状态记录，每次修改会在原有的基础上
+        自增$inc指定的值</dd>
+    <dt>$set</dt>
+    <dd> $set的值也是一个对象,里面要包含你要更新的键值。</dd>
+</dl>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+        users.insert([
+            {
+                name:"xxx",
+                sex:1
+            },
+
+            {
+                name:"xxx",
+                sex:1
+            },
+
+            {
+                name:"yyy",
+                sex:1
+            },
+
+            {
+                name:"yyy",
+                sex:1
+            }
+        ],function(err, cursor){
+            users.update({
+                name:"xxx"
+            },{
+                $set:{
+                    name:"jjj"
+                }
+            },function(err){//注意update语句的回调只有一个参数
+                users.find().toArray(function(e, els){
+                    els.forEach(function(el){
+                        console.log(el)
+                    });
+                });
+            })
+
+        })
+    })
+})
+</pre>
+<br/>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+      //每次只能对一个记录进行$push操作
+      //如果记录存在指定的数组属性,那么就为它添加进去,没有就创建这个属性,赋给它一个空数组再push进去
+      //如果存在同名属性但不是数组就报错
+        users.update({
+            name:"jjj"
+        },{
+            $push:{
+                array"hhh"
+            }
+
+        },true,function(err){//注意update语句的回调只有一个参数
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+
+    })
+})
+</pre>
+<p>$unset,删除一个指定的属性,其值恒为1</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+        users.update({
+            array1:{$exists : true }
+        },{//移除最后一个
+            $unset:{
+                array1: 1
+            }
+        },true,function(err){
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+
+    })
+})
+</pre>
+<p>$push操作</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+      //每次只能对一个记录进行$push操作
+      //如果记录存在指定的数组属性,那么就为它添加进去,没有就创建这个属性,赋给它一个空数组再push进去
+      //如果存在同名属性但不是数组就报错
+        users.update({
+            name:"xxx"
+        },{
+            $push:{
+                array:2
+            }
+        },true,function(err){//注意update语句的回调只有一个参数
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+    
+    })
+})
+</pre>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+      //每次只能对一个记录进行$push操作
+      //如果记录存在指定的数组属性,那么就为它添加进去,没有就创建这个属性,赋给它一个空数组再push进去
+      //如果存在同名属性但不是数组就报错
+        users.update({
+            name:"xxx"
+        },{
+            $push:{
+                array1:1,
+                array2:2
+            }
+        },true,function(err){//注意update语句的回调只有一个参数
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+
+    })
+})
+</pre>
+<p>$pushAll,与$push差不多,不过要来值是一个数组,进行的是concat操作</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+        users.update({
+            name:"xxx"
+        },{
+            $push:{
+                array1:[11,22,33]
+            }
+        },true,function(err){//注意update语句的回调只有一个参数
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+
+    })
+})
+</pre>
+
+<p>$pop操作,类似数组的pop操作,如果值大于或等于零时,删除最后一个元素,如果是-1,删除第一个元素</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+        users.update({
+            array1:{$exists : true }
+        },{//移除第一个
+            $pop:{
+                array1: -1
+            }
+        },true,function(err){
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+
+    })
+})
+</pre>
+<p>$pull,用于删除数组属性指定的元素对象</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+{ $pull : { aaa: {bbb:"xxx"} } } 删除数组中有个属性bbb并且其为值为xxx的元素
+{ $pull : { aaa : {$gt: 3} } } 删除数组中索引值大于3的元素
+{ $pull : { aaa : {/*其他查询条件*/} } }
+</pre>
+<p>$pullAll,用于删除数组属性中的元素对象,它们只要满足过滤数组中某一个元素代表的匹配项就行了</p>
+<p>$rename,将一个属性改名</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongo  = require('mongodb');
+var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
+db.open(function() {
+    db.collection("users",function(err, users){
+        users.update({
+            array1:{$exists : true }
+        },{
+            $rename:{
+                array1: "array4"
+            }
+        },true,function(err){
+            users.find().toArray(function(e, els){
+                els.forEach(function(el){
+                    console.log(el)
+                });
+            });
+        })
+
+    })
+})
+</pre>
+
+http://www.mongodb.org/display/DOCS/Updating#Updating-%24unset
