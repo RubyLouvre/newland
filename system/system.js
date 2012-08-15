@@ -15,7 +15,7 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/configs", function(
     //注意：下面这些代码都是与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
     var more = $.configs.third_modules
     more.replace($.rword, function( name ){
-        var path = $.path.join( __dirname,"more", name + ".js" );
+        var path = $.path.join( __dirname,"mass/more", name + ".js" );
         var text = $.readFileSync( path, "utf-8");
         var rubylouvre = $.path.join( "D:/rubylouvre/scripts/more",name+ ".js")
         $.updateFile( rubylouvre, path, function(){
