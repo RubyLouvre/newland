@@ -1,4 +1,4 @@
-$.define("httpflow","helper,cookie,flow,more/ejs", function( make_helper,cookie ){
+$.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_helper,cookie ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
