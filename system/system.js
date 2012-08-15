@@ -23,11 +23,17 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/configs", function(
             });
         $.writeFile( $.path.join( "app/public/scripts/more", name+ ".js" ), text )
     });
-     $.updateFile( $.path.join( __dirname, "lang.js" ), $.path.join( __dirname, "mass/lang.js" ) )
+    
+    $.updateFile( $.path.join( __dirname, "mass", "lang.js" ), $.path.join( __dirname, "lang.js" ) );
     //用mass Framework的所有核心模块合并成mass_merge.js文件
-    libs.replace($.rword, function( name ){
+    libs.replace($.rword, function( name, url ){
         try{
-            var url =  $.path.join( __dirname,"mass", name +".js" );
+            if(name == "lang"){
+                url =  $.path.join( __dirname,"mass", name +".js" );
+            }else{
+                url = $.path.join( __dirname, "lang.js" )
+            }
+          
             var text = $.readFileSync( url, "utf-8");
             var rubylouvre = url.replace(/\\/g,"/").replace("newland/system/mass","rubylouvre/scripts");
             $.updateFile( rubylouvre, text, function(){
@@ -40,6 +46,7 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/configs", function(
             $.log( e + "  "+url);
         }
     });
+    return
     var merge = function(){
         var module_value = {
             state: 2
@@ -70,8 +77,8 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/configs", function(
                 },1);
         }
     })
-    //到这里为止的代码都与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
-    //http://www.elmerzhang.com/2011/09/nodejs-module-develop-publish/
-    //==================================================================
+//到这里为止的代码都与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
+//http://www.elmerzhang.com/2011/09/nodejs-module-develop-publish/
+//==================================================================
 })
 

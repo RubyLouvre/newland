@@ -149,6 +149,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return '\\u' + a;
             }) + '"';
         },
+        //查看对象或数组的内部构造
         dump: function(obj, indent) {
             indent = indent || "";
             if (obj == null)//处理null,undefined
@@ -187,8 +188,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                     return indent + "[object "+type +"]";
             }
         },
-        //http://www.schillmania.com/content/projects/javascript-animation-1/
-        //http://www.cnblogs.com/rubylouvre/archive/2010/04/09/1708419.html
+        //将字符串当作JS代码执行
         parseJS: function( code ) {
             //IE中，global.eval()和eval()一样只在当前作用域生效。
             //Firefox，Safari，Opera中，直接调用eval()为当前作用域，global.eval()调用为全局作用域。
@@ -198,6 +198,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 }catch(e){ }
             }
         },
+        //将字符串解析成JSON对象
         parseJSON: function( data ) {
             if ( typeof data !== "string" || !data ) {
                 return null;
@@ -215,9 +216,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             throw "Invalid JSON: " + data ;
         },
-
-        // Cross-browser xml parsing
-        parseXML: function ( data,xml,tmp ) {
+        //将字符串转化为一个XML文档
+        parseXML: function ( data, xml, tmp ) {
             try {
                 if ( global.DOMParser ) { // Standard
                     tmp = new DOMParser();
@@ -374,6 +374,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return ignorecase ? end_str.toLowerCase() === str.toLowerCase() :
             end_str === str;
         },
+        //将字符串重复n遍
         repeat: function(target, n){
             var result = "";
             while (n > 0) {
@@ -390,9 +391,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
          *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
          *随着浏览器普及对二进制的操作，这方法也越来越常用。
          */
-        // byteLen: function(target){
-        //     return target.replace(/[^\x00-\xff]/g,"--").length;
-        // },
         byteLen: function(str){
             for(var i = 0, cnt = 0; i < str.length; i++){
                 var value = str.charCodeAt(i);
@@ -654,7 +652,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             var t = target.length,
             n = Math.ceil( t / number),
             fill = fillWith !== void 0,
-            groups = [], value, i, j, cur
+            groups = [], i, j, cur
             for (i = 0; i < n; i++) {
                 groups[i] = [];
                 for (j = 0; j < number; j++) {
@@ -761,6 +759,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return clone;
         },
+        //将多个对象合并到第一个参数中或将后两个参数当作键与值加入到第一个参数
         merge: function(target, k, v){
             var obj, key;
             //为目标对象添加一个键值对

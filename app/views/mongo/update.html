@@ -181,7 +181,11 @@ db.open(function() {
     })
 })
 </pre>
-
+<p>如果想添加多个元素到数组元素，并达到$addToSet的效果，可以结合$each操作符，即</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+{ $addToSet : { a : { $each : [ 3 , 5 , 6 ] } } }
+</pre>
+<br/>
 <p>$pushAll,与$push差不多,不过要来值是一个数组,进行的是concat操作</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 var mongo  = require('mongodb');
@@ -259,5 +263,19 @@ db.open(function() {
     })
 })
 </pre>
+<p>$ 操作符$是他自己的意思，代表按条件找出的数组里面某项他自己。呵呵，比较坳口。看一下官方的例子：</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
 
+> t.find(){ "_id" : ObjectId("4b97e62bf1d8c7152c9ccb74"), "title" : "ABC",
+"comments" : [ { "by" : "joe", "votes" : 3 }, { "by" : "jane", "votes" : 7 } ] }
+
+> t.update( {'comments.by':'joe'}, {$inc:{'comments.$.votes':1}}, false, true )
+
+> t.find(){ "_id" : ObjectId("4b97e62bf1d8c7152c9ccb74"), "title" : "ABC",
+ "comments" : [ { "by" : "joe", "votes" : 4 }, { "by" : "jane", "votes" : 7 } ] }
+</pre>
+<p>可选对象的使用,涉及三个操作符</p>
+<p>safe如果有回调一定要指定</p>
+<p>upsert不存在就插入一个新记录</p>
+<p>multi更新多条记录</p>
 http://www.mongodb.org/display/DOCS/Updating#Updating-%24unset
