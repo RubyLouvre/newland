@@ -1,4 +1,4 @@
-$.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function(){
+$.define("system","hfs, more/mapper, hfs, controller, ../app/configs", function(){
     var libs = "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx"
     var files = [];
     $.mix({
@@ -22,11 +22,12 @@ $.define("system","hfs,more/mapper, hfs, controller, ../app/configs", function()
             //  $.log(rubylouvre+" 更新成功");
             });
         $.writeFile( $.path.join( "app/public/scripts/more", name+ ".js" ), text )
-    })
+    });
+     $.updateFile( $.path.join( __dirname, "lang.js" ), $.path.join( __dirname, "mass/lang.js" ) )
     //用mass Framework的所有核心模块合并成mass_merge.js文件
     libs.replace($.rword, function( name ){
         try{
-            var url =   $.path.join( __dirname, name +".js" );
+            var url =  $.path.join( __dirname,"mass", name +".js" );
             var text = $.readFileSync( url, "utf-8");
             var rubylouvre = url.replace(/\\/g,"/").replace("newland/system","rubylouvre/scripts");
             $.updateFile( rubylouvre, text, function(){
