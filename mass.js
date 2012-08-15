@@ -289,17 +289,13 @@
     //暴露到全局作用域下,所有模块可见!!
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
-    //    $.require( "test/loader", function(){
-    //        console.log("测试结束!!!!!!!!!!!!!")
-    //    });
-    //装配所有控制器，视图模板，配置文件
-    //  $.require("system/server", function(){
-    //     $.log($.configs.port)
-    //  });
+
     //生成mass framework所需要的页面
-    $.require("system/page_generate");
+    $.require("system/page_generate",function(){
+        console.log("page_generate")
+    });
     
-    $.require("system/deploy,system/mvc", function(deploy){
+ $.require("system/deploy,system/mvc", function(deploy){
         deploy(  process.cwd() );//监听app目录下文件的变化,实现热启动
     });
 //http://localhost:8888/index.html
@@ -313,38 +309,7 @@
 //mongo的node.js数据库连接库安装要用NPM: npm --registry http://42.121.86.107:1984 install mongoose
 //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
 //2011.12.17 $.define再也不用指定模块所在的目录了,
-//如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
-//才能用mass.require("intercepters/favicon",callback)请求得到
-//现在可以直接mass.define("favicon",module)了
 //2012.7.12 重新开始搞后端框架
 //2012.8.9  添加parseUrl, parseQuery API
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
 //一个很好的前端工具 https://github.com/colorhook/att
-/*
- * 对此，SpringMVC所提出的方案是：将整个处理流程规范化，并把每一个处理步骤分派到不同的组件中进行处理。
-
-这个方案实际上涉及到两个方面：
-
-处理流程规范化 —— 将处理流程划分为若干个步骤（任务），并使用一条明确的逻辑主线将所有的步骤串联起来
-处理流程组件化 —— 将处理流程中的每一个步骤（任务）都定义为接口，并为每个接口赋予不同的实现模式
-在SpringMVC的设计中，这两个方面的内容总是在一个不断交叉、互为补充的过程中逐步完善的。
-
-处理流程规范化是目的，对于处理过程的步骤划分和流程定义则是手段。因而处理流程规范化的首要内容就是考虑一个通用的Servlet响应程序大致应该包含的逻辑步骤：
-
-步骤1 —— 对Http请求进行初步处理，查找与之对应的Controller处理类（方法）
-步骤2 —— 调用相应的Controller处理类（方法）完成业务逻辑
-步骤3 —— 对Controller处理类（方法）调用时可能发生的异常进行处理
-步骤4 —— 根据Controller处理类（方法）的调用结果，进行Http响应处理
-这些逻辑步骤虽然还在我们的脑海中，不过这些过程恰恰正是我们对整个处理过程的流程化概括，稍后我们就会把它们进行程序化处理。
-
-所谓的程序化，实际上也就是使用编程语言将这些逻辑语义表达出来。在Java语言中，最适合表达逻辑处理语义的语法结构是接口，因此上述的四个流程也就被定义为了四个不同接口，它们分别是：
-
-步骤1 —— HandlerMapping
-步骤2 —— HandlerAdapter
-步骤3 —— HandlerExceptionResolver
-步骤4 —— ViewResolver
-结合之前我们对流程组件化的解释，这些接口的定义不正是处理流程组件化的步骤嘛？这些接口，就是组件。 
- */
-
-//公开我的答案，请直接贴在firebug中
-
