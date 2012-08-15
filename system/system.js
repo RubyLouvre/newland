@@ -29,7 +29,7 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/configs", function(
         try{
             var url =  $.path.join( __dirname,"mass", name +".js" );
             var text = $.readFileSync( url, "utf-8");
-            var rubylouvre = url.replace(/\\/g,"/").replace("newland/system","rubylouvre/scripts");
+            var rubylouvre = url.replace(/\\/g,"/").replace("newland/system/mass","rubylouvre/scripts");
             $.updateFile( rubylouvre, text, function(){
                 //   $.log(rubylouvre+" 更新成功");
                 }, 1);
