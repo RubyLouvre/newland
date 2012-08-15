@@ -16,7 +16,7 @@ $.define("get_page", function(){
                 this.fire("send_file", cache);
             }else{
                 var page_url = $.path.join("app","pages", url );
-                if(!$.configs.get_in_pages){
+                if(!$.config.get_in_pages){
                     page_url = page_url.replace("pages","XXX")
                 }
                 $.readFile( page_url, 'utf-8', function (err, html) {//读取内容

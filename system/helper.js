@@ -95,7 +95,7 @@ $.define("helper", function(){
     //辅助函数
     //判定是开发环境或是测试环境还是线上环境
     function checkProd() {
-        return $.configs.env === 'production';
+        return $.config.env === 'production';
     }
 
     function checkFile(  href ) {

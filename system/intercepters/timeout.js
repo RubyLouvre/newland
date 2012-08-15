@@ -4,7 +4,7 @@ $.define("timeout", function(){
             if(this.timeoutID){
                 flow.fire("send_error", 408);
             }
-        }, $.configs.timeout);
+        }, $.config.timeout);
         
         flow.bind("send_file", function(  ){
             clearTimeout(this.timeoutID);

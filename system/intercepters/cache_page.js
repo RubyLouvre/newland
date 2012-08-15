@@ -38,7 +38,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                 data: html,
                 type: this.content_type("html")
             }
-            if( $.configs.write_page ){
+            if( $.config.write_page ){
                 var pageurl = $.path.join("app","pages", url );
                 var rubylouvre = $.path.join("D:/rubylouvre/", url )
                 $.writeFile( pageurl , html, function(){

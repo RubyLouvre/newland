@@ -59,6 +59,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return false;
         },
+        //将任意类型都变成数组
         makeArray: function(obj){
             if (obj == null) {
                 return [];
@@ -111,9 +112,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return chain(start,content,xml);
         },
-        // Generate an integer Array containing an arithmetic progression. A port of
-        // the native Python `range()` function. See
-        // [the Python documentation](http://docs.python.org/library/functions.html#range).
+        //用于生成一个数字数组
         range: function(start, end, step) {
             step || (step = 1);
             if (end == null) {
@@ -516,6 +515,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return $.Array.removeAt(target, index);
             return false;
         },
+        //合并参数二到参数一
         merge: function( first, second ) {
             var i = ~~first.length, j = 0;
             for ( var n = second.length; j < n; j++ ) {
@@ -736,7 +736,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             });
             return result;
         },
-        //遍历对象的键值对
+        //将参数一的键值都放入回调中执行，如果回调返回false中止遍历
         each: function(target, fn, scope){
             var keys = Object.keys(target);
             for(var i = 0, n = keys.length; i < n; i++){
@@ -746,6 +746,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return target;
         },
+        //将参数一的键值都放入回调中执行，收集其结果返回
         map: function(target, fn, scope){
             return Object.keys(target).map(function(name){
                 return fn.call(scope, target[name], name, target);
@@ -812,12 +813,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.1.17 添加dump方法
 2012.1.20 重构$.String, $.Array, $.Number, $.Object, 让其变成一个函数v3
 2012.1.27 让$$.String等对象上的方法全部变成静态方法
-2012.1.31 去掉$.Array.ensure，添加$.Array.merge
 2012.3.17 v4 重构语言链对象
 2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
 2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法 v4
-2012.6.29 添加inGroupsOf，去掉last first
+2012.6.29 去掉last first
 2012.7.31 添加$.Array.merge API
+2012.8.15 添加$.Array.ensure, $.Array.inGroupsOf
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
 https://gist.github.com/395070

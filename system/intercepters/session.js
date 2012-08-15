@@ -7,7 +7,7 @@ $.define("session","../cookie,../stores/memory", function(Cookie, getSession ){
             flow.bind("no_action,get_view",function(){
                 console.log("no_action,get_view")
             })
-            var opts = $.configs.session;
+            var opts = $.config.session;
             var cookie = flow.cookie;
             var sid = cookie.get(opts.sid);
             if(Array.isArray(sid )){

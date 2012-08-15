@@ -6,7 +6,7 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
     "get_layout","500","send_error","session", "timeout","get_less"]
     //合并默认拦截器与用户自定义拦截，并修正URL地址
-    var inter = $.Array.union(defaults, $.configs.intercepters).map(function(str){
+    var inter = $.Array.union(defaults, $.config.intercepters).map(function(str){
         return "system/intercepters/"+str
     })
     var rcname = /\/(\w+)_controller/;
@@ -70,7 +70,7 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
             }else{
                 router(flow, "GET", req.url)
             }
-        }).listen( $.configs.port );
+        }).listen( $.config.port );
 
     }
 
