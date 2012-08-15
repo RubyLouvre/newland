@@ -1,4 +1,4 @@
-$.define("memory","../more/random",function(random){
+$.define("memory","../mass/more/random",function(random){
     $.log("使用内存来保存session")
     var store = $.memory
     function sweep (){//清理过期的session

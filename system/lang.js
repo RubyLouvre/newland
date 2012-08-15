@@ -374,7 +374,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return ignorecase ? end_str.toLowerCase() === str.toLowerCase() :
             end_str === str;
         },
-          //将自身重复N次
         repeat: function(target, n){
             var result = "";
             while (n > 0) {
@@ -391,6 +390,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
          *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
          *随着浏览器普及对二进制的操作，这方法也越来越常用。
          */
+        // byteLen: function(target){
+        //     return target.replace(/[^\x00-\xff]/g,"--").length;
+        // },
         byteLen: function(str){
             for(var i = 0, cnt = 0; i < str.length; i++){
                 var value = str.charCodeAt(i);
@@ -717,7 +719,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return target;
         },
-        //将键值对放进回调收集它的结果，以数组形式返回
         map: function(target, fn, scope){
             return Object.keys(target).map(function(name){
                 return fn.call(scope, target[name], name, target);
@@ -731,7 +732,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return clone;
         },
-        //合并多个对象到参数一，或将一个键值合并到参数一
         merge: function(target, k, v){
             var obj, key;
             //为目标对象添加一个键值对
