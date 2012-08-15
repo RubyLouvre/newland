@@ -1,4 +1,4 @@
-$.define("controller","class",function(){
+$.define("controller","mass/class",function(){
    // $.log( "已加载控制器模块")
     var opts = {}
     "index,new,create,show,edit,update,destroy".replace($.rword, function( action ){
