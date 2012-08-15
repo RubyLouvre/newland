@@ -103,6 +103,11 @@ db.users.find({favorite_number : {$all : [6, 8]}});
 <p>查询出{name: 'David', age: 26, favorite_number: [ 6, 8, 9 ] } </p>
 <p>过滤掉{name: 'David', age: 26, favorite_number: [ 6, 7, 9 ] } </p>
 <br/>
+<p>$size,匹配一个数组属性，它应该有指定的值这么长 </p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+db.users.find({"name": {$size:2}} );
+</pre>
+
 <p>$not,不匹配</p>
 <p>查询不匹配name=B*带头的记录 </p>
 <pre class="brush:javascript;gutter:false;toolbar:false">

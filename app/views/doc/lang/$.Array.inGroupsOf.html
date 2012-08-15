@@ -54,7 +54,7 @@ var inGroupsOf = function(target, number, fillWith) {
         groups[i] = [];
         for (j = 0; j < number; j++) {
             cur = i * number + j;
-            if ( cur === t ) {
+            if ( cur >= t ) {
                 if ( fill ) {
                     groups[i][j] = fillWith;
                 }

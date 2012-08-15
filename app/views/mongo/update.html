@@ -2,12 +2,16 @@
 <%  set_layout("doc_layout.html") %>
 <h3>更新相关</h3>
 <p>update方法</p>
+<pre>
+collection.update(criteria, update[, options[, callback]]);
+</pre>
 <p>它的第一参数是查询对象</p>
-<p>它的第二参数是更新对象,包含$inc ,$unset, $set, $push, $pushAll, $pop, $pull操作</p>
-<p>它的第三参数是可先对象,包含$inc , $set, upsert操作</p>
+<p>它的第二参数是更新对象,包含$inc, $unset, $set, $push, $pushAll, $pop, $pull操作</p>
+<p>它的第三参数是可选对象,包含safe, multi,upsert,raw等设置</p>
+<p>它的第四参数是回调函数</p>
 <dl>
     <dt>$inc</dt>
-    <dd> $inc也就是increase的缩写，学过sql server 的同学应该很熟悉，比如我们做一个在线用户状态记录，每次修改会在原有的基础上
+    <dd>$inc也就是increase的缩写，学过sql server 的同学应该很熟悉，比如我们做一个在线用户状态记录，每次修改会在原有的基础上
         自增$inc指定的值</dd>
     <dt>$set</dt>
     <dd> $set的值也是一个对象,里面要包含你要更新的键值。</dd>
@@ -278,4 +282,94 @@ db.open(function() {
 <p>safe如果有回调一定要指定</p>
 <p>upsert不存在就插入一个新记录</p>
 <p>multi更新多条记录</p>
+
+<h3> findAndModify</h3>
+<p>findAndModify的参数设置非常有技巧的，我们可以将源码晒一晒：</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+Collection.prototype.findAndModify = function findAndModify (query, sort, doc, options, callback) {
+//首先第一个对象肯定是查询对象,不用动
+  var args = Array.prototype.slice.call(arguments, 1);
+ //最后一个参数肯定是回调，我们可以看到接着下来就立即判定是否有args.length，因此它最少有两个参数，查询对象与回调
+  callback = args.pop();
+//第二参数是排序相关的，是一个数组，如 [['_id','asc']]
+  sort = args.length ? args.shift() : [];
+//第二参数是更新相关的，是一个对象，如  {$set: {hi: 'there'}}
+  doc = args.length ? args.shift() : null;
+//第三参数也是以更新相关的，如$multi， new, remove, upsert等操作符
+  options = args.length ? args.shift() : {};
+  var self = this;
+
+  var queryObject = {
+      'findandmodify': this.collectionName
+    , 'query': query
+    , 'sort': utils.formattedOrderClause(sort)
+  };
+
+  queryObject.new = options.new ? 1 : 0;
+  queryObject.remove = options.remove ? 1 : 0;
+  queryObject.upsert = options.upsert ? 1 : 0;
+
+  if (options.fields) {
+    queryObject.fields = options.fields;
+  }
+
+  if (doc && !options.remove) {
+    queryObject.update = doc;
+  }//....
+}
+</pre>
+<p>下面是一个完整的例子, 我们另起一个数据库,插入两条记录做小白鼠:</p>
+
+    collection.findAndModify(
+    {
+        hello: 'world'
+    }, // query
+    [['_id','asc']],  // sort order
+    {
+        $set: {
+            hi: 'there'
+        }
+        }, // replacement, replaces only the field "hi"
+
+        {}, // options
+    function(err, object) {
+        if (err){
+            console.warn(err.message);  // returns error if no matching object found
+        }else{
+            console.dir(object);
+        }
+    });
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+
+new mongodb.Db('test', server, {}).open(function (error, client) {
+    if (error) throw error;
+    var collection = new mongodb.Collection(client, 'test_collection');
+    collection.findAndModify(
+    {
+        hello: 'world'
+    }, // 查询对象
+    [['_id','asc']],  // 排序条件,是一个二维数组,每个子数组只有两个元素
+    {
+        $set: {//更新对象
+            rrr: 'sss'
+        }
+    },//可选对象可以省去
+    function(err, object) {//回调对象,第二个参数是更新前的对象,由于没有指定multi,只取第一个
+        if (err){
+            console.warn(err.message);
+        }else{
+            console.dir(object);
+        }
+    });
+});
+</pre>
+
+
+
+
+
+
+
 http://www.mongodb.org/display/DOCS/Updating#Updating-%24unset

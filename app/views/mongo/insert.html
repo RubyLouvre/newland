@@ -1,6 +1,66 @@
 <%  set_title("collection.insert") %>
 <%  set_layout("doc_layout.html") %>
 <h3>插入相关</h3>
+<p>插入一组文档</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+  collection.insert([{hello:'world_safe1'}
+      , {hello:'world_safe2'}], {safe:true}, function(err, result) {
+      collection.findOne({hello:'world_safe2'}, function(err, item) {
+        assert.equal(null, err);
+        assert.equal('world_safe2', item.hello);
+        db.close();
+      })
+</pre>
+<br/>
+<p>insert方法的第二参数有个safe属性,用于决定回调的执行时机,如果为false,那么回调是同步的,立即执行,这时数据库
+    操作可能还没有完成,如果为true,则它会待到数据库操作执行完毕才调用,为了安全起见,最好设为true.</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+        var records  = [{
+            hello:"world"
+        },{
+            name:"aaa",
+            sex: 2
+        },{
+            name:"aaa",
+            sex: 2
+        }]
+        users.insert(records,{safe:true},function(e, data){//data恒为数组
+            console.log(data)
+            console.log(data == records)//true
+        })
+    })
+
+});
+</pre>
+<p>insert的回调在第二个参数设为safe为true的情况下,第二个参数为刚才插入的数据,不过保证是数组</p>
+<p>注意不能插入_id相同的记录</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+        users.insert({
+            _id:1
+        }, {
+            safe:true
+        }, function(err, doc){
+            console.log(err)
+            users.insert({
+                _id:1
+            }, {
+                safe:true
+            }, function(err, doc){
+                console.log(err)//报错
+            });
+        });
+    })
+});
+</pre>
 <p>mongo的最小插入对象为文档，它外表看起来就是一个普通的javascript对象，而当我们用find方法取出来时就变成一个cursor对象</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 var mongo  = require('mongodb');
@@ -38,30 +98,3 @@ db.open(function() {
     });
 });
 </pre>
-<p>上面的open部分也可以写成</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.open(function() {
-    db.collection("posts", function(err, posts) {
-        posts.insert(doc);
-        var cursor = posts.find( {
-            "comments.author" : "jim"
-        })
-        cursor.nextObject(function(){
-            console.log(cursor.items)
-        })
-
-    });
-});
-
-</pre>
-<p>插入一组文档</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-  collection.insert([{hello:'world_safe1'}
-      , {hello:'world_safe2'}], {safe:true}, function(err, result) {
-      collection.findOne({hello:'world_safe2'}, function(err, item) {
-        assert.equal(null, err);
-        assert.equal('world_safe2', item.hello);
-        db.close();
-      })
-</pre>
-<br/>
