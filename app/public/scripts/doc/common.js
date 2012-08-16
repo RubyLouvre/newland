@@ -4,13 +4,12 @@
         ).replace($.rword,function(tag){
         document.createElement(tag)
     });
- 
+
     if(self.eval !== top.eval){
         window.$ && $.require("ready,css,node",function(){
             parent.callParent && parent.callParent(document);
         });
     }
-    window.SyntaxHighlighter && SyntaxHighlighter.all();
     $.require("ready,event",function(){
         $("pre").each(function(){
             if(this.exec !== "function"){
@@ -22,6 +21,7 @@
                 }
             }
         });
+        window.SyntaxHighlighter && SyntaxHighlighter.highlight();
         $("body").delegate(".doc_btn","click",function(){
             if(typeof this.exec == "function"){
                 this.exec.call(window)
