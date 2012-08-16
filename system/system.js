@@ -8,7 +8,6 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/config", function()
         controllers: {}  //用于保存控制器,
     });
 
-return
     //==================================================================================
     //==================================================================================
     //==================================================================================
@@ -29,9 +28,9 @@ return
     libs.replace($.rword, function( name, url ){
         try{
             if(name == "lang"){
-                url =  $.path.join( __dirname,"mass", name +".js" );
+                url =  $.path.join( __dirname, name +".js" );
             }else{
-                url = $.path.join( __dirname, "lang.js" )
+                url = $.path.join( __dirname,"mass", name +".js" );
             }
           
             var text = $.readFileSync( url, "utf-8");
@@ -46,7 +45,7 @@ return
             $.log( e + "  "+url);
         }
     });
-    return
+
     var merge = function(){
         var module_value = {
             state: 2
@@ -69,6 +68,7 @@ return
     replaced = first.replace("/*combine modules*/", replaced ).replace(rcomments,"");
     var merge_url = "app/public/scripts/mass_merge.js"
     $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
+        console.log(e)
         if(e) {
             $.log("合并出错 "+e);
         }else{
