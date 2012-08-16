@@ -1,7 +1,6 @@
 $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
 
-    var url = "D:/newland/app/views/"//doc/event
-    var layouts = {};
+    var url = $.path.join( process.cwd(),"app/views/").replace(/\\/g,"/"),layouts = {};
     $.walk(url, function(files){
         var pending = files.length;
         for(var i = 0; i < pending; i++){
@@ -19,7 +18,7 @@ $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
                         html = layouts[layout]
                         if( !html ){
                             try{
-                                var layout_url =  $.path.join("D:/newland/app/views/layout", data.layout);
+                                var layout_url =  $.path.join(url ,"layout", data.layout);
                                 html =  $.readFileSync( layout_url , "utf-8");
                                 layouts[layout] = html;
                             }catch(e){
@@ -31,18 +30,20 @@ $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
                         html = fn(data);
                     }
                     if(html){//必须确保其有内容
-                        var page_url = view_url.replace("\\views","\\pages");
-                        $.updateFile(page_url, html, function(){
-                            $.log(page_url+"  同步完成")
-                        },1);
+                        var page_url = view_url.replace("/views","/pages");
+                        if(page_url !== view_url){
+                            $.updateFile(page_url, html, function(){
+                                $.log(page_url+"  同步完成")
+                            },1);
+                        }
                         //同步到rubylouvre项目
-                        var rubylouvre = view_url.replace("\\newland\\app\\views","\\rubylouvre")
+                        var rubylouvre = view_url.replace("/app/views","").replace("newland","rubylouvre")
                         $.updateFile(rubylouvre, html, function(){
                             $.log(rubylouvre+"  同步完成");
                         },1);
                     }
                 });
-            })( files[i].replace(/\//g,"\\") );//要处理路径时必须先统一path.sep,因为你不知它是/,还是\
+            })( files[i].replace(/\\/g,"/") );//要处理路径时必须先统一path.sep,因为你不知它是/,还是\
 
         }
     })

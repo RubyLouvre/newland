@@ -1,4 +1,6 @@
-<h3>查询相关</h3>
+<%  set_title("MongoDB数据文件内部结构") %>
+<%  set_layout("doc_layout.html") %>
+<3>查询相关</h3>
 <p>find方法是一个collection对象的方法，不过它能迅速返回一个cursor对象（在没有回调的情况为返回值，有则为回调的第二个参数）进行更细致的操作。</p>
 <pre>
 collection.find(query[[[, fields], options], callback]);
