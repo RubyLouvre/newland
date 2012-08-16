@@ -7,7 +7,6 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/config", function()
         staticCache: {}, //用于保存静态资源,
         controllers: {}  //用于保存控制器,
     });
-
     //==================================================================================
     //==================================================================================
     //==================================================================================
@@ -68,13 +67,12 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/config", function()
     replaced = first.replace("/*combine modules*/", replaced ).replace(rcomments,"");
     var merge_url = "app/public/scripts/mass_merge.js"
     $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
-        console.log(e)
         if(e) {
             $.log("合并出错 "+e);
         }else{
             $.updateFile(  "D:/rubylouvre/scripts/mass_merge.js", replaced, function(){
-                //  $.log("mass_merge.js 合并成功");
-                },1);
+                $.log("mass_merge.js 合并成功");
+            },1);
         }
     })
 //到这里为止的代码都与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
