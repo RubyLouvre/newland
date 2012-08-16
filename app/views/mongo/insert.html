@@ -1,20 +1,30 @@
 <%  set_title("collection.insert") %>
 <%  set_layout("doc_layout.html") %>
 <h3>插入相关</h3>
-<p>插入一组文档</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-  collection.insert([{hello:'world_safe1'}
-      , {hello:'world_safe2'}], {safe:true}, function(err, result) {
-      collection.findOne({hello:'world_safe2'}, function(err, item) {
-        assert.equal(null, err);
-        assert.equal('world_safe2', item.hello);
-        db.close();
-      })
+<p>格式如下:</p>
+<pre>
+collection.insert(docs[, options, callback])
 </pre>
-<br/>
-<p>insert方法的第二参数有个safe属性,用于决定回调的执行时机,如果为false,那么回调是同步的,立即执行,这时数据库
-    操作可能还没有完成,如果为true,则它会待到数据库操作执行完毕才调用,为了安全起见,最好设为true.</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>docs</dt>
+    <dd>
+        当个文档或多个文档组成的对象数组
+    </dd>
+    <dt>options</dt>
+    <dd>
+        可选对象，里面有个safe属性，用于决定回调的执行时机，如果为false，那么回调是同步的，立即执行，这时数据库
+        操作可能还没有完成，如果为true，则它会待到数据库操作执行完毕才调用,为了安全起见，最好设为true。
+    </dd>
+    <dt>callback</dt>
+    <dd>
+       回调，第二个参数为刚才的插入文档，不过它都会打包成一个数组
+    </dd>
+</dl>
+<hr/>
+
 <pre class="brush:javascript;gutter:false;toolbar:false">
+//by 司徒正美
 var mongodb = require('mongodb'),
 server = new mongodb.Server("127.0.0.1", 27017, {});
 new mongodb.Db('test', server, {}).open(function (error, db) {
@@ -59,42 +69,5 @@ new mongodb.Db('test', server, {}).open(function (error, db) {
             });
         });
     })
-});
-</pre>
-<p>mongo的最小插入对象为文档，它外表看起来就是一个普通的javascript对象，而当我们用find方法取出来时就变成一个cursor对象</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-var mongo  = require('mongodb');
-var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
-var doc = {
-    author: 'joe',
-    created : new Date('03/28/2009'),
-    title : 'Yet another blog post',
-    text : 'Here is the text...',
-    tags : [ 'example', 'joe' ],
-    comments : [ {
-        author: 'jim',
-        comment: 'I disagree'
-    },
-    {
-        author: 'blue',
-        comment: 'no,year'
-    },
-    {
-        author: 'nancy',
-        comment: 'Good post'
-    }
-    ]
-}
-db.open(function() {
-    db.collection("posts", function(err, posts) {
-        posts.insert(doc);
-        posts.find( {
-            "comments.author" : "jim"
-        },function(e,cursor){
-            cursor.nextObject(function(){
-                console.log(cursor.items)
-            })
-        } )
-    });
 });
 </pre>

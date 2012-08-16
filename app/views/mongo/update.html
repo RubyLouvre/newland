@@ -32,7 +32,7 @@ new mongodb.Db('test', server, {}).open(function (error, db) {
 </pre>
 <p>当第二个参数存在$开头的操作符时,就可以对选定的文档进行局部的属性修正,其中</p>
 <ul>
-    <li> $inc是对数字属性进行增减操作</li>
+    <li>$inc是对数字属性进行增减操作</li>
     <li>$set是对指定属性进行替换</li>
     <li>$rename是对指定属性进行更名</li>
     <li>$是指向自身的</li>
@@ -288,22 +288,22 @@ db.open(function() {
     </ul>
 </fieldset>
 <br/>
-<h3>findAndModify</h3>
-<p>findAndModify的参数设置非常有技巧的，我们可以将源码晒一晒：</p>
+<h4>findAndModify</h4>
 <pre>
-collection.findAndModify(criteria, sort, update[, options, callback])
+collection.findAndModify(query, [sort, update, options],callback)
 </pre>
+<p>此方法的参数设置非常有技巧的，我们可以将源码晒一晒：</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 Collection.prototype.findAndModify = function findAndModify (query, sort, doc, options, callback) {
 //首先第一个对象肯定是查询对象,不用动
   var args = Array.prototype.slice.call(arguments, 1);
  //最后一个参数肯定是回调，我们可以看到接着下来就立即判定是否有args.length，因此它最少有两个参数，查询对象与回调
   callback = args.pop();
-//第二参数是排序相关的，是一个数组，如 [['_id','asc']]
+//第二参数是排序数组，如 [['_id','asc']]
   sort = args.length ? args.shift() : [];
-//第二参数是更新相关的，是一个对象，如  {$set: {hi: 'there'}}
+//第二参数是更新对象，如  {$set: {hi: 'there'}}
   doc = args.length ? args.shift() : null;
-//第三参数也是以更新相关的，如$multi， new, remove, upsert等操作符
+//第三参数是配置对象，包含 new, remove, upsert等配置
   options = args.length ? args.shift() : {};
   var self = this;
 
@@ -326,27 +326,23 @@ Collection.prototype.findAndModify = function findAndModify (query, sort, doc, o
   }//....
 }
 </pre>
-<p>下面是一个完整的例子, 我们另起一个数据库,插入两条记录做小白鼠:</p>
-
-collection.findAndModify(
-{
-hello: 'world'
-}, // query
-[['_id','asc']],  // sort order
-{
-$set: {
-hi: 'there'
-}
-}, // replacement, replaces only the field "hi"
-
-{}, // options
-function(err, object) {
-if (err){
-console.warn(err.message);  // returns error if no matching object found
-}else{
-console.dir(object);
-}
-});
+<p>它的可选对象有三个配置项</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>remove </dt>
+    <dd>
+        如果为true，进行删除操作,将它们当成回调的第二个参数中。默认是false
+    </dd>
+    <dt>new </dt>
+    <dd>
+        如果为true，进行更新操作,并只将发生更改的集合当成回调的第二个参数。默认是false
+    </dd>
+    <dt>upsert </dt>
+    <dd>
+        如果为true，那么会在没有匹配的情况，会将查询对象插入当前集合中。默认是false
+    </dd>
+</dl>
+<p> 示例</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 var mongodb = require('mongodb'),
 server = new mongodb.Server("127.0.0.1", 27017, {});
@@ -373,31 +369,20 @@ new mongodb.Db('test', server, {}).open(function (error, client) {
     });
 });
 </pre>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-var mongodb = require('mongodb'),
-server = new mongodb.Server("127.0.0.1", 27017, {});
-new mongodb.Db('test', server, {}).open(function (error, db) {
-    db.collection("users", function(err, users){
-        users.findAndModify({
-            safe:true
-        },[],{
-            $unset:{safe:1}
-        },
-        {
-            safe:true
-        }, function(err, ee){
-            console.log(ee)
-            users.find().toArray(function(e, items){
-                console.log(items)
-            })
-        })
-    })
-});
+<h4>findAndRemove</h4>
+<pre>
+collection.findAndRemove(query, [sort, update, options],callback)
 </pre>
-
-
-
-
-
-
-http://www.mongodb.org/display/DOCS/Updating#Updating-%24unset
+<p>此方法就是findAndModify的再封装</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+Collection.prototype.findAndRemove = function(query, sort, options, callback) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  callback = args.pop();
+  sort = args.length ? args.shift() : [];
+  options = args.length ? args.shift() : {};
+  // Add the remove option
+  options['remove'] = true;
+  // Execute the callback
+  this.findAndModify(query, sort, null, options, callback);
+}
+</pre>

@@ -29,7 +29,13 @@ collection.findOne([query], callback)
 <p>最简单的例子，根据对象某个属性进行过滤</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 posts.find({author:"Daniel"}).toArray(function(err, results){
-    console.log(results); // output all records
+    console.log(results); 
+});
+</pre>
+<p>我们也可以让键值用一个正则代替，那么就轻易实现模糊匹配。</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+posts.find({author:/^Daniel/}).toArray(function(err, results){
+    console.log(results); 
 });
 </pre>
 <p>指定多个属性，要求目标同时拥有这些属性并值也全等于它们，实现<strong>AND操作</strong></p>
@@ -88,15 +94,16 @@ db.users.find( { $query : { x : 3, y : "abc" }, $orderby : { x : 1 } } );
 <hr/>
 <h4>查询</h4>
 <ul>
-    <li>$in要求匹配的对象，他的某个属性的值是$in数组的其中一个元素，如{"name":{$in:[1,2,3]}}</li>
-    <li>$nin要求匹配的对象，他的某个属性的值是不在$nin数组之列</li>
-    <li>$all要求匹配的对象，他拥有某个数组属性，它应该包含$all数组的元素</li>
-    <li>$exists要求匹配的对象，他是否存在或不存在某个属性</li>
-    <li>$mod要求匹配的对象，他是拥有某个数字属性，取模后等于某个值，如{"name":{$mod:{3,2}}，相当于"name" % 3 == 2</li>
-    <li>$size要求匹配的对象，他是拥有某个数组属性，其长度等于某个值，如{"name": {$size:2}} </li>
-    <li>$ne要求匹配的对象，他是拥有某个属性的值不等于给定值 </li>
-    <li>$gt,$lt,$gte,$lte要求匹配的对象，他是拥有某个数字属性，其值要大于（小于，大于或等于，小于或等于）给定值 </li>
-    <li>$type要求匹配的对象，他是拥有某个属性的类型等于给定值 </li>
+    <li><span class="stress">$in</span>要求匹配的对象，他的某个属性的值是$in数组的其中一个元素，如{"name":{$in:[1,2,3]}}</li>
+    <li><span class="stress">$nin</span>要求匹配的对象，他的某个属性的值是不在$nin数组之列</li>
+    <li><span class="stress">$all</span>要求匹配的对象，他拥有某个数组属性，它应该包含$all数组的元素</li>
+    <li><span class="stress">$exists</span>要求匹配的对象，他是否存在或不存在某个属性</li>
+    <li><span class="stress">$mod</span>要求匹配的对象，他是拥有某个数字属性，取模后等于某个值，如{"name":{$mod:{3,2}}，相当于"name" % 3 == 2</li>
+    <li><span class="stress">$size</span>要求匹配的对象，他是拥有某个数组属性，其长度等于某个值，如{"name": {$size:2}} </li>
+    <li><span class="stress">$ne</span>要求匹配的对象，他是拥有某个属性的值不等于给定值 </li>
+    <li><span class="stress">$gt,$lt,$gte,$lte</span>要求匹配的对象，他是拥有某个数字属性，其值要大于（小于，大于或等于，小于或等于）给定值 </li>
+    <li><span class="stress">$type</span>要求匹配的对象，他是拥有某个属性的类型等于给定值 </li>
+    <li><span class="stress"> $where</span>如果是字符串它会转换成函数，如果是函数就直接用它来匹配 </li>
 </ul>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 //$in示例，by 司徒正美
@@ -248,211 +255,6 @@ new mongodb.Db('test', server, {}).open(function (error, db) {
         })
 });
 </pre>
-<p>$type对应的格式都是BSON类型，与JSON的类型差不多，只是多出几个，但多出的都不常用，不用劳神记它们。</p>
-<table class="table1" border="1" >
-    <tbody>
-        <tr>
-            <td>
-                Type Name
-            </td>
-            <td>
-                Type Number
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Double
-            </td>
-            <td>
-                1
-            </td>
-        </tr>
-        <tr>
-            <td>
-                String
-            </td>
-            <td>
-                2
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Object
-            </td>
-            <td>
-                3
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Array
-            </td>
-            <td>
-                4
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Binary data
-            </td>
-            <td>
-                5
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Object id
-            </td>
-            <td>
-                7
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Boolean
-            </td>
-            <td>
-                8
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Date
-            </td>
-            <td>
-                9
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Null
-            </td>
-            <td>
-                10
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Regular expression
-            </td>
-            <td>
-                11
-            </td>
-        </tr>
-        <tr>
-            <td>
-                JavaScript code
-            </td>
-            <td>
-                13
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Symbol
-            </td>
-            <td>
-                14
-            </td>
-        </tr>
-        <tr>
-            <td>
-                JavaScript code with scope
-            </td>
-            <td>
-                15
-            </td>
-        </tr>
-        <tr>
-            <td>
-                32-bit integer
-            </td>
-            <td>
-                16
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Timestamp
-            </td>
-            <td>
-                17
-            </td>
-        </tr>
-        <tr>
-            <td>
-                64-bit integer
-            </td>
-            <td>
-                18
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Min key
-            </td>
-            <td>
-                255
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Max key
-            </td>
-            <td>
-                127
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<hr>
-<h4>可选对象</h4>
-<p> 它拥有以下三个配置项：</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-var options = {
-    "limit": 20,
-    "skip": 10,
-    "sort": title
-}
-collection.find({}, options).toArray(...);
-</pre>
-<p>其中limit几对返回记录数进行限制</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = collection.find({'msg':'Hello 1'}).limit(10)
-//或者
- var cursor = collection.find({'msg':'Hello 1'},{"limit":10})
-</pre>
-<br/>
-<p>skip:跳跃到已得到的结果某一条中,配合上面limit可以轻易实现分页功能.</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-page1 = collection.find().limit(20)
-page2 = collection.find().skip(20).limit(20)
-page3 = collection.find().skip(40).limit(20)
-</pre>
-<p>注:当数据量很大时，skip操作会变的很慢，应该避免使用。（不止是mongoDb会这样，大部分数据库都是。）
-    可以通过改变查询文档的规则来达到分页效果，避免使用skip来跳过大量的数据。通过计算，得到下次查询应该从什么地方开始
-</p>
-<p>sort排序，它可以是对应一个字符串，值为属性名，这时只能是顺序，也可以是一个二维数组</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = db.users.find({'email':'ixigua@sina.com'}).sort({'Dt',-1})
-//或者
-var cursor =  db.users.find({'email':'ixigua@sina.com'},{"sort":{'Dt',-1}} )
-//上面的-1表示倒序
-var cursor =  db.users.find({'email':'ixigua@sina.com'},{"sort":"Dt"} )
-</pre>
-<br/>
-<p>count操作，返回匹配的记录数</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- db.user_addr.count()
-</pre>
-<p>distinct操作，对记录进行去重</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- db.users.distinct('msg')
-</pre>
-<br/>
-
-
 <p>$where查询 </p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 //查询 age > 18 的记录，以下查询都一样
@@ -463,26 +265,177 @@ db.users.find("this.age > 18");
 var f = function() {return this.age > 18} db.users.find(f);
 </pre>
 
-
-<br/>
-<p>each方法</p>
-<p>不过坑爹的方法,如果cursor里面包含三个记录,那么它会遍历四次,最后一次为null.</p>
+<p>$type对应的格式都是BSON类型，与JSON的类型差不多，只是多出几个，但多出的都不常用，不用劳神记它们。</p>
+<fieldset><legend>BSON类型一览表</legend>
+    <table class="table1" border="1" >
+        <tbody>
+            <tr>
+                <td>
+                    Type Name
+                </td>
+                <td>
+                    Type Number
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Double
+                </td>
+                <td>
+                    1
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    String
+                </td>
+                <td>
+                    2
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Object
+                </td>
+                <td>
+                    3
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Array
+                </td>
+                <td>
+                    4
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Binary data
+                </td>
+                <td>
+                    5
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Object id
+                </td>
+                <td>
+                    7
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Boolean
+                </td>
+                <td>
+                    8
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Date
+                </td>
+                <td>
+                    9
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Null
+                </td>
+                <td>
+                    10
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Regular expression
+                </td>
+                <td>
+                    11
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    JavaScript code
+                </td>
+                <td>
+                    13
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Symbol
+                </td>
+                <td>
+                    14
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    JavaScript code with scope
+                </td>
+                <td>
+                    15
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    32-bit integer
+                </td>
+                <td>
+                    16
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Timestamp
+                </td>
+                <td>
+                    17
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    64-bit integer
+                </td>
+                <td>
+                    18
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Min key
+                </td>
+                <td>
+                    255
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Max key
+                </td>
+                <td>
+                    127
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>
+<h4>可选对象</h4>
+<p> 它拥有以下三个配置项：</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-var cursor = db.users.find()
-cursor.each(function(err, item) {
-    if(item != null) {
-        console.log(item)
-    };
-});
+var options = {
+    limit: 20,
+    skip: 10,
+    sort: "title",
+    raw:  false
+}
+collection.find({}, options).toArray(...);
 </pre>
-<p>toArray方法,带一个不能省略的回调作参数,内部调用上面的each方法，将cursor包含的所有记集变成一个数组放到此回调中</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-var cursor = db.users.find()
-cursor.toArray(function(e,array){
-    console.log(array)
- })
-</pre>
-<p>raw ：让包含的记录变成Buffer</p>
+<p>raw ：让包含的文档以Buffer形式返回</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
         person.insert({
             name:"aaa"
@@ -498,7 +451,7 @@ cursor.toArray(function(e,array){
         })
 </pre>
 <p>结果显示如下：</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
+<pre class="brush:xml;gutter:false;toolbar:false">
 [ &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
 0 28 fb f4 5e ec 07 f4 18 00 00 01 00&gt;,
   &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
@@ -518,12 +471,140 @@ cursor.toArray(function(e,array){
   &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
 0 28 fe 23 f0 2a 89 e0 1f 00 00 03 00&gt; ]
 </pre>
-<p>nextObject:cursor的原型方法，一个比each, toArray更好用的得到记录的方法</p>
+<p>limit：对返回记录数进行限制</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-        cursor.nextObject(function(){
-            console.log( cursor.items)
-        })
+ var cursor = collection.find({'msg':'Hello 1'}).limit(10)
+//或者
+ var cursor = collection.find({'msg':'Hello 1'},{"limit":10})
 </pre>
+<br/>
+<p>skip:跳跃到已得到的结果某一条中,配合上面limit可以轻易实现分页功能.</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+page1 = collection.find().limit(20)
+page2 = collection.find().skip(20).limit(20)
+page3 = collection.find().skip(40).limit(20)
+//或者在第三个参数中填skip值，第四个参数填limit值
+collection.find( {}, {}, 40, 20).toArray(function(e, docs){
+     console.log(docs)//取40—60个
+ })
+</pre>
+<p>注:当数据量很大时，skip操作会变的很慢，应该避免使用。（不止是mongoDb会这样，大部分数据库都是。）
+    可以通过改变查询文档的规则来达到分页效果，避免使用skip来跳过大量的数据。通过计算，得到下次查询应该从什么地方开始
+</p>
+<p>sort排序，它可以是对应一个字符串，值为属性名，这时只能是顺序，也可以是一个二维数组</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var cursor1 = collection.find({},{
+    "sort": [['field1','asc'], ['field2','desc']]
+});
+var cursor2 = collection.find({},{
+    "sort": "name"
+});
+</pre>
+<br/>
+<h3>Cursor</h3>
+<p>此对象保存于find方法的返回值与回调中，用于细化查询结果。</p>
+<p>count操作，返回匹配的记录数</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ db.user_addr.count()
+</pre>
+<p>distinct操作，对记录进行去重</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ db.users.distinct('msg')
+</pre>
+<br/>
+
+<br/>
+<p>each方法</p>
+<p>一个很坑爹的方法,如果cursor里面包含三个记录,那么它会遍历四次,最后一次为null.</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ users.find().each(function(err, doc) {
+    if(item != null) {
+        console.log(item)
+    };
+});
+</pre>
+<p>toArray方法,带一个不能省略的回调作参数,内部调用上面的each方法，将cursor包含的所有文档变成一个数组放到此回调中</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+users.find().toArray(function(err, docs){
+    console.log(docs)
+ })
+</pre>
+<p>nextObject,带一个不能省略的回调作参数,相当于toArray的弱智版，回调的第二个参数是匹配文档中的第一个</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+users.find().nextObject(function(err, doc){ //相当于 doc === docs[0]
+    console.log(doc)
+ })
+</pre>
+<p>count,带一个不能省略的回调作参数,将匹配文档的个数传到回调的第二个参数中</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+users.find().count(function(err, n){
+    console.log(n)
+ })
+</pre>
+<p>sort方法,传入一个对象,值为正数与零为顺序,-1为倒序</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("dogs",function(err,dogs){
+        dogs.insert( [{
+            "id" : 1 ,
+            name : "x",
+            ttm : 23,
+            val : 5
+        },
+        {
+            "id" : 1 ,
+            name : "x",
+            ttm : 34 ,
+            val : 1
+        },
+        {
+            "id" : 1 ,
+            name : "x",
+            ttm : 24 ,
+            val : 2
+        },
+        {
+            "id" : 2 ,
+            name : "x",
+            ttm : 56 ,
+            val : 3
+        },
+        {
+            "id" : 2 ,
+            name : "x",
+            ttm : 76 ,
+            val : 3
+        },
+        {
+            "id" : 3 ,
+            name : "x",
+            ttm : 54 ,
+            val : 7
+        }],{
+            safe: true
+        }, function(){
+            dogs.find({
+                "id" : {
+                    "$in" : [1,2,3]
+                    }
+            }).sort({
+                ttm : -1
+            }).limit(3).toArray(function(e, els){
+                console.log(els)
+            })
+        })
+    })
+});
+</pre>
+<p>rewind，回滚到上次操作之前，没有参数</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+users.rewind()
+</pre>
+
+
+
 <pre class="brush:javascript;gutter:true;toolbar:true;collapse:true;">
 var testForFields = {'limit' : 1, 'sort' : 1, 'fields' : 1, 'skip' : 1, 'hint' : 1, 'explain' : 1, 'snapshot' : 1
   , 'timeout' : 1, 'tailable' : 1, 'batchSize' : 1, 'raw' : 1, 'read' : 1

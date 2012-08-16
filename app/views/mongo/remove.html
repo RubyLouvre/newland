@@ -1,0 +1,20 @@
+<%  set_title("删除相关") %>
+<%  set_layout("doc_layout.html") %>
+<h3>删除相关</h3>
+<pre>
+collection.remove([[query[, options]], callback]);
+</pre>
+<p>callback的第二个参数为被移除的文档组成的数组</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+//如果这里的记录不指定_id,它每次都当作新建,如果指定_id,它才会检测数据库有没有相同的记录,有才当作更新
+    db.collection("users", function(err, users){
+       users.remove({user:"David"},{safe:true}, function(err, docs){
+               console.log(docs)
+       })
+    })
+});
+</pre>
+<br/>
