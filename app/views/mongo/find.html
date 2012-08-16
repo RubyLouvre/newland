@@ -1,22 +1,79 @@
-<%  set_title("collection.find") %>
-<%  set_layout("doc_layout.html") %>
 <h3>查询相关</h3>
+<p>find方法是一个collection对象的方法，不过它能迅速返回一个cursor对象（在没有回调的情况为返回值，有则为回调的第二个参数）进行更细致的操作。</p>
+<pre>
+collection.find(query[[[, fields], options], callback]);
+</pre>
+<ul>
+    <li><span class="stress">query：</span>查询对象</li>
+    <li><span class="stress">fields：</span>过滤对象，要求返回的文档应该只包含那些属性，默认是所有</li>
+    <li><span class="stress">options：</span>可选对象，包含排序，分页，过期等配置</li>
+    <li><span class="stress">callback：</span>没有出错的情况下，第二个参数为cursor对象</li>
+</ul>
+<p><span class="stress">选择所有</span></p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ var cursor = collection.find({})
+ var cursor = collection.find()
+</pre>
+<p><span class="stress">选择单个</span></p>
+<pre>
+collection.findOne([query], callback)
+</pre>
+<p>query为一个查询对象或一个_id的字符串</p>
+<hr/>
+<h4>查询对象</h4>
+<p>查询对象可以是一个空对象，返回此集合的所有文档(mongo的最小保存单位是文档)，可以是单个键值对，可以多个键值对，
+    键名可以是特定的以$开头的操作符！
+</p>
+<p>最简单的例子，根据对象某个属性进行过滤</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+posts.find({author:"Daniel"}).toArray(function(err, results){
+    console.log(results); // output all records
+});
+</pre>
+<p>指定多个属性，要求目标同时拥有这些属性并值也全等于它们，实现<strong>AND操作</strong></p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+posts.find({author:"Daniel",sex:"男"}).toArray(function(err, results){
+    console.log(results); // output all records
+});
+</pre>
+<p>假如我们有个文档这样的结构</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+{
+    user: {
+        name: "Daniel"
+    }
+}
+</pre>
+<p>我们可以在键名中通“.”把对象的名字与属性的名字连在一起，进行<strong>子属性寻找</strong></p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+posts.find({"user.name":"Daniel"}).toArray(function(err, results){
+    console.log(results); // output all records
+});
+</pre>
+<p>我们可以通过$or操作符，它对应的值为一个对象数组，实现<strong>OR操作</strong></p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+posts.find({
+    $or:[
+        {author:"Daniel"},
+        {author:"Jessica"}
+    ]
+}).toArray(function(err, results){
+    console.log(results); // output all records
+});
+</pre>
+<p><strong>OR操作与AND操作</strong>混合使用</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+posts.find({
+    title:"MongoDB",
+    $or:[
+        {author:"Daniel"},
+        {author:"Jessica"}
+    ]
+}).toArray(function(err, results){
+    console.log(results); // output all records
+});
+</pre>
 
-<p>find方法支持传入多个对象作为过滤条件得到我们想要的结果，如果想得到所有数据，可以什么都不传或只传个空对象</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = db.users.find({})
- var cursor = db.users.find()
-</pre>
-<p>它的所有传参形式</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- *  - callback?
- *  - selector, callback?,
- *  - selector, fields, callback?
- *  - selector, options, callback?
- *  - selector, fields, options, callback?
- *  - selector, fields, skip, limit, callback?
- *  - selector, fields, skip, limit, timeout, callback?
-</pre>
 <p>我们可以认为find方法的传参都为对象与最后面的可选回调，就算不是对象，它内部都会整成对象。</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 db.users.find( { x : 3, y : "abc" } ).sort({x:1});
@@ -26,134 +83,170 @@ db.users.find( { x : 3, y : "abc" } ).sort({x:1});
 <pre class="brush:javascript;gutter:false;toolbar:false">
 db.users.find( { $query : { x : 3, y : "abc" }, $orderby : { x : 1 } } );
 </pre>
-<br/>
-<p>我们可以根据对象某个属性进行过滤.</p>
+<hr/>
+<h4>查询</h4>
+<ul>
+    <li>$in要求匹配的对象，他的某个属性的值是$in数组的其中一个元素，如{"name":{$in:[1,2,3]}}</li>
+    <li>$nin要求匹配的对象，他的某个属性的值是不在$nin数组之列</li>
+    <li>$all要求匹配的对象，他拥有某个数组属性，它应该包含$all数组的元素</li>
+    <li>$exists要求匹配的对象，他是否存在或不存在某个属性</li>
+    <li>$mod要求匹配的对象，他是拥有某个数字属性，取模后等于某个值，如{"name":{$mod:{3,2}}，相当于"name" % 3 == 2</li>
+    <li>$size要求匹配的对象，他是拥有某个数组属性，其长度等于某个值，如{"name": {$size:2}} </li>
+    <li>$ne要求匹配的对象，他是拥有某个属性的值不等于给定值 </li>
+    <li>$gt,$lt,$gte,$lte要求匹配的对象，他是拥有某个数字属性，其值要大于（小于，大于或等于，小于或等于）给定值 </li>
+    <li>$type要求匹配的对象，他是拥有某个属性的类型等于给定值 </li>
+</ul>
 <pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = db.users.find({'last_name': 'Smith'})
-</pre>
-<p>并且这个查询对象将作为返回cursor的selector属性。</p>
-<p>返回只包含一条记录的cursor.</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = db.users.findOne()
-</pre>
-<br/>
-<p>limit:对返回记录数进行限制</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = db.users.find({'msg':'Hello 1'}).limit(10)
-//或者
-var cursor = db.users.find({'msg':'Hello 1'},{"limit":10})
-</pre>
-<br/>
-<p>skip:跳跃到已得到的结果某一条中,配合上面limit可以轻易实现分页功能.</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-page1 = db.things.find().limit(20)
-page2 = db.things.find().skip(20).limit(20)
-page3 = db.things.find().skip(40).limit(20)
-//更简单的写法
-page3 = db.things.find({}, {}, 20, 40);
-</pre>
-<p>注:当数据量很大时，skip操作会变的很慢，应该避免使用。（不止是mongoDb会这样，大部分数据库都是。）
-    可以通过改变查询文档的规则来达到分页效果，避免使用skip来跳过大量的数据。通过计算，得到下次查询应该从什么地方开始
-</p>
-<br/>
-<p>sort排序</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = db.users.find({'email':'ixigua@sina.com'}).sort({'Dt',-1})
-//或者
-var cursor =  db.users.find({'email':'ixigua@sina.com'},{"sort":{'Dt',-1}} )
-//上面的-1表示倒序
-var cursor =  db.users.find({'email':'ixigua@sina.com'},{"sort":"Dt"} )
-</pre>
-<br/>
-<p>count操作，返回匹配的记录数</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- db.user_addr.count()
-</pre>
-<p>distinct操作，对记录进行去重</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
- db.users.distinct('msg')
-</pre>
-<br/>
-<p>对数值类型的属性可以通过比较大小的操作进行过滤</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.collection.find({ "field" : { $gt: value } } );   // greater than  : field > value
-db.collection.find({ "field" : { $lt: value } } );   // less than  :  field < value
-db.collection.find({ "field" : { $gte: value } } );  // greater than or equal to : field >= value
-db.collection.find({ "field" : { $lte: value } } );  // less than or equal to : field <=
-</pre>
-<p>还可以复合使用</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.collection.find({ "field" : { $gt: value1, $lt: value2 } } );
-</pre>
-<br/>
-<p>$exists操作：判断字段是否存在 </p>
-<p>查询所有存在name字段的记录 </p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.users.find({name: {$exists: true}});
-</pre>
-<p>查询所有不存在phone字段的记录 </p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.users.find({phone: {$exists: false}});
-</pre> 
-<br/>
-<p>$all,匹配所有 </p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.users.find({favorite_number : {$all : [6, 8]}});
-</pre>
-<p>查询出{name: 'David', age: 26, favorite_number: [ 6, 8, 9 ] } </p>
-<p>过滤掉{name: 'David', age: 26, favorite_number: [ 6, 7, 9 ] } </p>
-<br/>
-<p>$size,匹配一个数组属性，它应该有指定的值这么长 </p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.users.find({"name": {$size:2}} );
+//$in示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+        users.insert([{
+            aaa:1
+        },{
+            aaa:2
+        },{
+            aaa:3
+        }], {
+            safe:true
+        }, function(){
+       //相当于users.find({'a':/[1|3]/})
+            users.find({
+                aaa:{
+                    $in:[1,3]
+                }
+            }).toArray(function(e, items){
+                console.log(items)//{aaa:1,_id:xxxxx},{aaa:3,_id:xxxxx}
+            })
+        })
+    })
+});
+
 </pre>
 
-<p>$not,不匹配</p>
-<p>查询不匹配name=B*带头的记录 </p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-db.users.find({name: {$not: /^B.*/}});
-</pre>
-<p>查询 age取模10不等于0 的数据 </p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-db.users.find({age : {$not: {$mod : [10, 0]}}});
-</pre>
-<p>$in操作符:</p>
-<p>比如下面两个查询是一样的:</p>
-<pre class="brush:javascript;gutter:false;toolbar:false">
+//$nin示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+        users.insert([{
+            aaa:1
+        },{
+            aaa:2
+        },{
+            aaa:3
+        }], {
+            safe:true
+        }, function(){
+            users.find({
+                aaa:{
+                    $nin:[7,9]
+                }
+            }).toArray(function(e, items){
+                console.log(items)
+            })
+        })
+    })
+});
 
-          collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
-            cursor.toArray(function(err, docs) {
-              console.log("Returned #" + docs.length + " documents");
-            });
-          });
+</pre>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//$all示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+        users.insert([{
+            aaa:[1,2,3,4]
+        }], {
+            safe:true
+        }, function(){
+            users.find({
+                aaa:{
+                    $all:[1,2,3]
+                }
+            }).toArray(function(e, items){
+                console.log(items)
+            })
+        })
+    })
+});
 
-          collection.find({'a':/[1|2]/}, function(err, cursor) {
-            cursor.toArray(function(err, docs) {
-              console.log("Returned #" + docs.length + " documents");
-            });
-          });
 </pre>
 
-<p>$where查询 </p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-//查询 age > 18 的记录，以下查询都一样
-db.users.find({age: {$gt: 18}});
-db.users.find({$where: "this.age > 18"});
-db.users.find({$where: function(){ return this.age > 18 } });
-db.users.find("this.age > 18");
-var f = function() {return this.age > 18} db.users.find(f);
+//$exists示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+            users.find({ccc:{$exists:false}} ).toArray(function(e, items){//$exists的值为true或false
+                console.log(items)
+            })
+        })
+});
 </pre>
-<p>根据子对象的属性查询</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-db.users.find({age : {$not: {$mod : [10, 0]}}});
+//$mod示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+     db.collection("users", function(err, users){
+           //相当于 users.find( "this.aaa % 2 == 1")
+            users.find({aaa:{$mod:[2, 1]}} ).toArray(function(e, items){
+                console.log(items)
+            })
+        })
+});
 </pre>
-<p>$type判断字段类型 </p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-//查询所有name字段是字符类型的
-db.users.find({name: {$type: 2}});
-//查询所有age字段是整型的
-db.users.find({age: {$type: 16}});
+//$size示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+     db.collection("users", function(err, users){
+            users.find({aaa:{$size:4}} ).toArray(function(e, items){
+                console.log(items)
+            })
+        })
+});
 </pre>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//$ne示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+     db.collection("users", function(err, users){
+            users.find({aaa:{$ne:2}} ).toArray(function(e, items){
+                console.log(items)
+            })
+        })
+});
+</pre>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//$gt, $lt, $gte, $lte示例，by 司徒正美
+users.find({ "field" : { $gt: 2} } );   // field > 2
+users.find({ "field" : { $lt: 2} } );   // field < 2
+users.find({ "field" : { $gte: 2} } );  // field >= 2
+users.find({ "field" : { $lte: 2} } );  // field <=2
+users.find({ "field" : { $gt: 2, $lt: 5 } } );// 2 < field < 5
+</pre>
+
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//$type示例，by 司徒正美
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+     db.collection("users", function(err, users){
+            users.find({aaa:{$type:16}} ).toArray(function(e, items){//要求类型为数组
+                console.log(items)
+            })
+        })
+});
+</pre>
+<p>$type对应的格式都是BSON类型，与JSON的类型差不多，只是多出几个，但多出的都不常用，不用劳神记它们。</p>
 <table class="table1" border="1" >
     <tbody>
         <tr>
@@ -310,6 +403,61 @@ db.users.find({age: {$type: 16}});
         </tr>
     </tbody>
 </table>
+
+
+
+
+<br/>
+<p>limit:对返回记录数进行限制</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ var cursor = db.users.find({'msg':'Hello 1'}).limit(10)
+//或者
+var cursor = db.users.find({'msg':'Hello 1'},{"limit":10})
+</pre>
+<br/>
+<p>skip:跳跃到已得到的结果某一条中,配合上面limit可以轻易实现分页功能.</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+page1 = db.things.find().limit(20)
+page2 = db.things.find().skip(20).limit(20)
+page3 = db.things.find().skip(40).limit(20)
+//更简单的写法
+page3 = db.things.find({}, {}, 20, 40);
+</pre>
+<p>注:当数据量很大时，skip操作会变的很慢，应该避免使用。（不止是mongoDb会这样，大部分数据库都是。）
+    可以通过改变查询文档的规则来达到分页效果，避免使用skip来跳过大量的数据。通过计算，得到下次查询应该从什么地方开始
+</p>
+<br/>
+<p>sort排序</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ var cursor = db.users.find({'email':'ixigua@sina.com'}).sort({'Dt',-1})
+//或者
+var cursor =  db.users.find({'email':'ixigua@sina.com'},{"sort":{'Dt',-1}} )
+//上面的-1表示倒序
+var cursor =  db.users.find({'email':'ixigua@sina.com'},{"sort":"Dt"} )
+</pre>
+<br/>
+<p>count操作，返回匹配的记录数</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ db.user_addr.count()
+</pre>
+<p>distinct操作，对记录进行去重</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ db.users.distinct('msg')
+</pre>
+<br/>
+
+
+<p>$where查询 </p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//查询 age > 18 的记录，以下查询都一样
+db.users.find({age: {$gt: 18}});
+db.users.find({$where: "this.age > 18"});
+db.users.find({$where: function(){ return this.age > 18 } });
+db.users.find("this.age > 18");
+var f = function() {return this.age > 18} db.users.find(f);
+</pre>
+
+
 <br/>
 <p>each方法</p>
 <p>不过坑爹的方法,如果cursor里面包含三个记录,那么它会遍历四次,最后一次为null.</p>
@@ -345,28 +493,165 @@ cursor.toArray(function(e,array){
 </pre>
 <p>结果显示如下：</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-[ <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
-0 28 fb f4 5e ec 07 f4 18 00 00 01 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
-0 28 fb f4 5e ec 07 f4 18 00 00 03 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
-0 28 fb f4 5e ec 07 f4 18 00 00 02 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
-0 28 fd ab 58 ac 1e 40 1c 00 00 02 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
-0 28 fd ab 58 ac 1e 40 1c 00 00 03 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
-0 28 fd ab 58 ac 1e 40 1c 00 00 01 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
-0 28 fe 23 f0 2a 89 e0 1f 00 00 01 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
-0 28 fe 23 f0 2a 89 e0 1f 00 00 02 00>,
-  <Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
-0 28 fe 23 f0 2a 89 e0 1f 00 00 03 00> ]
-                                        </pre>
-                                        <p>nextObject:cursor的原型方法，一个比each, toArray更好用的得到记录的方法</p>
-                                        <pre class="brush:javascript;gutter:false;toolbar:false">
+[ &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
+0 28 fb f4 5e ec 07 f4 18 00 00 01 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
+0 28 fb f4 5e ec 07 f4 18 00 00 03 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
+0 28 fb f4 5e ec 07 f4 18 00 00 02 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
+0 28 fd ab 58 ac 1e 40 1c 00 00 02 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
+0 28 fd ab 58 ac 1e 40 1c 00 00 03 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
+0 28 fd ab 58 ac 1e 40 1c 00 00 01 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 61 61 61 00 07 5f 69 64 00 5
+0 28 fe 23 f0 2a 89 e0 1f 00 00 01 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 62 62 62 00 07 5f 69 64 00 5
+0 28 fe 23 f0 2a 89 e0 1f 00 00 02 00&gt;,
+  &lt;Buffer 24 00 00 00 02 6e 61 6d 65 00 04 00 00 00 63 63 63 00 07 5f 69 64 00 5
+0 28 fe 23 f0 2a 89 e0 1f 00 00 03 00&gt; ]
+</pre>
+<p>nextObject:cursor的原型方法，一个比each, toArray更好用的得到记录的方法</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
         cursor.nextObject(function(){
             console.log( cursor.items)
         })
-                                        </pre>
+</pre>
+<pre class="brush:javascript;gutter:true;toolbar:true;collapse:true;">
+var testForFields = {'limit' : 1, 'sort' : 1, 'fields' : 1, 'skip' : 1, 'hint' : 1, 'explain' : 1, 'snapshot' : 1
+  , 'timeout' : 1, 'tailable' : 1, 'batchSize' : 1, 'raw' : 1, 'read' : 1
+  , 'returnKey' : 1, 'maxScan' : 1, 'min' : 1, 'max' : 1, 'showDiskLoc' : 1, 'comment' : 1, 'dbName' : 1};
+   //find方法的源码方法，find是一个极富弹性强大无比的API，也意味着了为应该它的参数多态化，内部要做许多工作
+Collection.prototype.find = function find () {
+    var options
+    //首先为了方便使用数组方法，框架会将参数对象变成一个数组
+    , args = Array.prototype.slice.call(arguments, 0)
+    //判定最后一个参数是否回调
+    , has_callback = typeof args[args.length - 1] === 'function'
+    //如果第一个参数就是回调
+    , has_weird_callback = typeof args[0] === 'function'
+    , callback = has_callback ? args.pop() : (has_weird_callback ? args.shift() : null)
+    //然后取得去掉回调后数组的长度
+    , len = args.length
+    //如果只有一个参数，就要默认一个空对象作查询对象★★★
+    , selector = len >= 1 ? args[0] : {}
+    //是否指定了取那些属性
+    , fields = len >= 2 ? args[1] : undefined;
+
+    if(len === 1 && has_weird_callback) {
+        //collection.find(fn, {})
+        selector = {};
+        options = args[0];
+    }
+
+    if(len === 2 && !Array.isArray(fields)) {
+        //Object.getOwnPropertyNames 是返回对象可枚举的和不可枚举的本地成员名
+        //Object.keys仅是返回对象可枚举的本地成员名
+        var fieldKeys = Object.getOwnPropertyNames(fields);
+        var is_option = false;
+        //如果查询对象后面跟着的对象包含testForFields的上述属性，说明是个可选对象，而不是域对象
+        for(var i = 0; i < fieldKeys.length; i++) {
+            if(testForFields[fieldKeys[i]] != null) {
+                is_option = true;
+                break;
+            }
+        }
+
+        if(is_option) {
+            options = fields;
+            fields = undefined;
+        } else {
+            options = {};
+        }
+    } else if(len === 2 && Array.isArray(fields) && !Array.isArray(fields[0])) {
+        var newFields = {};
+        // collection.find(query,["aaa","bbb","ccc"])
+        for(var i = 0; i < fields.length; i++) {
+            newFields[fields[i]] = 1;
+        }
+        fields = newFields;
+    }
+   //如果去掉回调后，还有三个参数，那么第三个肯定是可选对象
+    if(3 === len) {
+        options = args[2];
+    }
+
+    // Ensure selector is not null
+    selector = selector == null ? {} : selector;
+    // Validate correctness off the selector
+    var object = selector;
+    if(Buffer.isBuffer(object)) {
+        var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;
+        if(object_size != object.length)  {
+            var error = new Error("query selector raw message size does not match message header size [" + object.length + "] != [" + object_size + "]");
+            error.name = 'MongoError';
+            throw error;
+        }
+    }
+
+    // Validate correctness of the field selector
+    var object = fields;
+    if(Buffer.isBuffer(object)) {
+        var object_size = object[0] | object[1] << 8 | object[2] << 16 | object[3] << 24;
+        if(object_size != object.length)  {
+            var error = new Error("query fields raw message size does not match message header size [" + object.length + "] != [" + object_size + "]");
+            error.name = 'MongoError';
+            throw error;
+        }
+    }
+
+    //如果查询对象是一个ObjectID实例，则外包一层
+    if(selector instanceof ObjectID) {
+        selector = {
+            _id:selector
+        };
+    }
+
+    //如果可选对象有field属性，重组field属性
+    if(options && options.fields && !(Buffer.isBuffer(options.fields))) {
+        fields = {};
+
+        if(Array.isArray(options.fields)) {
+            if(!options.fields.length) {
+                fields['_id'] = 1;
+            } else {
+                for (var i = 0, l = options.fields.length; i < l; i++) {
+                    fields[options.fields[i]] = 1;
+                }
+            }
+        } else {
+            fields = options.fields;
+        }
+    }
+
+    if (!options) options = {};
+    //与分页相关
+    options.skip = len > 3 ? args[2] : options.skip ? options.skip : 0;
+    options.limit = len > 3 ? args[3] : options.limit ? options.limit : 0;
+    //与返回形式相关
+    options.raw = options.raw != null && typeof options.raw === 'boolean' ? options.raw : this.raw;
+    options.hint = options.hint != null ? normalizeHintField(options.hint) : this.internalHint;
+    //超时处理
+    options.timeout = len == 5 ? args[4] : typeof options.timeout === 'undefined' ? undefined : options.timeout;
+    // If we have overridden slaveOk otherwise use the default db setting
+    options.slaveOk = options.slaveOk != null ? options.slaveOk : this.db.slaveOk;
+
+    var o = options;
+    if(o["read"] != null) o["readPreference"] = o["read"];
+    o.read = o["readPreference"] ? o.readPreference : this.readPreference;
+    if(o.read == "secondary" || o.read == "secondaryOnly") options.slaveOk = true;
+   //返回一个Cursor实例
+    if(callback) {
+        callback(null, new Cursor(this.db, this, selector, fields, o.skip, o.limit
+            , o.sort, o.hint, o.explain, o.snapshot, o.timeout, o.tailable, o.batchSize
+            , o.slaveOk, o.raw, o.read, o.returnKey, o.maxScan, o.min, o.max, o.showDiskLoc, o.comment, o.awaitdata
+            , o.numberOfRetries, o.dbName));
+    } else {
+        return new Cursor(this.db, this, selector, fields, o.skip, o.limit
+            , o.sort, o.hint, o.explain, o.snapshot, o.timeout, o.tailable, o.batchSize
+            , o.slaveOk, o.raw, o.read, o.returnKey, o.maxScan, o.min, o.max, o.showDiskLoc, o.comment, o.awaitdata
+            , o.numberOfRetries, o.dbName);
+    }
+};
+</pre>

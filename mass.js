@@ -311,3 +311,4 @@
 //2012.8.9  添加parseUrl, parseQuery API
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
 //一个很好的前端工具 https://github.com/colorhook/att
+//http://blog.csdn.net/dojotoolkit/article/details/7820321
