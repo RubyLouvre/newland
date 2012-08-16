@@ -6,16 +6,43 @@
 collection.update(criteria, update[, options[, callback]]);
 </pre>
 <p>它的第一参数是查询对象</p>
-<p>它的第二参数是更新对象,包含$inc, $unset, $set, $push, $pushAll, $pop, $pull操作</p>
+<p>它的第二参数是更新对象,包含$inc, $set,  $unset, $push, $pushAll, $pop, $pull等操作</p>
 <p>它的第三参数是可选对象,包含safe, multi,upsert,raw等设置</p>
 <p>它的第四参数是回调函数</p>
-<dl>
-    <dt>$inc</dt>
-    <dd>$inc也就是increase的缩写，学过sql server 的同学应该很熟悉，比如我们做一个在线用户状态记录，每次修改会在原有的基础上
-        自增$inc指定的值</dd>
-    <dt>$set</dt>
-    <dd> $set的值也是一个对象,里面要包含你要更新的键值。</dd>
-</dl>
+<p><span class="stress">替换</span>操作,如果第一个对象是查询对象,第二个对象是document,那么就被认为是替换.</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+        //当update是替换操作时,即第个参数没有操作符,那么第三个可选对象即使集团了multi为true,它也每次替换一个
+        users.update({
+            user:"David"
+        },{
+            user:"xxx"
+        },{
+            safe:true
+        }, function(err){
+            users.find().toArray(function(e, items){
+                console.log(items)
+            })
+        })
+    })
+});
+</pre>
+<p>当第二个参数存在$开头的操作符时,就可以对选定的文档进行局部的属性修正,其中</p>
+<ul>
+    <li> $inc是对数字属性进行增减操作</li>
+    <li>$set是对指定属性进行替换</li>
+    <li>$rename是对指定属性进行更名</li>
+    <li>$是指向自身的</li>
+    <li>$unset是对指定属性进行删除</li>
+    <li>$$push $pushAll $addToSet $pop $pull $pullAll是对数组属性进行增删操作</li>
+</ul>
+</p>
+<p><span class="stress">$inc</span>, 也就是increase的缩写，学过sql server 的同学应该很熟悉，比如我们做一个在线用户状态记录，
+    每次修改会在原有的基础上自增$inc指定的值</p>
+<p><span class="stress">$set</span>, 它的值是一个对象,里面要包含你要更新的键值。</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 var mongo  = require('mongodb');
 var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
@@ -61,32 +88,7 @@ db.open(function() {
 })
 </pre>
 <br/>
-<pre class="brush:javascript;gutter:false;toolbar:false">
-var mongo  = require('mongodb');
-var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
-db.open(function() {
-    db.collection("users",function(err, users){
-      //每次只能对一个记录进行$push操作
-      //如果记录存在指定的数组属性,那么就为它添加进去,没有就创建这个属性,赋给它一个空数组再push进去
-      //如果存在同名属性但不是数组就报错
-        users.update({
-            name:"jjj"
-        },{
-            $push:{
-                array"hhh"
-            }
 
-        },true,function(err){//注意update语句的回调只有一个参数
-            users.find().toArray(function(e, els){
-                els.forEach(function(el){
-                    console.log(el)
-                });
-            });
-        })
-
-    })
-})
-</pre>
 <p>$unset,删除一个指定的属性,其值恒为1</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 var mongo  = require('mongodb');
@@ -116,15 +118,15 @@ var mongo  = require('mongodb');
 var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
 db.open(function() {
     db.collection("users",function(err, users){
-      //每次只能对一个记录进行$push操作
       //如果记录存在指定的数组属性,那么就为它添加进去,没有就创建这个属性,赋给它一个空数组再push进去
       //如果存在同名属性但不是数组就报错
         users.update({
-            name:"xxx"
+            name:"jjj"
         },{
             $push:{
-                array:2
+                array"hhh"
             }
+
         },true,function(err){//注意update语句的回调只有一个参数
             users.find().toArray(function(e, els){
                 els.forEach(function(el){
@@ -132,7 +134,7 @@ db.open(function() {
                 });
             });
         })
-    
+
     })
 })
 </pre>
@@ -141,7 +143,6 @@ var mongo  = require('mongodb');
 var db = new mongo.Db("northwind", new mongo.Server('localhost', 27017, {}), {});
 db.open(function() {
     db.collection("users",function(err, users){
-      //每次只能对一个记录进行$push操作
       //如果记录存在指定的数组属性,那么就为它添加进去,没有就创建这个属性,赋给它一个空数组再push进去
       //如果存在同名属性但不是数组就报错
         users.update({
@@ -263,7 +264,6 @@ db.open(function() {
                 });
             });
         })
-
     })
 })
 </pre>
@@ -278,13 +278,21 @@ db.open(function() {
 > t.find(){ "_id" : ObjectId("4b97e62bf1d8c7152c9ccb74"), "title" : "ABC",
  "comments" : [ { "by" : "joe", "votes" : 4 }, { "by" : "jane", "votes" : 7 } ] }
 </pre>
-<p>可选对象的使用,涉及三个操作符</p>
-<p>safe如果有回调一定要指定</p>
-<p>upsert不存在就插入一个新记录</p>
-<p>multi更新多条记录</p>
-
-<h3> findAndModify</h3>
+<fieldset><legend>可选对象</legend>
+    <p>可选对象拥有以下可选的设置项:</p>
+    <ul>
+        <li>safe，只要数据库操作完成后才执行回调，因此有回调一定要指定它</li>
+        <li>upsert，不存在就插入一个新文档</li>
+        <li>multi，同时更新多个文档</li>
+        <li>multi，回调返回的数据是二进制的Buffer</li>
+    </ul>
+</fieldset>
+<br/>
+<h3>findAndModify</h3>
 <p>findAndModify的参数设置非常有技巧的，我们可以将源码晒一晒：</p>
+<pre>
+collection.findAndModify(criteria, sort, update[, options, callback])
+</pre>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 Collection.prototype.findAndModify = function findAndModify (query, sort, doc, options, callback) {
 //首先第一个对象肯定是查询对象,不用动
@@ -320,25 +328,25 @@ Collection.prototype.findAndModify = function findAndModify (query, sort, doc, o
 </pre>
 <p>下面是一个完整的例子, 我们另起一个数据库,插入两条记录做小白鼠:</p>
 
-    collection.findAndModify(
-    {
-        hello: 'world'
-    }, // query
-    [['_id','asc']],  // sort order
-    {
-        $set: {
-            hi: 'there'
-        }
-        }, // replacement, replaces only the field "hi"
+collection.findAndModify(
+{
+hello: 'world'
+}, // query
+[['_id','asc']],  // sort order
+{
+$set: {
+hi: 'there'
+}
+}, // replacement, replaces only the field "hi"
 
-        {}, // options
-    function(err, object) {
-        if (err){
-            console.warn(err.message);  // returns error if no matching object found
-        }else{
-            console.dir(object);
-        }
-    });
+{}, // options
+function(err, object) {
+if (err){
+console.warn(err.message);  // returns error if no matching object found
+}else{
+console.dir(object);
+}
+});
 <pre class="brush:javascript;gutter:false;toolbar:false">
 var mongodb = require('mongodb'),
 server = new mongodb.Server("127.0.0.1", 27017, {});
@@ -356,7 +364,7 @@ new mongodb.Db('test', server, {}).open(function (error, client) {
             rrr: 'sss'
         }
     },//可选对象可以省去
-    function(err, object) {//回调对象,第二个参数是更新前的对象,由于没有指定multi,只取第一个
+    function(err, object) {//回调对象,第二个参数是更新前的文档，总为数组
         if (err){
             console.warn(err.message);
         }else{
@@ -365,7 +373,27 @@ new mongodb.Db('test', server, {}).open(function (error, client) {
     });
 });
 </pre>
-
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+new mongodb.Db('test', server, {}).open(function (error, db) {
+    db.collection("users", function(err, users){
+        users.findAndModify({
+            safe:true
+        },[],{
+            $unset:{safe:1}
+        },
+        {
+            safe:true
+        }, function(err, ee){
+            console.log(ee)
+            users.find().toArray(function(e, items){
+                console.log(items)
+            })
+        })
+    })
+});
+</pre>
 
 
 
