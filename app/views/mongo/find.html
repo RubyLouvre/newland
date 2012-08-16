@@ -406,30 +406,34 @@ new mongodb.Db('test', server, {}).open(function (error, db) {
     </tbody>
 </table>
 
-
-
-
-<br/>
-<p>limit:对返回记录数进行限制</p>
+<hr>
+<h4>可选对象</h4>
+<p> 它拥有以下三个配置项：</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
- var cursor = db.users.find({'msg':'Hello 1'}).limit(10)
+var options = {
+    "limit": 20,
+    "skip": 10,
+    "sort": title
+}
+collection.find({}, options).toArray(...);
+</pre>
+<p>其中limit几对返回记录数进行限制</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ var cursor = collection.find({'msg':'Hello 1'}).limit(10)
 //或者
-var cursor = db.users.find({'msg':'Hello 1'},{"limit":10})
+ var cursor = collection.find({'msg':'Hello 1'},{"limit":10})
 </pre>
 <br/>
 <p>skip:跳跃到已得到的结果某一条中,配合上面limit可以轻易实现分页功能.</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-page1 = db.things.find().limit(20)
-page2 = db.things.find().skip(20).limit(20)
-page3 = db.things.find().skip(40).limit(20)
-//更简单的写法
-page3 = db.things.find({}, {}, 20, 40);
+page1 = collection.find().limit(20)
+page2 = collection.find().skip(20).limit(20)
+page3 = collection.find().skip(40).limit(20)
 </pre>
 <p>注:当数据量很大时，skip操作会变的很慢，应该避免使用。（不止是mongoDb会这样，大部分数据库都是。）
     可以通过改变查询文档的规则来达到分页效果，避免使用skip来跳过大量的数据。通过计算，得到下次查询应该从什么地方开始
 </p>
-<br/>
-<p>sort排序</p>
+<p>sort排序，它可以是对应一个字符串，值为属性名，这时只能是顺序，也可以是一个二维数组</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
  var cursor = db.users.find({'email':'ixigua@sina.com'}).sort({'Dt',-1})
 //或者
