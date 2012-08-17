@@ -1,4 +1,4 @@
-$.define("session","../cookie,../stores/memory", function(Cookie, getSession ){
+$.define("session","../cookie,../stores/"+$.configs.session.store, function(Cookie, getSession ){
 
     return function(flow){
         if( flow._page ){
