@@ -2,12 +2,13 @@ $.define("session","../cookie,../stores/"+$.configs.session.store, function(Cook
     return function(flow){
         if( flow._page ){
             $.log("已进入session栏截器")
-            flow.cookie = new Cookie(flow.req);
 
+            var cookie = flow.req.headers.cookie;
             var opts = $.config.session;
-            var cookie = flow.cookie;
             var life  = opts.life;
-            var sid = cookie.get(opts.sid);
+            flow.cookie = new Cookie( cookie );
+
+            var sid = flow.cookie.get(opts.sid);
 
             if(Array.isArray(sid )){
                 sid = sid[0]
@@ -15,9 +16,9 @@ $.define("session","../cookie,../stores/"+$.configs.session.store, function(Cook
 
             new Store(sid, life, flow);
 
-            flow.bind("open_session_"+flow._id, function(session){
-                if( sid !== session._id){
-                    flow.addCookie(opts.sid, session._sid )
+            flow.bind("open_session_"+flow.id, function(session){
+                if( sid !== session.sid){
+                    flow.addCookie(opts.sid, session.sid )
                 }
             });
 
@@ -28,13 +29,13 @@ $.define("session","../cookie,../stores/"+$.configs.session.store, function(Cook
                 }
                 switch(args.length){
                     case 2:
-                        flow.fire("set_session_"+flow._id, "flash."+ type, msg, callback);
+                        flow.fire("set_session_"+flow.id, "flash."+ type, msg, callback);
                         break;
                     case 1:
-                        flow.fire("get_session_"+flow._id, "flash."+ type,  callback);
+                        flow.fire("get_session_"+flow.id, "flash."+ type,  callback);
                         break;
                     case 0:
-                        flow.fire("remove_session_"+flow._id, "flash",  callback);
+                        flow.fire("remove_session_"+flow.id, "flash",  callback);
                         break;
                 }
             }

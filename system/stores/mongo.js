@@ -2,7 +2,7 @@ $.define("mongodb","mongodb", function(mongodb){
     var config = $.configs.session;
     var server = new mongodb.Server(config.host, config.port, {});
     var store = function(sid, life, flow){
-        this._id = sid;
+        this.sid = sid;
         this.life = life;
         if(!this._init){
             var that = this;
@@ -18,10 +18,11 @@ $.define("mongodb","mongodb", function(mongodb){
                             that.sid = flow.uuid();
                         }
                         that._init = true;
+                        //set,get,remove,clear等事件必须在open操作之后才能执行!
                         String("set,get,remove,clear").replace($.rword, function(event){
-                            that.bind(event+"_session_"+flow._id, that[event]);
+                            that.bind(event+"_session_"+flow.id+",open_session_"+flow.id, that[event]);
                         });
-                        flow.fire("open_session_"+flow._id, that);
+                        flow.fire("open_session_"+flow.id, that);
                     })
                 })
             });
@@ -32,61 +33,55 @@ $.define("mongodb","mongodb", function(mongodb){
         "new":true,
         upsert: true
     }
+    var make = function( update, callback){
+        callback = callback || $.noop;
+        this.data.findAndModify ({
+            sid:  this.sid,
+            life: this.life
+        },[],update,options).toArray(function(err, docs){
+            if(err){
+                callback(err)
+            }else{
+                callback(err,docs[0])
+            }
+        })
+    }
+
     store.prototype = {
-        set: function(key, value, callback){
-            callback = callback || $.noop;
+        //插入或更新数据
+        set: function(key, value, callback, get){
             var set = {
-                timestamp: new Date * 1 + this._life
+                timestamp: new Date * 1 + this.life
             }
-            set[ key ] = value;
-            this.data.findAndModify ({
-                sid:  this.sid,
-                life: this.life
-            },[],{
-                $set:set
-            },options).toArray(callback)
-        },
-        get: function(key, callback){
-            callback = callback || $.noop;
-            var set = {
-                timestamp: new Date * 1 + this._life
+            if(get !== true){
+                set[ key ] = value;
             }
-            this.data.findAndModify ({
-                sid:  this.sid,
-                life: this.life
-            },[],{
-                $set:set
-            }, options).toArray(function(err, docs){
-                if(err){
-                    callback(err)
-                }else{
-                    callback(err,docs[0][key])
-                }
-            })
+            make.call( this, {
+                $set: set
+            }, callback );
         },
-        remove: function (key, callback){
-            callback = callback || $.noop;
-            this.data.findAndModify ({
-                sid:  this.sid,
-                life: this.life
-            },[],{
+        //读取数据
+        get: function( key, callback){
+            this.set(null, null, function(doc){
+                var fn = callback || $.noop;
+                fn(doc[key])
+            },true);
+        },
+        //移除某一数据
+        remove: function ( key, callback){
+            make.call(this, {
                 $unset:key,
                 $set:{
                     timestamp: new Date * 1 + this._life
                 }
-            }, options).toArray(function(err, docs){
-                if(err){
-                    callback(err)
-                }else{
-                    callback(err, !(key in docs[0]))
-                }
-            })
+            }, callback );
         },
+        //删掉这个文档对象
         clear: function(callback){
             callback = callback || $.noop;
             this.data.remove ({
-                sid:this.sid
-            },options,callback)
+                sid: this.sid
+            },options, callback)
         }
     }
    

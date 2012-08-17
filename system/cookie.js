@@ -38,9 +38,9 @@ $.define("cookie", function(){
         });
         return obj;
     };
-    function Cookie (req){
+    function Cookie (cookie){
         this._resCookies = [];
-        this._reqCookies = $.parseQuery(req.headers.cookie, '; ');
+        this._reqCookies = $.parseQuery(cookie, '; ');
     }
     Cookie.expires = 60 * 60 * 24
     Cookie.parse = parse;
