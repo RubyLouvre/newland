@@ -47,25 +47,6 @@ $.define("random", function(){
             var seed = Math.random() * (span + span2); //全跨度取种子
             if(seed < span) return Math.floor(seed) + min; //默认跨度内
             else return Math.floor((seed - span)/(opts.value - 1)) +  opts.from; //如果是在增加的跨度内
-        },
-//       num:function (min,max) {
-//            return Math.floor(Math.random()*(max-min+1)) + min;
-//        },
-        //https://github.com/louisremi/Math.uuid.js/blob/master/Math.uuid.js
-        uuid: function(){
-            var  uuid = [], r, i = 36;
-            // rfc4122 requires these characters
-            uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-            uuid[14] = '4';
-            // Fill in random data.  At i==19 set the high bits of clock sequence as
-            // per rfc4122, sec. 4.1.5
-            while (i--) {
-                if (!uuid[i]) {
-                    r = Math.random()*16|0;
-                    uuid[i] = uuid_arr[(i == 19) ? (r & 0x3) | 0x8 : r];
-                }
-            }
-            return uuid.join('');
         }
     }
 

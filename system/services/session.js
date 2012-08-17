@@ -10,6 +10,7 @@ $.define("session","../cookie,../stores/"+$.config.session.store, function(Cooki
             flow.session = flow.session || {};
             flow.cookie = new Cookie( cookie );
             var sid = flow.cookie.get(opts.sid);
+            console.log("old "+sid)
             //使用Deferred模式,延迟到连接上数据后才操作它们,并改上这四个方法
             String("set,get,clear,remove").replace($.rword, function(name){
                 flow.session[ "_" + name ] = [];
@@ -23,18 +24,16 @@ $.define("session","../cookie,../stores/"+$.config.session.store, function(Cooki
                 String("set,get,remove,clear").replace($.rword, function(name){
                     var type =  name+"_session_"+flow.id;
                     var array = flow.session[ "_" + name ];
+                    console.log(type)
                     function tmp(){
                         var args = $.slice(arguments);
                         args.unshift( type );
                         flow.fire.apply(flow, args)
                     }
                     flow.bind(type+",open_session_"+flow.id, session[name]);
-                    if(array.length){
-                        for(var el; el = array.shift();){
-                            tmp.apply(null, el)
-                        }
+                    for(var el; el = array.shift();){
+                        tmp.apply(null, el)
                     }
-                    flow.session[ "_" + name ] = [];
                     flow.session[ name ] = tmp;
                 });
                 if( sid !== session.sid){
