@@ -8,6 +8,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             this.root = {};//数据共享,但策略自定
             this.id = this.id || this.uuid()
         },
+        //https://github.com/louisremi/Math.uuid.js/blob/master/Math.uuid.js
         uuid: function(){
             var  uuid = [], r, i = 36;
             uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
