@@ -386,3 +386,78 @@ Collection.prototype.findAndRemove = function(query, sort, options, callback) {
   this.findAndModify(query, sort, null, options, callback);
 }
 </pre>
+<p>一个综合的例子,建一个session 文档,包含sid, life, timestamp这三个属性,最开始时timestamp
+    为当前时间,每次更新时都用当前时间加上它的life</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+var life = 60* 60 * 24;
+
+new mongodb.Db('test', server, {}).open(function (e, db) {
+    db.collection("dogs", function(e,table){
+        function callback(err, els){
+            if(this instanceof Array){
+                table.find({
+                    _id: this[0]
+                    } ).toArray(function(err, els){
+                    console.log(els);
+                })
+            }else{
+                console.log(els);
+            }
+        }
+        table.find ({
+            sid: "rubylouvre"
+        }).toArray(function(e, els){
+            if(!els.length){
+                table.insert({
+                    sid: "rubylouvre",
+                    life: life,
+                    timestamp: new Date * 1
+                },{
+                    safe: true,
+                    "new":true
+                },callback );
+            }else{
+                var id = els[0]._id
+                table.update( {
+                    _id:id
+                }, {
+                    $set:{
+                        timestamp: new Date * 1+ life
+                    }
+                },{
+                    safe:true,
+                    "new":true
+                },callback.bind( [ id ] ) )
+            }
+        })
+    })
+});
+</pre>
+<p>如果善用findAndModify与upsert， 上面代码可以精简成：</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+
+var mongodb = require('mongodb'),
+server = new mongodb.Server("127.0.0.1", 27017, {});
+var life = 60* 60 * 24;
+new mongodb.Db('test', server, {}).open(function (e, db) {
+    db.collection("dogs", function(e,table){
+        table.findAndModify ({
+            sid: "rubylouvre",
+            life: life
+        },[],{
+            $set:{
+                timestamp: new Date * 1 * life
+            }
+        },{
+            safe:true,
+            "new":true,
+            upsert: true
+        }, function(e, a){
+            console.log(e)
+            console.log(a)
+        })
+    })
+})
+</pre>
