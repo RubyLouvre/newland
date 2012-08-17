@@ -1,14 +1,17 @@
 $.define("mongodb","mongodb", function(mongodb){
-    var config = $.configs.session;
+    var config = $.config.session;
     var server = new mongodb.Server(config.host, config.port, {});
-    var store = function(sid, life, flow){
+    var Store = function(sid, life, flow){
         this.sid = sid;
         this.life = life;
-        if(!this._init){
+  
+        if(! $.dbs[ config.db ]){
+            $.dbs[ config.db ] = 1;//临时处理
             var that = this;
             //新建或打开目标数据库
             new mongodb.Db(config.db, server, {}).open(function (e, db) {
                 //新建或打开目标集合
+                $.dbs[ config.db ] = db;//正式处理
                 db.collection(config.table,function(e, session){
                     that.data = session
                     session.find({
@@ -17,11 +20,6 @@ $.define("mongodb","mongodb", function(mongodb){
                         if(!docs.length){//如果指定sessionID不存在,随机生成一个新的
                             that.sid = flow.uuid();
                         }
-                        that._init = true;
-                        //set,get,remove,clear等事件必须在open操作之后才能执行!
-                        String("set,get,remove,clear").replace($.rword, function(event){
-                            that.bind(event+"_session_"+flow.id+",open_session_"+flow.id, that[event]);
-                        });
                         flow.fire("open_session_"+flow.id, that);
                     })
                 })
@@ -47,7 +45,7 @@ $.define("mongodb","mongodb", function(mongodb){
         })
     }
 
-    store.prototype = {
+    Store.prototype = {
         //插入或更新数据
         set: function(key, value, callback, get){
             var set = {
@@ -84,6 +82,6 @@ $.define("mongodb","mongodb", function(mongodb){
             },options, callback)
         }
     }
-   
+    return Store;
 })
 

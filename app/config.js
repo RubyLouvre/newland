@@ -3,7 +3,7 @@ $.define("configs", function(){
     return $.config = {
         //栏截器"favicon",
         //"mime","location","static","postData","methodOverride","json","render","matcher"
-        intercepters: [],
+        services: [],
         http_method: "_method",//用于模拟PUT,DELETE方法
         environments: "development",
         port: 8888,
@@ -16,33 +16,32 @@ $.define("configs", function(){
         //默认session配置,如果没有,则不使用session
         session: {
             store: 'mongodb',
-            sid:   "jsessionid",
+            sid:   "mass_sid",
             host:  "localhost",
             port:  27017,
             db:    "sessionDB",
             table: "sessions",
             life: 14 * 24 * 60 * 60
         },
-        //session在Cookie中的键名
-        cookieSessionKey: 'sdata',
+
         db:{
             development:{
-                driver:   "mongoose",
+                driver:   "mongodb",
                 host:     "localhost",
                 database: "cms-dev"
             },
             test: {
-                driver:   "mongoose" ,
+                driver:   "mongodb" ,
                 host:     "localhost",
                 database: "cms-test"
             } ,
             staging:{
-                driver:   "mongoose",
+                driver:   "mongodb",
                 host:     "localhost",
                 database: "cms-staging"
             },
             production:{
-                driver:   "mongoose" ,
+                driver:   "mongodb" ,
                 host:     "localhost" ,
                 database: "cms-production"
             }

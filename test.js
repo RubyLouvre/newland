@@ -8,7 +8,7 @@ new mongodb.Db('test', server, {}).open(function (e, db) {
             life: life
         },[],{
             $set:{
-                timestamp: new Date * 1 * life
+                "aaa.ccc": new Date * 1 * life
             }
         },{
             safe:true,
