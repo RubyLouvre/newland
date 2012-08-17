@@ -1,5 +1,5 @@
 $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
-
+   $.log("生成页面")
     var url = $.path.join( process.cwd(),"app/views/").replace(/\\/g,"/"),layouts = {};
     $.walk(url, function(files){
         var pending = files.length;

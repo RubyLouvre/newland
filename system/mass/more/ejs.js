@@ -6,7 +6,13 @@ $.define("ejs", "../lang",function(){
             opts = opts || {}
             var doc = opts.doc || document;
             data = data || {};
-            el = $.query ? $(id, doc)[0] : doc.getElementById(id.slice(1));
+            if($.fn){
+                el = $(id, doc)[0];
+            }else if(doc.querySelectorAll){
+                el = doc.querySelectorAll(id)[0];
+            }else{
+                el = doc.getElementById(id.slice(1));
+            }
             if(! el )
                 throw "can not find the target element";
             source = el.innerHTML;
@@ -16,7 +22,6 @@ $.define("ejs", "../lang",function(){
             var fn = $.ejs.compile( source, opts );
             $.ejs.cache[ id ] = fn;
         }
-        //$.log( $.ejs.cache[ id ] +"")
         return $.ejs.cache[ id ]( data );
     }
     var isNodejs = typeof exports == "object";
@@ -26,9 +31,12 @@ $.define("ejs", "../lang",function(){
             return fn( data )
         }
     }
-
     $.ejs.compile = function( source, opts){
         opts = opts || {}
+        var tid = opts.tid
+        if(typeof tid === "string" && typeof $.ejs.cache[tid] == "function"){
+            return $.ejs.cache[tid];
+        }
         var open  = opts.open  || isNodejs ? "<%" : "<&";
         var close = opts.close || isNodejs ? "%>" : "&>";
         var helperNames = [], helpers = []
@@ -132,8 +140,11 @@ $.define("ejs", "../lang",function(){
         var body = ["txt"+time,"js"+time, "filters"]
         var fn = Function.apply(Function, body.concat(helperNames,t) );
         var args = [codes, js, $.ejs.filters];
-        //console.log(fn+"")
-        return fn.apply(this, args.concat(helpers));
+        var compiled = fn.apply(this, args.concat(helpers));
+        if(typeof tid === "string"){
+            return  $.ejs.cache[tid] = compiled
+        }
+        return compiled;
     }
     $.ejs.cache = {};//用于保存编译好的模板函数
     $.ejs.filters = {//用于添加各种过滤器

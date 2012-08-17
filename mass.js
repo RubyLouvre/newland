@@ -1,33 +1,33 @@
 (function(){
-    //åç«¯éƒ¨åˆ†ã€€2012.7.11 by å¸å¾’æ­£ç¾
+    //ºó¶Ë²¿·Ö¡¡2012.7.11 by Ë¾Í½ÕıÃÀ
     function $(){}
-    var class2type = {  //ç±»å‹æ˜ å°„
+    var class2type = {  //ÀàĞÍÓ³Éä
         "[object global]" : "Global" ,
         "null" : "Null" ,
         "NaN"  : "NaN"  ,
         "undefined" : "Undefined"
     }
-    , rmodule =  /([^(\s]+)\(?([^)]*)\)?/   //ç”¨äºä»å­—ç¬¦ä¸²ä¸­åˆ‡å‰²å‡ºæ¨¡å—åä¸çœŸè·¯è·¯å¾„
-    , loadings = []                         //æ­£åœ¨åŠ è½½ä¸­çš„æ¨¡å—åˆ—è¡¨
-    , returns  = {}                         //æ¨¡å—çš„è¿”å›å€¼
-    , cbi      = 1e5                        //ç”¨äºç”Ÿæˆå›è°ƒå‡½æ•°çš„åå­—
+    , rmodule =  /([^(\s]+)\(?([^)]*)\)?/   //ÓÃÓÚ´Ó×Ö·û´®ÖĞÇĞ¸î³öÄ£¿éÃûÓëÕæÂ·Â·¾¶
+    , loadings = []                         //ÕıÔÚ¼ÓÔØÖĞµÄÄ£¿éÁĞ±í
+    , returns  = {}                         //Ä£¿éµÄ·µ»ØÖµ
+    , cbi      = 1e5                        //ÓÃÓÚÉú³É»Øµ÷º¯ÊıµÄÃû×Ö
     , uuid     = 1
     , toString = returns.toString
-    //ä¸º[[class]] --> type æ˜ å°„å¯¹è±¡æ·»åŠ æ›´å¤šæˆå‘˜,ç”¨äº$.typeå‡½æ•°
+    //Îª[[class]] --> type Ó³Éä¶ÔÏóÌí¼Ó¸ü¶à³ÉÔ±,ÓÃÓÚ$.typeº¯Êı
     "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace(/\w+/g,function(name){
         class2type[ "[object " + name + "]" ] = name;
     });
-    //å°†ä¸€ä¸ªæˆ–å¤šä¸ªå¯¹è±¡åˆå¹¶åˆ°ç¬¬ä¸€ä¸ªå‚æ•°ï¼ˆå®ƒä¹Ÿå¿…é¡»æ˜¯å¯¹è±¡ï¼‰ä¸­ï¼Œ
-    //å¦‚æœåªæœ‰ä¸€ä¸ªå‚æ•°ï¼Œåˆ™åˆå¹¶åˆ°mixçš„è°ƒç”¨è€…ä¸Šï¼Œå¦‚æœæœ€åä¸€ä¸ªå‚æ•°æ˜¯å¸ƒå°”ï¼Œåˆ™ç”¨äºåˆ¤å®šæ˜¯å¦è¦†ç›–å·²æœ‰å±æ€§
+    //½«Ò»¸ö»ò¶à¸ö¶ÔÏóºÏ²¢µ½µÚÒ»¸ö²ÎÊı£¨ËüÒ²±ØĞëÊÇ¶ÔÏó£©ÖĞ£¬
+    //Èç¹ûÖ»ÓĞÒ»¸ö²ÎÊı£¬ÔòºÏ²¢µ½mixµÄµ÷ÓÃÕßÉÏ£¬Èç¹û×îºóÒ»¸ö²ÎÊıÊÇ²¼¶û£¬ÔòÓÃÓÚÅĞ¶¨ÊÇ·ñ¸²¸ÇÒÑÓĞÊôĞÔ
     function mix( receiver, supplier ){
-        var args = Array.apply([], arguments ),i = 1, key,//å¦‚æœæœ€åå‚æ•°æ˜¯å¸ƒå°”ï¼Œåˆ¤å®šæ˜¯å¦è¦†å†™åŒåå±æ€§
+        var args = Array.apply([], arguments ),i = 1, key,//Èç¹û×îºó²ÎÊıÊÇ²¼¶û£¬ÅĞ¶¨ÊÇ·ñ¸²Ğ´Í¬ÃûÊôĞÔ
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-        if(args.length === 1){//å¤„ç†$.mix(hash)çš„æƒ…å½¢
+        if(args.length === 1){//´¦Àí$.mix(hash)µÄÇéĞÎ
             receiver = !this.window ? this : {} ;
             i = 0;
         }
         while((supplier = args[i++])){
-            for ( key in supplier ) {//å…è®¸å¯¹è±¡ç³…æ‚ï¼Œç”¨æˆ·ä¿è¯éƒ½æ˜¯å¯¹è±¡
+            for ( key in supplier ) {//ÔÊĞí¶ÔÏóôÛÔÓ£¬ÓÃ»§±£Ö¤¶¼ÊÇ¶ÔÏó
                 if (supplier.hasOwnProperty(key) && (ride || !(key in receiver))) {
                     receiver[ key ] = supplier[ key ];
                 }
@@ -36,12 +36,12 @@
         return receiver;
     };
 
-    mix( $, {//ä¸ºæ­¤ç‰ˆæœ¬çš„å‘½åç©ºé—´å¯¹è±¡æ·»åŠ æˆå‘˜
+    mix( $, {//Îª´Ë°æ±¾µÄÃüÃû¿Õ¼ä¶ÔÏóÌí¼Ó³ÉÔ±
         rword: /[^, ]+/g,
         mix:  mix,
         "@debug" : true,
-        isWindows: process.platform === 'win32',//åˆ¤å®šå½“å‰å¹³å°æ˜¯å¦ä¸ºwindow
-        //å°†ç±»æ•°ç»„å¯¹è±¡è½¬æ¢æˆçœŸæ­£çš„æ•°ç»„ï¼Œå¹¶è¿›è¡Œåˆ‡ç‰‡æ“ä½œ(å¦‚æœç¬¬äºŒç¬¬ä¸‰å‚æ•°å­˜åœ¨çš„æƒ…å†µä¸‹)
+        isWindows: process.platform === 'win32',//ÅĞ¶¨µ±Ç°Æ½Ì¨ÊÇ·ñÎªwindow
+        //½«ÀàÊı×é¶ÔÏó×ª»»³ÉÕæÕıµÄÊı×é£¬²¢½øĞĞÇĞÆ¬²Ù×÷(Èç¹ûµÚ¶şµÚÈı²ÎÊı´æÔÚµÄÇé¿öÏÂ)
         slice: function ( nodes, start, end ) {
             var ret = [], n = nodes.length
             if(end === void 0 || typeof end == "number" && isFinite(end)){
@@ -65,7 +65,7 @@
         getUid:  function( node ){
             return node.uniqueNumber || ( node.uniqueNumber = uuid++ );
         },
-        // åˆ›å»ºä¸€ä¸ªå¯¹è±¡ï¼Œå…¶é”®å€¼éƒ½ä¸º1(å¦‚æœæ²¡æœ‰æŒ‡å®š)æˆ–ç¬¬äºŒä¸ªå‚æ•°ï¼Œç”¨äºç”¨äºé«˜é€ŸåŒ–åˆ¤å®š
+        // ´´½¨Ò»¸ö¶ÔÏó£¬Æä¼üÖµ¶¼Îª1(Èç¹ûÃ»ÓĞÖ¸¶¨)»òµÚ¶ş¸ö²ÎÊı£¬ÓÃÓÚÓÃÓÚ¸ßËÙ»¯ÅĞ¶¨
         oneObject: function(array, val){
             if(typeof array == "string"){
                 array = array.match($.rword) || [];
@@ -76,12 +76,12 @@
             }
             return result;
         },
-        // ç”¨äºå–å¾—æ•°æ®çš„ç±»å‹ï¼ˆä¸€ä¸ªå‚æ•°çš„æƒ…å†µä¸‹ï¼‰æˆ–åˆ¤å®šæ•°æ®çš„ç±»å‹ï¼ˆä¸¤ä¸ªå‚æ•°çš„æƒ…å†µä¸‹ï¼‰
+        // ÓÃÓÚÈ¡µÃÊı¾İµÄÀàĞÍ£¨Ò»¸ö²ÎÊıµÄÇé¿öÏÂ£©»òÅĞ¶¨Êı¾İµÄÀàĞÍ£¨Á½¸ö²ÎÊıµÄÇé¿öÏÂ£©
         type: function (obj, str){
             var result = class2type[ (obj == null || obj !== obj )? obj : toString.call(obj) ] || "#";
             if( result.charAt(0) === "#"){
                 if(Buffer.isBuffer(obj)){
-                    result = 'Buffer'; //è¿”å›æ„é€ å™¨åå­—
+                    result = 'Buffer'; //·µ»Ø¹¹ÔìÆ÷Ãû×Ö
                 }else{
                     result = toString.call(obj).slice(8,-1);
                 }
@@ -94,16 +94,16 @@
         md5: function(str, encoding){
             return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
         },
-        path: require("path"),//å°†åŸç”Ÿpathæ¨¡å—åŠ«æŒåˆ°å‘½åç©ºé—´ä¸­
-        //å®ƒçš„å†…å®¹ç”±app/configsæ¨¡å—æä¾›
+        path: require("path"),//½«Ô­ÉúpathÄ£¿é½Ù³Öµ½ÃüÃû¿Õ¼äÖĞ
+        //ËüµÄÄÚÈİÓÉapp/configsÄ£¿éÌá¹©
         configs: {
             intercepters:[]
         },
-        //æ¨¡å—åŠ è½½çš„å®šä¹‰å‡½æ•°
-        define: function( name, deps, factory ){//æ¨¡å—å,ä¾èµ–åˆ—è¡¨,æ¨¡å—æœ¬èº«
-        //è¿™é‡Œåªæ˜¯ä¸€ä¸ªç©ºæ¥å£
+        //Ä£¿é¼ÓÔØµÄ¶¨Òåº¯Êı
+        define: function( name, deps, factory ){//Ä£¿éÃû,ÒÀÀµÁĞ±í,Ä£¿é±¾Éí
+        //ÕâÀïÖ»ÊÇÒ»¸ö¿Õ½Ó¿Ú
         },
-        //æ¨¡å—åŠ è½½çš„è¯·æ±‚å‡½æ•°
+        //Ä£¿é¼ÓÔØµÄÇëÇóº¯Êı
         require: function( deps, factory, errback ){
             var _deps = {}, args = [], dn = 0, cn = 0;
             factory = typeof factory == "function" ? factory : $.noop;
@@ -113,29 +113,29 @@
                 }
                 dn++;
                 var match = str.match( rmodule );
-                var id  = "@"+ match[1];//æ¨¡å—çš„ID
-                var filename = match[2];//æ¨¡å—çš„URL
+                var id  = "@"+ match[1];//Ä£¿éµÄID
+                var filename = match[2];//Ä£¿éµÄURL
                 if(!filename){
                     id = id.replace(/\.js$/,"")
-                    filename = $.path.join( factory.parent || $.require.root, match[1] ); //path.joinä¼šè‡ªåŠ¨å¤„ç†../çš„æƒ…å†µ
+                    filename = $.path.join( factory.parent || $.require.root, match[1] ); //path.join»á×Ô¶¯´¦Àí../µÄÇé¿ö
                     filename = /\.js$/.test(filename) ? filename : filename +".js";
                 }
                 var input = id;
-                try{//å…ˆæŠŠå®ƒå½“æˆåŸç”Ÿæ¨¡å—è¿›è¡ŒåŠ è½½
-                    returns[ id ] = require( match[1] );//requireè‡ªèº«æ˜¯ç¼“å­˜è¯·æ±‚çš„
+                try{//ÏÈ°ÑËüµ±³ÉÔ­ÉúÄ£¿é½øĞĞ¼ÓÔØ
+                    returns[ id ] = require( match[1] );//require×ÔÉíÊÇ»º´æÇëÇóµÄ
                     mapper[ id ] = {
                         state : 2
                     }
-                    process.nextTick( $._checkDeps );//æ¯æˆåŠŸåŠ è½½ä¸€ä¸ªæ¨¡å—å°±è¿›è¡Œä¾èµ–æ£€æµ‹
+                    process.nextTick( $._checkDeps );//Ã¿³É¹¦¼ÓÔØÒ»¸öÄ£¿é¾Í½øĞĞÒÀÀµ¼ì²â
                 }catch(e){
                     input = filename
                 }
                 if( !_deps[ input ] ){
                     args.push( input );
-                    _deps[ input ] = "å¸å¾’æ­£ç¾";
+                    _deps[ input ] = "Ë¾Í½ÕıÃÀ";
                 }
-                if( input === filename &&  !mapper[ input ] ){ //é˜²æ­¢é‡å¤ç”ŸæˆèŠ‚ç‚¹ä¸è¯·æ±‚
-                    mapper[ input ] = {};//state: undefined, æœªå®‰è£…; 1 æ­£åœ¨å®‰è£…; 2 : å·²å®‰è£…
+                if( input === filename &&  !mapper[ input ] ){ //·ÀÖ¹ÖØ¸´Éú³É½ÚµãÓëÇëÇó
+                    mapper[ input ] = {};//state: undefined, Î´°²×°; 1 ÕıÔÚ°²×°; 2 : ÒÑ°²×°
                     loadJS( filename );
                 }else if( mapper[ input ].state === 2  ){
                     cn++;
@@ -143,22 +143,22 @@
             });
             var id = factory.id || "@cb"+ ( cbi++ ).toString(32);
             if( typeof errback == "function" ){
-                errorStack.push( errback );//å‹å…¥é”™è¯¯å †æ ˆ
+                errorStack.push( errback );//Ñ¹Èë´íÎó¶ÑÕ»
             }
             mapper[ id ] = mapper[ id ] || {}
-            $.mix( mapper[ id ], {//åˆ›å»ºæˆ–æ›´æ–°æ¨¡å—çš„çŠ¶æ€
+            $.mix( mapper[ id ], {//´´½¨»ò¸üĞÂÄ£¿éµÄ×´Ì¬
                 callback: factory,
                 id:       id,
                 deps:     _deps,
                 args:     args,
                 state:    1
             }, false);
-            //åœ¨æ­£å¸¸æƒ…å†µä¸‹æ¨¡å—åªèƒ½é€šè¿‡_checkDepsæ‰§è¡Œ
+            //ÔÚÕı³£Çé¿öÏÂÄ£¿éÖ»ÄÜÍ¨¹ı_checkDepsÖ´ĞĞ
             loadings.unshift( id );
             process.nextTick( $._checkDeps );
         },
 
-        //  æ¨¡å—åŠ è½½çš„æ£€æµ‹ä¾èµ–å‡½æ•°,å¦‚æœä¸€ä¸ªæ¨¡å—æ‰€ä¾èµ–çš„å…¶ä»–æ¨¡å—çš„çŠ¶æ€éƒ½æ˜¯2äº†,é‚£ä¹ˆå°†å®ƒä¹Ÿæ”¹æˆ2,å¹¶æ‰§è¡Œå›è°ƒ
+        //  Ä£¿é¼ÓÔØµÄ¼ì²âÒÀÀµº¯Êı,Èç¹ûÒ»¸öÄ£¿éËùÒÀÀµµÄÆäËûÄ£¿éµÄ×´Ì¬¶¼ÊÇ2ÁË,ÄÇÃ´½«ËüÒ²¸Ä³É2,²¢Ö´ĞĞ»Øµ÷
         _checkDeps: function (){
             loop:
             for ( var i = loadings.length, filename; filename = loadings[ --i ]; ) {
@@ -168,64 +168,64 @@
                         continue loop;
                     }
                 }
-                //å¦‚æœdepsæ˜¯ç©ºå¯¹è±¡æˆ–è€…å…¶ä¾èµ–çš„æ¨¡å—çš„çŠ¶æ€éƒ½æ˜¯2
+                //Èç¹ûdepsÊÇ¿Õ¶ÔÏó»òÕßÆäÒÀÀµµÄÄ£¿éµÄ×´Ì¬¶¼ÊÇ2
                 if( obj.state !== 2){
-                    loadings.splice( i, 1 );//å¿…é¡»å…ˆç§»é™¤å†å®‰è£…ï¼Œé˜²æ­¢åœ¨IEä¸‹DOMæ ‘å»ºå®Œåæ‰‹åŠ¨åˆ·æ–°é¡µé¢ï¼Œä¼šå¤šæ¬¡æ‰§è¡Œå®ƒ
+                    loadings.splice( i, 1 );//±ØĞëÏÈÒÆ³ıÔÙ°²×°£¬·ÀÖ¹ÔÚIEÏÂDOMÊ÷½¨ÍêºóÊÖ¶¯Ë¢ĞÂÒ³Ãæ£¬»á¶à´ÎÖ´ĞĞËü
                     obj.state = 2 ;
                     var  id = obj.id;
                     var  ret = collect_rets( id, obj.args ||[], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
-                        //   $.log('<code style="color:cyan;">å·²åŠ è½½', id, 'æ¨¡å—</code>', true);
+                        //   $.log('<code style="color:cyan;">ÒÑ¼ÓÔØ', id, 'Ä£¿é</code>', true);
                         $._checkDeps();
                     }
                 }
             }
         }
     });
-    //æŠŠæ¨¡å—æœ‰å…³ä¿¡æ¯éƒ½å­˜æ”¾åœ¨è¿™é‡Œ
+    //°ÑÄ£¿éÓĞ¹ØĞÅÏ¢¶¼´æ·ÅÔÚÕâÀï
     var mapper = $.require.cache = {}
-    //æ¨¡å—åŠ è½½çš„æ ¹è·¯å¾„,é»˜è®¤æ˜¯mass.jsç§å­æ¨¡å—æ‰€åœ¨çš„ç›®å½•
+    //Ä£¿é¼ÓÔØµÄ¸ùÂ·¾¶,Ä¬ÈÏÊÇmass.jsÖÖ×ÓÄ£¿éËùÔÚµÄÄ¿Â¼
     $.require.root = process.cwd();
-    //ä»returnså¯¹è±¡å–å¾—ä¾èµ–åˆ—è¡¨ä¸­çš„å„æ¨¡å—çš„è¿”å›å€¼
+    //´Óreturns¶ÔÏóÈ¡µÃÒÀÀµÁĞ±íÖĞµÄ¸÷Ä£¿éµÄ·µ»ØÖµ
     function collect_rets( name, args, fn ){
         for(var i = 0, argv = []; i < args.length ; i++){
             argv.push( returns[ args[i] ] );
         }
-        var ret = fn.apply( null, argv );//æ‰§è¡Œæ¨¡å—å·¥å‚ï¼Œç„¶åæŠŠè¿”å›å€¼æ”¾åˆ°returnså¯¹è±¡ä¸­
-        $.debug( name );//æƒ³åŠæ³•å–å¾—å‡½æ³•ä¸­çš„exportså¯¹è±¡
+        var ret = fn.apply( null, argv );//Ö´ĞĞÄ£¿é¹¤³§£¬È»ºó°Ñ·µ»ØÖµ·Åµ½returns¶ÔÏóÖĞ
+        $.debug( name );//Ïë°ì·¨È¡µÃº¯·¨ÖĞµÄexports¶ÔÏó
         return ret;
     }
     $.parseQuery = require("querystring").parse;
-    $.parseUrl = require("url").parse; //å°†åŸç”ŸURLæ¨¡å—çš„parseåŠ«æŒä¸‹æ¥
-    $.noop = $.error = $.debug = function(){};//error, debugç°åœ¨è¿˜æ˜¯ç©ºæ¥å£
+    $.parseUrl = require("url").parse; //½«Ô­ÉúURLÄ£¿éµÄparse½Ù³ÖÏÂÀ´
+    $.noop = $.error = $.debug = function(){};//error, debugÏÖÔÚ»¹ÊÇ¿Õ½Ó¿Ú
 
-    //æ¨¡å—åŠ è½½çš„åŠ è½½å‡½æ•°
+    //Ä£¿é¼ÓÔØµÄ¼ÓÔØº¯Êı
     function loadJS(  filename ){
         try{
-            $.define = function(){//è¯¡å˜çš„$.define
+            $.define = function(){//¹î±äµÄ$.define
                 var args = Array.apply([],arguments);
-                if( typeof args[1] === "function" ){//å¤„ç†åªæœ‰ä¸¤ä¸ªå‚æ•°çš„æƒ…å†µ
+                if( typeof args[1] === "function" ){//´¦ÀíÖ»ÓĞÁ½¸ö²ÎÊıµÄÇé¿ö
                     [].splice.call( args, 1, 0, "" );
                 }
-                args[2].id = filename; //æ¨¡å—å
-                args[2].parent =  filename.slice(0, filename.lastIndexOf( $.path.sep ) + 1) //å–å¾—çˆ¶æ¨¡å—çš„æ–‡ä»¶å¤¹
+                args[2].id = filename; //Ä£¿éÃû
+                args[2].parent =  filename.slice(0, filename.lastIndexOf( $.path.sep ) + 1) //È¡µÃ¸¸Ä£¿éµÄÎÄ¼ş¼Ğ
                 mapper[ filename ].state = 1;
-                process.nextTick( $._checkDeps );//æ¯æˆåŠŸåŠ è½½ä¸€ä¸ªæ¨¡å—å°±è¿›è¡Œä¾èµ–æ£€æµ‹
+                process.nextTick( $._checkDeps );//Ã¿³É¹¦¼ÓÔØÒ»¸öÄ£¿é¾Í½øĞĞÒÀÀµ¼ì²â
                 $.require( args[1], args[2] );
             }
             require( filename );
         }catch( e ){
             $.log("<code style='color:red'>",e , "</code>", true);
             for(var fn; fn = errorStack.shift(); ){
-                fn();//æ‰“å°é”™è¯¯å †æ ˆ
+                fn();//´òÓ¡´íÎó¶ÑÕ»
             }
         }
     }
 
-    //ç”¨äºæ¨¡å—åŠ è½½å¤±è´¥æ—¶çš„é”™è¯¯å›è°ƒ
+    //ÓÃÓÚÄ£¿é¼ÓÔØÊ§°ÜÊ±µÄ´íÎó»Øµ÷
     var errorStack = [];
-    //å®ç°æ¼‚äº®çš„äº”é¢œå…­è‰²çš„æ—¥å¿—æ‰“å°
+    //ÊµÏÖÆ¯ÁÁµÄÎåÑÕÁùÉ«µÄÈÕÖ¾´òÓ¡
     new function(){
         var rformat = /<code\s+style=(['"])(.*?)\1\s*>([\d\D]+?)<\/code>/ig
         , colors = {}
@@ -245,10 +245,10 @@
             return '\x1b[' + arr[0] + 'm' + str + '\x1b[' + arr[1] + 'm';
         }
         /**
-         * ç”¨äºè°ƒè¯•
-         * @param {String} s è¦æ‰“å°çš„å†…å®¹
-         * @param {Boolean} color è¿›è¡Œå„ç§é¢œè‰²çš„é«˜äº®ï¼Œä½¿ç”¨<code style="format:blod;color:red;background:green">
-         * formatçš„å€¼å¯ä»¥ä¸ºformatsä¸­äº”ä¸ªä¹‹ä¸€æˆ–å®ƒä»¬çš„ç»„åˆï¼ˆä»¥ç©ºæ ¼éš”å¼€ï¼‰ï¼ŒèƒŒæ™¯è‰²ä¸å­—ä½“è‰²åªèƒ½ä¸ºcolorsä¹‹ä¸€
+         * ÓÃÓÚµ÷ÊÔ
+         * @param {String} s Òª´òÓ¡µÄÄÚÈİ
+         * @param {Boolean} color ½øĞĞ¸÷ÖÖÑÕÉ«µÄ¸ßÁÁ£¬Ê¹ÓÃ<code style="format:blod;color:red;background:green">
+         * formatµÄÖµ¿ÉÒÔÎªformatsÖĞÎå¸öÖ®Ò»»òËüÃÇµÄ×éºÏ£¨ÒÔ¿Õ¸ñ¸ô¿ª£©£¬±³¾°É«Óë×ÖÌåÉ«Ö»ÄÜÎªcolorsÖ®Ò»
          */
         $.log = function (s, color){
             var args = Array.apply([],arguments);
@@ -286,29 +286,34 @@
         }
     }
 
-    //æš´éœ²åˆ°å…¨å±€ä½œç”¨åŸŸä¸‹,æ‰€æœ‰æ¨¡å—å¯è§!!
+    //±©Â¶µ½È«¾Ö×÷ÓÃÓòÏÂ,ËùÓĞÄ£¿é¿É¼û!!
     exports.$ = global.$ = $;
-    $.log("<code style='color:green'>åç«¯massæ¡†æ¶</code>",true);
+    $.log("<code style='color:green'>ºó¶Ëmass¿ò¼Ü</code>",true);
 
-    //ç”Ÿæˆmass frameworkæ‰€éœ€è¦çš„é¡µé¢
+    //Éú³Émass frameworkËùĞèÒªµÄÒ³Ãæ
     $.require("system/page_generate");
     
  $.require("system/deploy,system/mvc", function(deploy){
-        deploy(  process.cwd() );//ç›‘å¬appç›®å½•ä¸‹æ–‡ä»¶çš„å˜åŒ–,å®ç°çƒ­å¯åŠ¨
+        deploy(  process.cwd() );//¼àÌıappÄ¿Â¼ÏÂÎÄ¼şµÄ±ä»¯,ÊµÏÖÈÈÆô¶¯
     });
-//http://localhost:8888/index.html
-//C:\mongodb\bin\mongod.exe
-//ç°åœ¨æˆ‘çš„é¦–è¦ä»»åŠ¡æ˜¯åœ¨ç“¦é›·åˆ©äºšçš„æµ·æ»©ä¸Šå»ºç«‹ä¸€ä¸ªå°æ¸”æ‘
+
+//°²×°¹ı³Ì:
+//°²×°Êı¾İ¿â http://www.mongodb.org/downloads,ÏÂÔØ»ØÀ´·Åµ½CÅÌ½âÑ¹,¸ÄÃûÎªmongodb
+//ÔÚCÅÌÏÂ½¨dataÄ¿Â¼,ÀïÃæÔÙ½¨dbÄ¿Â¼
+//Æô¶¯mongoÊı¾İ¿â  C:\mongodb\bin\mongod.exe
+//ÔÚ¿ò¼Ümass.jsµÄËùÔÚÄ¿Â¼°²×°mongodbµÄnode.jsÁ¬½Ó¿ânpm install mongodb
+//Èç¹ûnpm°²×°Ê§°Ü¿ÉÒÔÊÇ±»Ç½,¸ÄÓÃ@Python·¢ÉÕÓÑ Ìá¹©µÄ´úÀí npm --registry http://42.121.86.107:1984 install mongodb
+//Æô¶¯¿ò¼Ü node mass
+
+//ÏÖÔÚÎÒµÄÊ×ÒªÈÎÎñÊÇÔÚÍßÀ×ÀûÑÇµÄº£Ì²ÉÏ½¨Á¢Ò»¸öĞ¡Óæ´å
 
 
 })();
-//æ¡†æ¶è¦ç”¨åˆ°mongoæ•°æ®åº“ï¼Œmongoæ•°æ®åº“çš„å®‰è£…è§è¿™é‡Œ
-////å¿…é¡»è¦å°†mongodbå®‰è£…åœ¨å½“å‰ç›®å½•ä¸‹
-//mongoçš„node.jsæ•°æ®åº“è¿æ¥åº“å®‰è£…è¦ç”¨NPM: npm --registry http://42.121.86.107:1984 install mongoose
-//https://github.com/codeparty/derby/blob/master/lib/View.js åˆ›å»ºè§†å›¾çš„æ¨¡å—
-//2011.12.17 $.defineå†ä¹Ÿä¸ç”¨æŒ‡å®šæ¨¡å—æ‰€åœ¨çš„ç›®å½•äº†,
-//2012.7.12 é‡æ–°å¼€å§‹æåç«¯æ¡†æ¶
-//2012.8.9  æ·»åŠ parseUrl, parseQuery API
-//ä¸¤ä¸ªæ–‡ä»¶è§‚å¯Ÿè€…https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
-//ä¸€ä¸ªå¾ˆå¥½çš„å‰ç«¯å·¥å…· https://github.com/colorhook/att
+
+//https://github.com/codeparty/derby/blob/master/lib/View.js ´´½¨ÊÓÍ¼µÄÄ£¿é
+//2011.12.17 $.defineÔÙÒ²²»ÓÃÖ¸¶¨Ä£¿éËùÔÚµÄÄ¿Â¼ÁË,
+//2012.7.12 ÖØĞÂ¿ªÊ¼¸ãºó¶Ë¿ò¼Ü
+//2012.8.9  Ìí¼ÓparseUrl, parseQuery API
+//Á½¸öÎÄ¼ş¹Û²ìÕßhttps://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
+//Ò»¸öºÜºÃµÄÇ°¶Ë¹¤¾ß https://github.com/colorhook/att
 //http://blog.csdn.net/dojotoolkit/article/details/7820321
