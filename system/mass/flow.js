@@ -2,10 +2,23 @@
 //  操作流模块v2,用于流程控制
 //==========================================
 $.define("flow","class",function(){//~表示省略，说明lang模块与flow模块在同一目录
+    var uuid_arr =  '0123456789ABCDEFG'.split('');
     return $.Flow = $.factory({
         init: function(){
             this.root = {};//数据共享,但策略自定
-            this.uuid = $.getUid({})
+            this._id = this._id || this.uuid()
+        },
+        uuid: function(){
+            var  uuid = [], r, i = 36;
+            uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+            uuid[14] = '4';
+            while (i--) {
+                if (!uuid[i]) {
+                    r = Math.random()*16|0;
+                    uuid[i] = uuid_arr[(i == 19) ? (r & 0x3) | 0x8 : r];
+                }
+            }
+            return uuid.join('');
         },
         /**
         names 可以为数组，用逗号作为分隔符的字符串，callback是回调函数，reload，布尔，可选，决定最后回调的第二次触发的条件
@@ -80,12 +93,12 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
                     return String(fn.args.sort()).indexOf(sorted) > -1
                 })
             }
-            if($.type(opts.match,"RegExp")){
+            if( $.type( opts.match,"RegExp" ) ){
                 var reg = opts.match;
                 callbacks = callbacks.filter(function(fn){
                     for(var i = 0, n = fn.args.length; i < n ;i++){
                         var name = fn.args[i].slice(2);
-                        if(reg.test(name)){
+                        if( reg.test( name ) ){
                             return true;
                         }
                     }
@@ -94,8 +107,8 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             }
             return callbacks;
         },
-        append: function(names, name){
-            var callback = this.find(names);
+        append: function( names, name ){
+            var callback = this.find( names );
             var root = this.root
             name = "__"+name;
             callback.forEach(function(fn){
@@ -180,7 +193,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
                 try{
                     this.fire.apply(this, arguments);
                 }catch(e){
-                    this.fire( "__error__", e);//如果发生异常，抛出500错误
+                    this.fire( "error_" + this._id, e);//如果发生异常，抛出500错误
                 }
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {
@@ -207,6 +220,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
  2012.6.8 对fire的传参进行处理
  2012.7.13 使用新式的相对路径依赖模块
  2012.8.14 添加find append reduce三个方法，随意增删某一个步骤
+ 2012.8.17 添加uuid方法
  一个简单的例子
  $.require("flow", function(){
                 var node = new $.Flow();
