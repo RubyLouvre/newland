@@ -6,7 +6,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
     return $.Flow = $.factory({
         init: function(){
             this.root = {};//数据共享,但策略自定
-            this._id = this._id || this.uuid()
+            this.id = this.id || this.uuid()
         },
         uuid: function(){
             var  uuid = [], r, i = 36;
@@ -193,7 +193,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
                 try{
                     this.fire.apply(this, arguments);
                 }catch(e){
-                    this.fire( "error_" + this._id, e);//如果发生异常，抛出500错误
+                    this.fire( "error_" + this.id, e);//如果发生异常，抛出500错误
                 }
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {
