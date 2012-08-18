@@ -1,24 +1,30 @@
-$.define("cookie", function(){
+$.define("cookie","crypto", function(crypto){
     var encode = encodeURIComponent;
     var decode = decodeURIComponent;
-    /// serialize('foo', 'bar', { httpOnly: true })
-    ///   => "foo=bar; httpOnly"
+    // serialize('foo', 'bar', { httpOnly: true })  => "foo=bar; httpOnly"
     //将两个字符串变成一个cookie字段
-    var serialize = function(name, val, opt){
+    var serialize = function(name, val, opts){
         var pairs = [name + '=' + encode(val)];
-        if( isFinite( $.type( opt ) ) ){
-            var expires = new Date(new Date * 1 +  Cookie.expires );
-            pairs.push('Expires=' + expires.toUTCString());
+        if( isFinite( opts ) && $.type( opts, "Number" ) ){
+            pairs.push('Max-Age=' + opts );
         }else{
-            opt = opt || {};
-            if (opt.maxAge) pairs.push('Max-Age=' + opt.maxAge);
-            if (opt.domain) pairs.push('Domain=' + opt.domain);
-            if (opt.path) pairs.push('Path=' + opt.path);
-            if (opt.expires) pairs.push('Expires=' + opt.expires.toUTCString());
-            if (opt.httpOnly) pairs.push('HttpOnly');
-            if (opt.secure) pairs.push('Secure');
-        }
-        
+            opts = opts || {};
+            if( opts.secret ){//添加加密支持
+                var timestamp = Date.now();
+                var hmac_sig = getHmac(true, timestamp, val);
+                var data = hmac_sig + timestamp + val;
+                if( data > 4096 ){
+                    throw  new Error('data too long to store in a cookie');
+                }
+                pairs = [name + '=' + encode(data)];
+            }
+            if (opts.maxAge) pairs.push('Max-Age=' + opts.maxAge);
+            if (opts.domain) pairs.push('Domain=' + opts.domain);
+            if (opts.path) pairs.push('Path=' + opts.path);
+            if (opts.expires) pairs.push('Expires=' + opts.expires.toUTCString());
+            if (opts.httpOnly) pairs.push('HttpOnly');
+            if (opts.secure) pairs.push('Secure');
+        } 
         return pairs.join('; ');
     };
     //将一段字符串变成对象
@@ -38,46 +44,60 @@ $.define("cookie", function(){
         });
         return obj;
     };
-    function Cookie (cookie){
-        this._resCookies = [];
-        this._reqCookies = $.parseQuery(cookie, '; ');
+
+    //使用 高级加密标准AES-192进行加密
+    var encrypt = function(secret, str){
+        var cipher = crypto.createCipher("aes192", secret);
+        return cipher.update(str, 'utf8', 'hex') + cipher.final('hex');
     }
-    Cookie.expires = 60 * 60 * 24
-    Cookie.parse = parse;
-    Cookie.serialize = serialize;
-    Cookie.prototype = {
-        //取得请求中的cookie对象或它的某一个键值
-        get: function (key){
-            var obj =  this._reqCookies
-            return typeof key === "string" ? obj[key] : obj
-        },
-        //通过Set-Cookie首头移除客户端的cookie
-        remove: function(name){
-            var ret = [];
-            var array = this._resCookies
-            for(var i = 0; i < array.length; i++){
-                var el = array[i]
-                if(el && el.split("=")[0] !== name){
-                    ret.push(el)
-                }
-            }
-            ret[ret.length] =  serialize(name, "", {
-                expires: new Date(0)
-            });
-            this._resCookies = ret;
-        },
-        //为响应给客户端的cookie数组添加一个键值
-        set: function (name, val, opt){
-            var ret = serialize(name, val, opt);
-            var array = this._resCookies
-            for (var i =  array.length; i >=0 ;i--) {
-                var el = array[i];
-                if( el && el.split("=")[0] == name){
-                    array.splice(i, 1);
-                }
-            }
-            this._resCookies.push(ret);
+    //使用 高级加密标准AES-192进行解密
+    var decrypt = function(secret, str){//解密aes192
+        var decipher = crypto.createDecipher("aes192", secret);
+        return decipher.update(str, 'hex', 'utf8') + decipher.final('utf8');
+    }
+    var getHmac = function(secret, timestamp, data){
+        // Generates a HMAC for the timestamped data, returning the
+        // hex digest for the signature.
+        var hmac = crypto.createHmac('sha1', secret);
+        hmac.update(timestamp + data);
+        return hmac.digest('hex');
+    };
+    // Splits a cookie string into hmac signature, timestamp and data blob.
+    var splitHmac = function(str){
+        return {
+            hmac_signature: str.slice(0,40),
+            timestamp: parseInt(str.slice(40, 53), 10),
+            data_blob: str.slice(53)
+        };
+    }
+    var validHmac = function(secret, timeout, str){
+        // Tests the validity of a cookie string. Returns true if the HMAC
+        // signature of the secret, timestamp and data blob matches the HMAC in the
+        // cookie string, and the cookie's age is less than the timeout value.
+        var parts = splitHmac(str);
+        var hmac_sig = getHmac( secret, parts.timestamp, parts.data_blob  );
+        return  parts.hmac_signature === hmac_sig && parts.timestamp + timeout > Date.now()
+    }
+
+    var deserialize = function(secret, timeout, str){//解密
+        // Parses a secure cookie string, returning the object stored within it.
+        // Throws an exception if the secure cookie string does not validate.
+        if(!validHmac(secret, timeout, str)){
+            return null
         }
+        var data = decrypt(secret, splitHmac(str).data_blob);
+        return JSON.parse(data);
+    };
+
+    return {
+        deserialize: deserialize,
+        encrypt: encrypt,
+        decrypt: decrypt,
+        splitHmac: splitHmac,
+        validHmac: validHmac,
+        parse: parse,
+        serialize: serialize
     }
-    return Cookie;
+
 })
+//2012.8.19  全新cookie工具类,添加大量加密解密函数
