@@ -20,11 +20,72 @@ $.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_help
         "xml": "text/xml",
         'manifest': 'text/cache-manifest'
     };
+
+    var Store = function(flow){
+        this.flow = flow;
+        var session = this;
+        //如果没有打开open操作,此四方法只是用于保存参数
+        String("set,get,remove,close").replace($.rword, function(name){
+            session[ "_" + name ] = [];
+            session[ name ] = function(){
+                session[ "_" + name ].push(  arguments );
+            }
+        });
+        //set,get,remove,clear等事件必须在open操作之后才能执行!
+        flow.bind("open_session_"+flow.id, function( ){
+            String("set,get,remove,close").replace($.rword, function(name){
+                delete session[ name ];//露出原始的原型方法
+                var array = session[ "_" + name ];
+                for(var args; args = array.shift();){
+                    session[ name ].apply( session, args )
+                }
+            });
+        });
+    }
+    Store.prototype = {
+        //每次操作都延长一段时间
+        get: function (key){
+            this.timestamp = Date.now() + this.life;
+            return this.data[ key ];
+        },
+        set: function (key, val){
+            this.timestamp = Date.now() + this.life;
+            this.data[key] = val;
+        },
+        remove: function (key){
+            this.timestamp = Date.now() + this.life;
+            delete this.data[key];
+        },
+        close: function (){
+            this.data = {};
+        },
+        open: function( data, life ){
+            this.data = data;
+            this.life = life;
+            this.flow.fire("open_session_"+ this.flow.id)
+        }
+    }
+    
     HttpFlow = $.factory({
         init: function(){
             this.helper = make_helper()
         },
         inherit: $.Flow,
+        //为flow添加一系列属性,并重写res.writeHead
+        patch: function(req, res){
+            this.res =  res;
+            this.req =  req;
+            this.originalUrl = req.url;
+            this.params = {};
+            this.session = new Store(flow)
+            var flow = this;
+            var writeHead = res.writeHead;
+            res.writeHead = function(){
+                flow.fire('header');
+                writeHead.apply(this, arguments);
+                this.writeHead = writeHead;//还原
+            }
+        },
         content_type: function( name ){
             return type_mine[ name ]
         },
