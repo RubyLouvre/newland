@@ -1,7 +1,5 @@
 $.define("mvc", "httpflow, http, system",function( Flow, http ){
     $.log("已加载MVC模块")
-    $.memory = {}
-
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
     "get_layout","500","send_error","session", "timeout","get_less"]
@@ -35,14 +33,11 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
     function resource_ready(services){
         http.createServer(function(req, res) {
             var flow = new Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接
-            flow.res =  res;
-            flow.req =  req;
-            flow.params = {};
+            flow.patch(req, res)
             services.forEach(function(fn){
                 fn(flow);//将拦截器绑到流程对象上
             });
             if(req.method == "POST"){
-                // POSTs may be overridden by the _method param
                 var buf = "";//收集post请求的参数
                 req.setEncoding('utf8');
                 function buildBuffer(chunk){
@@ -101,13 +96,10 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
         }
     }
 
-
-
-
 })
+//2012.8.19 使用httpflow.pacth方法节省代码量
 
-
-    /*
+/*
  用cookie在本地传输数据
 
 最近在研究如何测试网页的加载速度，发现了一个html5有一个叫performance的类可以获取诸如网络延迟，页面加载以及onload event处理时间等信息。
@@ -154,4 +146,4 @@ http://substack.net/
     //提供了组件(component)、模板(layout)、过滤器(filter)、路由(router)、类自动加载(class autoload)、
     //http://code.google.com/p/raremvc/
     //静态资源按需加载、框架核心函数钩子(hook)，让代码更容易共用，使用更加方便!
-     */
+ */
