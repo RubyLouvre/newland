@@ -89,18 +89,18 @@ $.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_help
         content_type: function( name ){
             return type_mine[ name ]
         },
-        addCookie: function(name,val, opt){
-            var res = this.res;
-            var cookie = this.cookie || new cookie(this.req)
-            cookie.set(name, val, opt);
-            res.setHeader("Set-Cookie",cookie._resCookies)
-        },
-        removeCookie: function(name){
-            var res = this.res;
-            var cookie = this.cookie || new cookie(this.req);
-            cookie.remove(name);
-            res.setHeader("Set-Cookie",cookie._resCookies)
-        },
+//        addCookie: function(name,val, opt){
+//            var res = this.res;
+//            var cookie = this.cookie || new cookie(this.req)
+//            cookie.set(name, val, opt);
+//            res.setHeader("Set-Cookie",cookie._resCookies)
+//        },
+//        removeCookie: function(name){
+//            var res = this.res;
+//            var cookie = this.cookie || new cookie(this.req);
+//            cookie.remove(name);
+//            res.setHeader("Set-Cookie",cookie._resCookies)
+//        },
         //Content-Type 相当于content-type
         get: function(name){
             var headers = this.req.headers || {}
@@ -138,4 +138,5 @@ $.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_help
     })
     return HttpFlow
 
-})
+});
+//2012.8.19 httpflow添加一个patch的打补丁方法，用于添加一系列属性与重写res.whiteHeader方法，添加一强大的储存对象
