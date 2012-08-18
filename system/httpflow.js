@@ -1,4 +1,4 @@
-$.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_helper,cookie ){
+$.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_helper,Cookie ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
@@ -77,30 +77,53 @@ $.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_help
             this.req =  req;
             this.originalUrl = req.url;
             this.params = {};
+            this.resCookies = {};
             this.session = new Store(flow)
             var flow = this;
             var writeHead = res.writeHead;
+            var setHeader = res.setHeader;
             res.writeHead = function(){
                 flow.fire('header');
                 writeHead.apply(this, arguments);
                 this.writeHead = writeHead;//还原
             }
+            res.setHeader = function(field, val){
+                var key = field.toLowerCase()
+                if ( 'set-cookie' == key ) {
+                    var array = typeof val == "string" ? [val] : val;
+                    array.forEach(function(str){
+                        var arr =  str.split("=");
+                        flow.addCookie(arr[0], arr[1])
+                    })
+                } else{
+                    if ('content-type' == key && this.charset) {
+                        val += '; charset=' + this.charset;
+                    }
+                    setHeader.call(this, field, val);
+                }
+            }
         },
         content_type: function( name ){
             return type_mine[ name ]
         },
-//        addCookie: function(name,val, opt){
-//            var res = this.res;
-//            var cookie = this.cookie || new cookie(this.req)
-//            cookie.set(name, val, opt);
-//            res.setHeader("Set-Cookie",cookie._resCookies)
-//        },
-//        removeCookie: function(name){
-//            var res = this.res;
-//            var cookie = this.cookie || new cookie(this.req);
-//            cookie.remove(name);
-//            res.setHeader("Set-Cookie",cookie._resCookies)
-//        },
+        addCookie: function(name, val, opt){
+            if(!this.resCookies){
+                this.resCookies[name] = [val, opt]
+                this.bind("header", function(){
+                    var array = []
+                    for(var i in this.resCookies){
+                        var arr = this.resCookies[i];
+                        array.push( Cookie.serialize(i, arr[0], arr[i] ) )
+                    }
+                    this.res.setHeader("Set-Cookie",array)
+                })
+            }else{
+                this.resCookies[name] = [val, opt]
+            }
+        },
+        removeCookie: function(name){
+            this.addCookie(name,"",-1)
+        },
         //Content-Type 相当于content-type
         get: function(name){
             var headers = this.req.headers || {}
@@ -108,7 +131,7 @@ $.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_help
                 case 'referer':
                 case 'referrer':
                     return headers.referrer
-                    || headers.referer;
+                        || headers.referer;
                 default:
                     return headers[ name ];
             }
@@ -139,4 +162,5 @@ $.define("httpflow","helper,cookie,mass/flow,mass/more/ejs", function( make_help
     return HttpFlow
 
 });
-//2012.8.19 httpflow添加一个patch的打补丁方法，用于添加一系列属性与重写res.whiteHeader方法，添加一强大的储存对象
+//2012.8.18 httpflow添加一个patch的打补丁方法，用于添加一系列属性与重写res.whiteHeader方法，添加一强大的储存对象
+//2012.8.19 重构addCookie,removeCookie,并劫持res.setHeader方法
