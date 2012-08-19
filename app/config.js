@@ -15,36 +15,19 @@ $.define("configs", function(){
         maxAge: 60*60*24*365,
         //默认session配置,如果没有,则不使用session
         session: {
-            store: 'mongodb',
+            type: "memory",
             sid:   "mass_sid",
-            host:  "localhost",
-            port:  27017,
-            db:    "sessionDB",
             table: "sessions",
             life: 14 * 24 * 60 * 60
         },
-
-        db:{
-            development:{
-                driver:   "mongodb",
-                host:     "localhost",
-                database: "cms-dev"
-            },
-            test: {
-                driver:   "mongodb" ,
-                host:     "localhost",
-                database: "cms-test"
-            } ,
-            staging:{
-                driver:   "mongodb",
-                host:     "localhost",
-                database: "cms-staging"
-            },
-            production:{
-                driver:   "mongodb" ,
-                host:     "localhost" ,
-                database: "cms-production"
-            }
+        cookie: {
+            path: "/",
+            life: 14 * 24 * 60 * 60
+        },
+        db: {
+            name: "mongodb",
+            host:  "localhost",
+            port:  27017
         }
     }
 })
