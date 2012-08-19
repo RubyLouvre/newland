@@ -21,63 +21,86 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         'manifest': 'text/cache-manifest'
     };
     //为flow添加一个session成员,它拥有set, get, remove, close
+    //    var Store = function(flow){
+    //        this.flow = flow;
+    //        var session = this;
+    //        //如果没有打开open操作,此四方法只是用于保存参数
+    //        String("set,get,remove,close").replace($.rword, function(name){
+    //            session[ "_" + name ] = [];
+    //            session[ name ] = function(){
+    //                session[ "_" + name ].push(  arguments );
+    //            }
+    //        });
+    //        //set,get,remove,clear等事件必须在open操作之后才能执行!
+    //        flow.bind("open_session_"+flow.id, function( ){
+    //            String("set,get,remove,close").replace($.rword, function(name){
+    //                delete session[ name ];//露出原始的原型方法
+    //                var array = session[ "_" + name ];
+    //                for(var args; args = array.shift();){
+    //                    session[ name ].apply( session, args )
+    //                }
+    //            });
+    //        });
+    //    }
+    //    Store.prototype = {
+    //        //每次操作都延长一段时间
+    //        get: function (key){
+    //            this.timestamp = Date.now() + this.life;
+    //            if(typeof key == "function"){
+    //                return key.call(this.data)
+    //            }
+    //            return this.data[ key ];
+    //        },
+    //        set: function (key, val){
+    //            this.timestamp = Date.now() + this.life;
+    //            if(typeof key == "function"){
+    //                return key.call(this.data)
+    //            }else{
+    //                this.data[key] = val;
+    //            }
+    //        },
+    //        remove: function (key){
+    //            this.timestamp = Date.now() + this.life;
+    //            if(typeof key == "function"){
+    //                return key.call(this.data)
+    //            }else{
+    //                delete this.data[key];
+    //            }
+    //
+    //        },
+    //        close: function (){
+    //            this.data = {};
+    //        },
+    //        open: function( data, life ){
+    //            this.data = data;
+    //            this.life = life;
+    //            console.log("open_session")
+    //           console.log( this.flow.find("goto_action") )
+    //            this.flow.fire("open_session_"+ this.flow.id)
+    //        }
+    //    }
+
+
     var Store = function(flow){
+        this.mtime = Date.now()
         this.flow = flow;
-        var session = this;
-        //如果没有打开open操作,此四方法只是用于保存参数
-        String("set,get,remove,close").replace($.rword, function(name){
-            session[ "_" + name ] = [];
-            session[ name ] = function(){
-                session[ "_" + name ].push(  arguments );
-            }
-        });
-        //set,get,remove,clear等事件必须在open操作之后才能执行!
-        flow.bind("open_session_"+flow.id, function( ){
-            String("set,get,remove,close").replace($.rword, function(name){
-                delete session[ name ];//露出原始的原型方法
-                var array = session[ "_" + name ];
-                for(var args; args = array.shift();){
-                    session[ name ].apply( session, args )
-                }
-            });
-        });
     }
     Store.prototype = {
-        //每次操作都延长一段时间
-        get: function (key){
-            this.timestamp = Date.now() + this.life;
-            if(typeof key == "function"){
-                return key.call(this.data)
-            }
-            return this.data[ key ];
-        },
-        set: function (key, val){
-            this.timestamp = Date.now() + this.life;
-            if(typeof key == "function"){
-                return key.call(this.data)
-            }else{
-                this.data[key] = val;
-            }
-        },
-        remove: function (key){
-            this.timestamp = Date.now() + this.life;
-            if(typeof key == "function"){
-                return key.call(this.data)
-            }else{
-                delete this.data[key];
-            }
-           
-        },
-        close: function (){
-            this.data = {};
-        },
-        open: function( data, life ){
-            this.data = data;
+        open: function(sid, life, data){
             this.life = life;
-            console.log("open_session")
-            this.flow.fire("open_session_"+ this.flow.id)
+            this.sid  = sid;
+            this.flow.fire("open_session")
+            this.flow.session = this.data = data;
+            this.mtime = Date.now() + life;
+            var self = this;
+            this.flow.bind("end", function(){
+                self.mtime = Date.now() + self.life; //重设mtime;
+                delete self.flow;
+                $.memory[ self.sid ] = self; //将它放进$.memory,等待清理
+            })
         }
     }
+
     
     HttpFlow = $.factory({
         init: function(){
@@ -91,7 +114,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             this.originalUrl = req.url;
             this.params = {};
             this.type = "html"
-            this.session = new Store(this)
+            this.store = new Store(this)
             this.flash =  function(type, msg){
                 switch(arguments.length){
                     case 2:
@@ -129,6 +152,11 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
                 writeHead.apply(this, arguments);
                 this.writeHead = writeHead;//还原
             }
+            var end = res.end;
+            res.end = function(data, encoding){
+                flow.fire("end")
+                end.call(res, data, encoding);
+            };
             res.setHeader = function(field, val){
                 var key = field.toLowerCase()
                 if ( 'set-cookie' == key ) {
@@ -202,7 +230,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             return this._mime;
         }
         return  this._mime = /\.(\w+)$/.test( this.originalUrl.replace(/[?#].*/, '') ) ?
-            RegExp.$1 : "*"
+        RegExp.$1 : "*"
     })
     HttpFlow.prototype.__defineGetter__("xhr", function(){
         if(!this.req)
