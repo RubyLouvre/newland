@@ -9,10 +9,6 @@ $.define("cookie", function(){
             pairs.push('Max-Age=' + opts );
         }else{
             opts = opts || {};
-            if( typeof opts.secret == "boolean"){//添加加密支持
-                val =  's:' + sign(val, opts.secret);
-                pairs = [name + '=' + encode(val)];
-            }
             if (opts.maxAge) pairs.push('Max-Age=' + opts.maxAge);
             if (opts.domain) pairs.push('Domain=' + opts.domain);
             if (opts.path) pairs.push('Path=' + opts.path);
