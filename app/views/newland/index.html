@@ -1,0 +1,22 @@
+<%  set_title("newland的文档") %>
+<%  set_layout("doc_layout.html") %>
+<h3>newland的文档</h3>
+<p>Cookie相关</p>
+<p>查看cookie</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+$.log( flow.cookie )
+</pre>
+<p>添加cookie</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//flow.addCookie(name, val, opts)
+ flow.addCookie("myCookie","xxxxxxxxxx");
+ flow.addCookie("newCookie","yyyyyyyyy");
+ flow.addCookie('rememberme', 'yes', { expires: 0, httpOnly: true })
+ //下面两个user不会相互覆盖的
+ flow.res.setHeader("Set-Cookie","user=aaa")
+ flow.res.setHeader("Set-Cookie","user=bbb")
+</pre>
+<p>删除cookie,会让客户端存在的同名cookie立即过期</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+flow.removeCookie("oldCookie")
+</pre>
