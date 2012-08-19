@@ -1,4 +1,4 @@
-$.define("session","../sessions/"+$.config.session.type ,function(fn){
+$.define("session", "sessions/"+$.config.session.type ,function(fn){
     return function(flow){
         if(flow.cookies){
             fn(flow)
