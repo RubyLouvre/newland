@@ -2,7 +2,7 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
     $.log("已加载MVC模块")
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
-    "get_layout","500","send_error","session", "timeout","get_less"]
+    "get_layout","500","send_error","get_cookie","session", "timeout","get_less"]
     //合并默认拦截器与用户自定义拦截，并修正URL地址
     var inter = $.Array.union(defaults, $.config.services).map(function(str){
         return "system/services/"+str
