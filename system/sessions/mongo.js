@@ -6,26 +6,25 @@ $.define("mongo","mongodb", function(mongodb){
     var read = function(e, col){
         //从数据库中取得一个文档，从于让用户通过Store实例直接同步操作它
         var flow = this;
-        flow.bind("get_cookie", function( ){
-            var s = $.config.session
-            var sid = flow.cookies[ s.sid ] || flow.uuid()//从cookie中取得键
-            col.find({
-                sid: sid
-            }).toArray(function(e, docs){
-                if(!docs.length){//不存在就新建一个键
-                    sid = flow.uuid()
-                    col.insert({
-                        sid: sid,
-                        life: s.life,
-                        data: {}
-                    },{
-                        safe: true
-                    }, write.bind([flow, sid, col, s ]))
-                }else{
-                    write.call([flow, sid, col, s ], e, docs)
-                }
-            })
+        var s = $.config.session
+        var sid = flow.cookies[ s.sid ] || flow.uuid()//从cookie中取得键
+        col.find({
+            sid: sid
+        }).toArray(function(e, docs){
+            if(!docs.length){//不存在就新建一个键
+                sid = flow.uuid()
+                col.insert({
+                    sid: sid,
+                    life: s.life,
+                    data: {}
+                },{
+                    safe: true
+                }, write.bind([flow, sid, col, s ]))
+            }else{
+                write.call([flow, sid, col, s ], e, docs)
+            }
         })
+
     }
 
     var write = function(e, docs){

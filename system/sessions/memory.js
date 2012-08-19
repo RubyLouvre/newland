@@ -17,7 +17,6 @@ $.define("memory", function(){
     }
 
     return function( flow ){
-        flow.bind("get_cookie", function( ){
             var s = $.config.session
             var sid = flow.cookies[ s.sid ];
             var nid = flow.uuid();
@@ -25,8 +24,8 @@ $.define("memory", function(){
             if( !sid ){
                 flow.addCookie( sid, nid )
             }
+            console.log("CCCCCCCCCCCCCCC")
             flow.session.open( s.life, data );
-        })
     }
 });
 

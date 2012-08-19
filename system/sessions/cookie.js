@@ -3,14 +3,12 @@ $.define("cookie", function(){
     //https://github.com/caolan/cookie-sessions/blob/master/lib/cookie-sessions.js
     //缺点是,可以储存的东西太少了
     return function( flow ){
-        flow.bind("get_cookie", function( ){
-            var s = $.config.session
-            var sval = flow.cookies[ s.sid ]
-            var data = sval ? JSON.parse(sval) : {}
-            flow.session.open( s.life, data )
-            flow.bind("header", function(){
-                flow.addCookie( s.sid, JSON.stringify(flow.session.data) )
-            })
+        var s = $.config.session
+        var sval = flow.cookies[ s.sid ]
+        var data = sval ? JSON.parse(sval) : {}
+        flow.session.open( s.life, data )
+        flow.bind("header", function(){
+            flow.addCookie( s.sid, JSON.stringify(flow.session.data) )
         })
     }
 });
