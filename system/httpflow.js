@@ -83,13 +83,12 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             this.helper = make_helper()
         },
         inherit: $.Flow,
-        //为flow添加一系列属性,并重写res.writeHead
+        //为flow添加一系列属性,并劫持res.writeHead,res.setHeader
         patch: function(req, res){
             this.res =  res;
             this.req =  req;
             this.originalUrl = req.url;
             this.params = {};
-            this.resCookies = {};
             this.session = new Store(this)
             this.flash =  function(type, msg){
                 switch(arguments.length){
@@ -122,6 +121,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             var flow = this;
             var writeHead = res.writeHead;
             var setHeader = res.setHeader;
+            flow._setHeader = setHeader;
             res.writeHead = function(){
                 flow.fire('header');
                 writeHead.apply(this, arguments);
@@ -148,21 +148,23 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         },
         addCookie: function(name, val, opt){
             if(!this.resCookies){
+                this.resCookies = {};
                 this.resCookies[name] = [val, opt]
                 this.bind("header", function(){
                     var array = []
                     for(var i in this.resCookies){
                         var arr = this.resCookies[i];
-                        array.push( Cookie.serialize(i, arr[0], arr[i] ) )
+                        array.push( Cookie.stringify(i, arr[0], arr[1] ) )
                     }
-                    this.res.setHeader("Set-Cookie",array)
+                    this._setHeader.call(this.res, "Set-Cookie",array)
                 })
             }else{
                 this.resCookies[name] = [val, opt]
             }
+            return this;
         },
         removeCookie: function(name){
-            this.addCookie(name,"",-1)
+           return this.addCookie(name,"", 0)
         },
         //Content-Type 相当于content-type
         get: function(name){

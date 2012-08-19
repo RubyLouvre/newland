@@ -14,8 +14,12 @@
 
         </style>
         <script>
-            $.require("ready,more/tab",function(){
-                console.log("dddddddd")
+            $.require("ready,flow",function(n,Flow){
+               var flow = new $.Flow;
+               flow.bind("xxx", function(){
+                   console.log(Array.apply([],arguments))
+               });
+               flow.fire.apply(flow,["xxx",1,2,3,4])
             })
         </script>
     </head>

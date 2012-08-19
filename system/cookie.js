@@ -3,7 +3,7 @@ $.define("cookie", function(){
     var decode = decodeURIComponent;
     // serialize('foo', 'bar', { httpOnly: true })  => "foo=bar; httpOnly"
     //将两个字符串变成一个cookie字段
-    var serialize = function(name, val, opts){
+    var stringify = function(name, val, opts){
         var pairs = [name + '=' + encode(val)];
         if( isFinite( opts ) && $.type( opts, "Number" ) ){
             pairs.push('Max-Age=' + opts );
@@ -43,7 +43,7 @@ $.define("cookie", function(){
 
     return {
         parse: parse,
-        serialize: serialize
+        stringify: stringify
     }
 
 })

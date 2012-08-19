@@ -13,4 +13,3 @@ $.define("get_cookie","../cookie", function(Cookie){
      
     }
 });
-//2012.8.19 用于在flow上添加cookies对象
