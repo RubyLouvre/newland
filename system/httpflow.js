@@ -164,7 +164,13 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             return this;
         },
         removeCookie: function(name){
-           return this.addCookie(name,"", 0)
+            if(Array.isArray(name)){
+                name.forEach(function(cookie){
+                    this.addCookie(cookie,"", 0)
+                },this);
+                return this;
+            }
+            return this.addCookie(name,"", 0)
         },
         //Content-Type 相当于content-type
         get: function(name){
