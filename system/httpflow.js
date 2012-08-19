@@ -74,6 +74,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         open: function( data, life ){
             this.data = data;
             this.life = life;
+            console.log("open_session")
             this.flow.fire("open_session_"+ this.flow.id)
         }
     }
@@ -89,6 +90,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             this.req =  req;
             this.originalUrl = req.url;
             this.params = {};
+            this.type = "html"
             this.session = new Store(this)
             this.flash =  function(type, msg){
                 switch(arguments.length){
@@ -143,7 +145,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
                 }
             }
         },
-        content_type: function( name ){
+        contentType: function( name ){
             return type_mine[ name ]
         },
         addCookie: function(name, val, opt){
@@ -193,12 +195,15 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
                 }
             }
             return this;
-        },
-        mime : function() {
-            var str = this.get( 'content-type' ) || '';
-            return str.split(';')[0];
         }
     });
+    HttpFlow.prototype.__defineGetter__("mime", function(){
+        if(this._mime){
+            return this._mime;
+        }
+        return  this._mime = /\.(\w+)$/.test( this.originalUrl.replace(/[?#].*/, '') ) ?
+            RegExp.$1 : "*"
+    })
     HttpFlow.prototype.__defineGetter__("xhr", function(){
         if(!this.req)
             return false;
@@ -208,5 +213,5 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
     return HttpFlow
 
 });
-//2012.8.18 httpflow添加一个patch的打补丁方法，用于添加一系列属性与重写res.whiteHeader方法，添加一强大的储存对象
-//2012.8.19 重构addCookie,removeCookie,并劫持res.setHeader方法
+    //2012.8.18 httpflow添加一个patch的打补丁方法，用于添加一系列属性与重写res.whiteHeader方法，添加一强大的储存对象
+    //2012.8.19 重构addCookie,removeCookie,并劫持res.setHeader方法
