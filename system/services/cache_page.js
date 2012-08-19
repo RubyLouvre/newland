@@ -36,7 +36,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
             var cache = {
                 code: 200,
                 data: html,
-                type: this.content_type("html")
+                type: this.contentType("html")
             }
             if( $.config.write_page ){
                 var pageurl = $.path.join("app","pages", url );

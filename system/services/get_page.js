@@ -28,7 +28,7 @@ $.define("get_page", function(){
                         var cache = {
                             code: 200,
                             data: html,
-                            type: this.content_type("html")
+                            type: this.contentType("html")
                         }
                         $.pagesCache[ url ] = cache;
                         this.fire("send_file", cache)
