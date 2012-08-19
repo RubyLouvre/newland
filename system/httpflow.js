@@ -20,7 +20,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         "xml": "text/xml",
         'manifest': 'text/cache-manifest'
     };
-
+    //为flow添加一个session成员,它拥有set, get, remove, close
     var Store = function(flow){
         this.flow = flow;
         var session = this;
@@ -46,15 +46,27 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         //每次操作都延长一段时间
         get: function (key){
             this.timestamp = Date.now() + this.life;
+            if(typeof key == "function"){
+                return key.call(this.data)
+            }
             return this.data[ key ];
         },
         set: function (key, val){
             this.timestamp = Date.now() + this.life;
-            this.data[key] = val;
+            if(typeof key == "function"){
+                return key.call(this.data)
+            }else{
+                this.data[key] = val;
+            }
         },
         remove: function (key){
             this.timestamp = Date.now() + this.life;
-            delete this.data[key];
+            if(typeof key == "function"){
+                return key.call(this.data)
+            }else{
+                delete this.data[key];
+            }
+           
         },
         close: function (){
             this.data = {};
@@ -78,7 +90,35 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             this.originalUrl = req.url;
             this.params = {};
             this.resCookies = {};
-            this.session = new Store(flow)
+            this.session = new Store(this)
+            this.flash =  function(type, msg){
+                switch(arguments.length){
+                    case 2:
+                        this.fire("set_session_"+this.id, function(){
+                            var data = this;
+                            var flash = data.flash ||  (data.flash  || {});
+                            if( flash[ type ] ){
+                                flash[ type ].push( msg )
+                            }else{
+                                flash[ type ] = [msg]
+                            }
+                        });
+                        break;
+                    case 1:
+                        this.fire("get_session_"+this.id, function(){
+                            var data = this;
+                            var flash = data.flash ||  (data.flash  || {});
+                            return  flash[ type ] || []
+                        });
+                        break;
+                    case 0:
+                        this.fire("remove_session_"+this.id, function(){
+                            var data = this;
+                            delete data.flash;
+                        });
+                        break;
+                }
+            }
             var flow = this;
             var writeHead = res.writeHead;
             var setHeader = res.setHeader;
@@ -131,7 +171,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
                 case 'referer':
                 case 'referrer':
                     return headers.referrer
-                        || headers.referer;
+                    || headers.referer;
                 default:
                     return headers[ name ];
             }
