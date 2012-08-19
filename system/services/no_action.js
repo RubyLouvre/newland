@@ -1,19 +1,9 @@
 $.define("no_action", function(){
     return function(flow){
-        var url = flow.req.url, type
-        if( /\.(html|css|js|png|jpg|gif|ico)$/.test( url.replace(/[?#].*/, '') ) ){
-            type = RegExp.$1;
-            flow._page = type == "html" ? 1 : 0
-        }else{
-            flow._page = 2;//通过模板生成的页面
-        }
         flow.bind("no_action", function( ){
             // $.log("已进入no_action栏截器")
-            //去掉#？等杂质，如果是符合如下后缀后，则进行静态资源缓存
-             var url = flow.req.url;
-            if( flow._page !== 2 ){
-                var type = RegExp.$1;
-                url = url.replace(/[?#].*/, '');
+            if( flow.mime !== "*" ){ //其实这里应该让用户指定特定pathname开头为静态文件的目录名
+                var url = flow.originalUrl.replace(/[?#].*/, '');
                 var cache = $.staticCache[ url ],lm
                 if( cache ){
                     if(( lm = cache.headers && cache.headers["Last-Modified"] )){
@@ -26,7 +16,7 @@ $.define("no_action", function(){
                     this.fire("send_file", cache);
                 }else{
                     //从硬盘中读取对应路径下的文件
-                    var file = $.path.join("app/public/",url);
+                    var file = $.path.join("app/public/",flow.originalUrl);
                     $.readFile(file, function(err, data){
                         var code = 200
                         if(err){
@@ -43,7 +33,7 @@ $.define("no_action", function(){
                         cache = {
                             code: code,
                             data: data,
-                            type: this.content_type( type ),
+                            type: this.contentType( flow.mime ),
                             headers: {
                                 "Last-Modified":new Date().toGMTString()
                             }
