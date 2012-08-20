@@ -87,7 +87,9 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
                 var instance = $.controllers[cname];
                 if( instance && typeof instance[aname] == "function" ){
                     clearTimeout( flow.timeoutID );
-                    if( flow.cookies ){//如果调用了cookie服务
+                    //如果调用了get_cookie服务,肯定会调用session服务,但如果session服务还没有到位,
+                    //就通过bind("open_session",fn)这加锁机制等待服务过错成才进入action
+                    if( flow.cookies && !flow.session){//如果调用了cookie服务
                         flow.bind("open_session",function(){
                              instance[aname]( flow );//到达指定action
                         })
