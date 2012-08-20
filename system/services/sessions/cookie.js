@@ -6,13 +6,18 @@ $.define("cookie", function(){
         var s = $.config.session
         var sval = flow.cookies[ s.sid ]
         var data = {}
-        if( sval ){
-            data =  JSON.parse(sval)
+        if( typeof sval ==="string"  &&  sval[0] == "{" && sval.substr(-1,1) == "}" ){
+            try{
+                data =  JSON.parse(sval) 
+            }catch(e){}
         }
-        flow.session.open( s.life, data )
-        flow.addCookie( s.sid, JSON.stringify(flow.session.data),{
-            maxAge: s.life,
-            httpOnly: true
+        flow.store.open( s.life, data );
+        flow.bind("before_header", function(){
+            flow.addCookie( s.sid, JSON.stringify(flow.session),{
+                maxAge: s.life,
+                httpOnly: true
+            })
         })
+      
     }
 });
