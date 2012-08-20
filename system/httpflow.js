@@ -29,6 +29,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         open: function(life, data){
             this.data = this.flow.session  = data;
             this.mtime = Date.now() + life;
+            $.log('<code style="color:green;">fire open session</code>', true);
             this.flow.fire("open_session")
         }
     }
@@ -79,6 +80,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             var setHeader = res.setHeader;
             flow._setHeader = setHeader;
             res.writeHead = function(){
+                flow.fire('before_header');
                 flow.fire('header');
                 writeHead.apply(this, arguments);
                 this.writeHead = writeHead;//还原
@@ -175,3 +177,4 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
 });
     //2012.8.18 httpflow添加一个patch的打补丁方法，用于添加一系列属性与重写res.whiteHeader方法，添加一强大的储存对象
     //2012.8.19 重构addCookie,removeCookie,并劫持res.setHeader方法
+    //2012.8.20 httpflow.patch 重构writeHead，添加多一个钩子before_cookie,并劫持res.end方法
