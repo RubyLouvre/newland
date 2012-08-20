@@ -13,19 +13,19 @@ $.define("configs", function(){
         maxAge: 60*60*24*365,
         //默认session配置,如果没有,则不使用session
         session: {
-            type: "cookie",
+            type: "mongo",
             sid:   "mass_sid",
             table: "sessions",
-            life: 60 * 5 //实验用,减少为5分种,
+            life: 60 * 10 //实验用,减少为10分种,
         },
         cookie: {
             path: "/",
-            life:60 * 5// 实验用,减少为5分种,其实至少要两星期  14 * 24 * 60 * 60
+            life:60 * 10// 实验用,减少为10分种,其实至少要两星期  14 * 24 * 60 * 60
         },
         db: {
-            name: "mongodb",
-            host:  "localhost",
-            port:  27017
+            name: "mongodb",   //数据库的名字
+            host:  "localhost",//连接数据库时用
+            port:  27017       //连接数据库时用
         }
     }
 })
