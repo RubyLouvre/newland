@@ -53,7 +53,7 @@ exports.validatePassword = function (password, encrypted) {
 //一个简单的node.js 数据库 https://github.com/creationix/nstore-session
 //又一个简单的node.js 数据库 https://github.com/philipp-spiess/json-db/blob/master/lib/client/collection.js
 //添加cookie 真正使用实例 http://www.noday.net/articles/2011/11/27/1322376242011.html
-
+//http://devilalbum.com/?p=847
 //            if(!this.resCookies){
 //                this.resCookies = [ name, val, opt ];
 //                this.bind("header", function(){
