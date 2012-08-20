@@ -251,10 +251,10 @@
          * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
          */
         $.log = function (s, color){
-            var args = Array.apply([],arguments);
             if(arguments.length === 1){
-                return  console.log( s );
+                return console.log( s );
             }
+            var args = $.slice(arguments);
             if( args.pop() === true){
                 s = args.join("").replace( rformat, function( a, b, style,ret){
                     style.toLowerCase().split(";").forEach(function(arr){
