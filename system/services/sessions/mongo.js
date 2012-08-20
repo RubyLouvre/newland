@@ -1,10 +1,7 @@
 $.define("mongo","mongodb", function(mongodb){
-
-    $.dbs = $.dbs || {};
-    var c = $.config.db;
-
+    //从数据库中取得一个文档{mtime:mtime,data:data} ，当中的data就是flow.session
     var read = function(e, col){
-        //从数据库中取得一个文档，从于让用户通过Store实例直接同步操作它
+        $.log('<code style="color:cyan;">开始在存放session的集合中寻找目标文档</code>', true);
         var flow = this;
         var s = $.config.session
         var sid = flow.cookies[ s.sid ] || flow.uuid()//从cookie中取得键
@@ -12,50 +9,56 @@ $.define("mongo","mongodb", function(mongodb){
             sid: sid
         }).toArray(function(e, docs){
             if(!docs.length){//不存在就新建一个键
-                sid = flow.uuid()
+                sid = flow.uuid();
+                $.log('<code style="color:cyan;">不存在就创建一个新的</code>', true);
                 col.insert({
                     sid: sid,
-                    life: s.life,
                     data: {}
                 },{
                     safe: true
-                }, write.bind([flow, sid, col, s ]))
+                }, function(e, docs){
+                    write( col, docs[0], flow, sid, s )
+                })
             }else{
-                write.call([flow, sid, col, s ], e, docs)
+                $.log('<code style="color:cyan;">继续使用原先的文档</code>', true);
+                write( col, docs[0], flow, sid, s )
             }
         })
-
     }
 
-    var write = function(e, docs){
-        var array = this;
-        var flow = array[0];
-        var sid  = array[1]
-        var collection  = array[2]
-        var s  = array[3]
-        flow.session.open( s.life, docs[0].data );
+    var write = function( col, doc, flow, sid, s){
         flow.addCookie( s.sid, sid );
-        flow.bind("header", function(){
-            collection.findAndModify ({
+        console.log("进入action等待关闭")
+        flow.bind("end", function(){
+            col.findAndModify ({
                 sid:  sid
+            },[], {
+                $set: {
+                    mtime: Date.now() + s.life,
+                    data: flow.store.data
+                }
             }, {
-                life: flow.session.life,
-                data: flow.session.data
-            }, {
+                "new":true,
                 safe: true
             },function(err, doc){
+                console.log("调整完成")
                 console.log([err,doc])
             })
         })
+        flow.store.open( s.life, doc.data );
     }
 
     return function(flow){
+        $.dbs = $.dbs || {};
+        var c = $.config.db;
         if(! $.dbs[ c.name ]){
+            $.log('<code style="color:cyan;">第一次连上mongo数据库</code>', true);
             $.dbs[ c.name  ] = 1;//临时处理
             var server = new mongodb.Server( c.host, c.port, {});
             new mongodb.Db( c.name, server, {}).open(function (e, db) {
                 //新建或打开目标集合
                 $.dbs[ c.name ] = db;//正式处理
+                //  db.dropCollection(c.name)
                 $.dbs[ c.name ].collection( $.config.session.table, read.bind(flow))
             });
         }else{
