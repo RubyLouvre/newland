@@ -13,7 +13,7 @@ $.define("configs", function(){
         maxAge: 60*60*24*365,
         //默认session配置,如果没有,则不使用session
         session: {
-            type: "memory",
+            type: "cookie",
             sid:   "mass_sid",
             table: "sessions",
             life: 60 * 5 //实验用,减少为5分种,

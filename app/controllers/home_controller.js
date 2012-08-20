@@ -5,7 +5,7 @@ $.define("home_controller",function(){
             var view_url = $.path.join("app","views", "home","index.html" );
             //链式写法，同名cookie前者会覆盖后者的，前端只生成“aaa=2; bbb=1”
             flow.session.aaa = "vvv"
-            console.log(flow.session)
+            flow.addCookie("ddd","yyy")
             flow.fire("get_view", view_url, flow.req.url )
         },
         tabs: function(flow){
