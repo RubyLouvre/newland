@@ -6,7 +6,7 @@ $.define("routes",function(){
         mapper.get("/","home#index")
         mapper.get("/mongo/(:method)","mongo#index")
         mapper.get("/tabs","home#tabs")
-
+        mapper.get("/newland","newland#index")
         mapper.add("GET","doc/:modules(/:method)","doc#index")
     //方法路由
     //        map.get('/','site#index');
