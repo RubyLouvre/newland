@@ -87,11 +87,10 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
                 var instance = $.controllers[cname];
                 if( instance && typeof instance[aname] == "function" ){
                     clearTimeout( flow.timeoutID );
-                    if("__get_cookie" in flow.root){
-                        flow.bind("get_cookie,open_session",function(){
+                    if( flow.cookies ){//如果调用了cookie服务
+                        flow.bind("open_session",function(){
                              instance[aname]( flow );//到达指定action
                         })
-
                     }else{
                          instance[aname]( flow );//到达指定action
                     }
