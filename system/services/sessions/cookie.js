@@ -5,10 +5,14 @@ $.define("cookie", function(){
     return function( flow ){
         var s = $.config.session
         var sval = flow.cookies[ s.sid ]
-        var data = sval ? JSON.parse(sval) : {}
+        var data = {}
+        if( sval ){
+            data =  JSON.parse(sval)
+        }
         flow.session.open( s.life, data )
-        flow.bind("header", function(){
-            flow.addCookie( s.sid, JSON.stringify(flow.session.data) )
+        flow.addCookie( s.sid, JSON.stringify(flow.session.data),{
+            maxAge: s.life,
+            httpOnly: true
         })
     }
 });
