@@ -28,7 +28,6 @@ $.define("mongo","mongodb", function(mongodb){
 
     var write = function( col, doc, flow, sid, s){
         flow.addCookie( s.sid, sid );
-        console.log("进入action等待关闭")
         flow.bind("end", function(){
             col.findAndModify ({
                 sid:  sid
@@ -41,8 +40,13 @@ $.define("mongo","mongodb", function(mongodb){
                 "new":true,
                 safe: true
             },function(err, doc){
-                console.log("调整完成")
-                console.log([err,doc])
+                $.log("更新完毕，开始删除过期数据")
+                $.log([err,doc])
+                col.remove({
+                    mtime:{
+                        $lt: Date.now()
+                    }
+                })
             })
         })
         flow.store.open( s.life, doc.data );
