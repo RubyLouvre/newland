@@ -85,11 +85,6 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
                 writeHead.apply(this, arguments);
                 this.writeHead = writeHead;//还原
             }
-            var end = res.end;
-            res.end = function(data, encoding){
-                flow.fire("end")
-                end.call(res, data, encoding);
-            };
             res.setHeader = function(field, val){
                 var key = field.toLowerCase()
                 if ( 'set-cookie' == key ) {
