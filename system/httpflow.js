@@ -20,84 +20,16 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         "xml": "text/xml",
         'manifest': 'text/cache-manifest'
     };
-    //为flow添加一个session成员,它拥有set, get, remove, close
-    //    var Store = function(flow){
-    //        this.flow = flow;
-    //        var session = this;
-    //        //如果没有打开open操作,此四方法只是用于保存参数
-    //        String("set,get,remove,close").replace($.rword, function(name){
-    //            session[ "_" + name ] = [];
-    //            session[ name ] = function(){
-    //                session[ "_" + name ].push(  arguments );
-    //            }
-    //        });
-    //        //set,get,remove,clear等事件必须在open操作之后才能执行!
-    //        flow.bind("open_session_"+flow.id, function( ){
-    //            String("set,get,remove,close").replace($.rword, function(name){
-    //                delete session[ name ];//露出原始的原型方法
-    //                var array = session[ "_" + name ];
-    //                for(var args; args = array.shift();){
-    //                    session[ name ].apply( session, args )
-    //                }
-    //            });
-    //        });
-    //    }
-    //    Store.prototype = {
-    //        //每次操作都延长一段时间
-    //        get: function (key){
-    //            this.timestamp = Date.now() + this.life;
-    //            if(typeof key == "function"){
-    //                return key.call(this.data)
-    //            }
-    //            return this.data[ key ];
-    //        },
-    //        set: function (key, val){
-    //            this.timestamp = Date.now() + this.life;
-    //            if(typeof key == "function"){
-    //                return key.call(this.data)
-    //            }else{
-    //                this.data[key] = val;
-    //            }
-    //        },
-    //        remove: function (key){
-    //            this.timestamp = Date.now() + this.life;
-    //            if(typeof key == "function"){
-    //                return key.call(this.data)
-    //            }else{
-    //                delete this.data[key];
-    //            }
-    //
-    //        },
-    //        close: function (){
-    //            this.data = {};
-    //        },
-    //        open: function( data, life ){
-    //            this.data = data;
-    //            this.life = life;
-    //            console.log("open_session")
-    //           console.log( this.flow.find("goto_action") )
-    //            this.flow.fire("open_session_"+ this.flow.id)
-    //        }
-    //    }
-
 
     var Store = function(flow){
         this.mtime = Date.now()
         this.flow = flow;
     }
     Store.prototype = {
-        open: function(sid, life, data){
-            this.life = life;
-            this.sid  = sid;
-            this.flow.fire("open_session")
-            this.flow.session = this.data = data;
+        open: function(life, data){
+            this.data = this.flow.session  = data;
             this.mtime = Date.now() + life;
-            var self = this;
-            this.flow.bind("end", function(){
-                self.mtime = Date.now() + self.life; //重设mtime;
-                delete self.flow;
-                $.memory[ self.sid ] = self; //将它放进$.memory,等待清理
-            })
+            this.flow.fire("open_session")
         }
     }
 
@@ -113,7 +45,6 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             this.req =  req;
             this.originalUrl = req.url;
             this.params = {};
-            this.type = "html"
             this.store = new Store(this)
             this.flash =  function(type, msg){
                 switch(arguments.length){
@@ -237,7 +168,8 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             return false;
         var val = this.get('X-Requested-With') || '';
         return 'xmlhttprequest' == val.toLowerCase();
-    })
+    });
+    
     return HttpFlow
 
 });
