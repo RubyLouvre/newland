@@ -48,3 +48,8 @@ exports.validatePassword = function (password, encrypted) {
     var newpassword = md5(left + password + right).toUpperCase();
     return newpassword === main;
 };
+
+//一个很好的网站,有用户登录验证 https://github.com/leizongmin/url-forwarding/blob/master/routes/user.js
+//一个简单的node.js 数据库 https://github.com/creationix/nstore-session
+//又一个简单的node.js 数据库 https://github.com/philipp-spiess/json-db/blob/master/lib/client/collection.js
+//添加cookie 真正使用实例 http://www.noday.net/articles/2011/11/27/1322376242011.html
