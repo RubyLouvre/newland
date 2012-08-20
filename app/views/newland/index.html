@@ -1,7 +1,7 @@
 <%  set_title("newland的文档") %>
 <%  set_layout("doc_layout.html") %>
-<h3>newland的文档</h3>
-<p>Cookie相关</p>
+<h2>newland的文档</h2>
+<h3>cookie相关</h3>
 <p>查看cookie</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.log( flow.cookies ) //{ __atuvc: '2|25', myCookie: 'xxxxxxxxxx', newCookie: 'ddd', user 'yyy' }
@@ -23,4 +23,52 @@ $.log( flow.cookies ) //{ __atuvc: '2|25', myCookie: 'xxxxxxxxxx', newCookie: 'd
 flow.removeCookie("oldCookie")
 //传入一个字符串数组，同时删除多个cookie
 flow.removeCookie(["myCookie","uuer","newCookie"])
+</pre>
+
+<h3>session相关</h3>
+<p>newland.js暂时提供三种sesson，基于内存的，基于cookie的，基于mongo数据库的。</p>
+<p>下面是app/config中相关的配置</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+        //默认session配置,必需加载get_cookie服务，否则无效
+        session: {
+            type: "cookie",//可选值有mongo, cookie, memory
+            sid:   "mass_sid",//sessionID
+            table: "sessions",//这个type=mongo时，决定存放在哪个集合中
+            life: 60 * 10 //生命周期，单位ms
+        },
+</pre>
+<p>使用。只能在action与模板中使用，操作目标为flow.session</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+   flow.session.aaa = "xxx"
+   delete flow.session.aaa
+   flow.session.bbb = ["11","22"]
+</pre>
+<p>在类型为cookie的情况下，你大可以把它当成一个JSON，意味着session的成员不能为函数，同时你也要注意长度不能大于4k</p>
+<p>在类型为memory或mongo的情况下，成员是任意的，大小理论上也不受限。<p>
+<p>session是用于在action中交互数据，因此生命周期不宜设得很长。</p>
+<h3>flash相关</h3>
+
+
+<p>这个flash与Adobe/Macromedia Flash半毛线关系也没有</p>
+<p>flash是基于session的消息传送机制，我们可以把消息放到flash中并在下一个action访问到它们。</p>
+<p>flash的通常是使用重定向后,确保消息可用到下一个页面呈现。比如一个表单提交后,我们在跳转后的新页面显示成功消息,
+    而不用在先前的页面让用户等待几秒钟才跳转.</p>
+<p>此机制的版权是属于rails的(向rails致敬!)，它最初定义消息应该有四种notice, warning, message，error</p>
+<p>使用。只能在action与模板中使用，视参数的个数决定是写入或读出。
+    读出的同时还做删除操作，什么参数也没有，直接把session.flash这个对象抛给你</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//两个或两个以上是添加消息
+flow.flash('info', 'email sent');
+flow.flash('error', 'email delivery failed');
+flow.flash('info', 'email re-sent');
+// => 2
+//一个是返回这个类型的所有消息,并从session中删除它们
+flow.flash('info');
+// => ['email sent', 'email re-sent']
+
+flow.flash('info');
+// => []
+//没有参数就返回一个对象,里面分门别类放置好各消息
+flow.flash();
+// => { error: ['email delivery failed'], info: [] }
 </pre>

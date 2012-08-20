@@ -11,12 +11,12 @@ $.define("configs", function(){
         maxObjects: 128,
         maxLength: 1024 * 256,
         maxAge: 60*60*24*365,
-        //默认session配置,如果没有,则不使用session
+        //默认session配置,必需加载get_cookie服务，否则无效
         session: {
-            type: "mongo",
-            sid:   "mass_sid",
-            table: "sessions",
-            life: 60 * 10 //实验用,减少为10分种,
+            type: "cookie",//可选值有mongo, cookie, memory
+            sid:   "mass_sid",//sessionID
+            table: "sessions",//这个type=mongo时，决定存放在哪个集合中
+            life: 60 * 10 //生命周期，单位ms 实验用,减少为10分种,
         },
         cookie: {
             path: "/",
