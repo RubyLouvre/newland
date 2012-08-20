@@ -4,19 +4,23 @@
 <p>Cookie相关</p>
 <p>查看cookie</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-$.log( flow.cookie )
+$.log( flow.cookies ) //{ __atuvc: '2|25', myCookie: 'xxxxxxxxxx', newCookie: 'ddd', user 'yyy' }
 </pre>
 <p>添加cookie</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 //flow.addCookie(name, val, opts)
- flow.addCookie("myCookie","xxxxxxxxxx");
- flow.addCookie("newCookie","yyyyyyyyy");
+ flow.addCookie("ACookie","xxxxxxxxxx");
+ flow.addCookie("BCookie","yyyyyyyyy");
  flow.addCookie('rememberme', 'yes', { expires: 0, httpOnly: true })
- //下面两个user不会相互覆盖的
+
+ //链式写法，同名cookie前者会覆盖后者的，前端只生成“aaa=2; bbb=1”
+ flow.addCookie("aaa",1).addCookie("aaa",2).addCookie("bbb",1).addCookie("bbb",1)
  flow.res.setHeader("Set-Cookie","user=aaa")
- flow.res.setHeader("Set-Cookie","user=bbb")
+
 </pre>
 <p>删除cookie,会让客户端存在的同名cookie立即过期</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 flow.removeCookie("oldCookie")
+//传入一个字符串数组，同时删除多个cookie
+flow.removeCookie(["myCookie","uuer","newCookie"])
 </pre>
