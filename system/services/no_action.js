@@ -1,9 +1,9 @@
 $.define("no_action", function(){
     return function(flow){
         flow.bind("no_action", function( ){
-            // $.log("已进入no_action栏截器")
+            // $.log("已调用no_action服务")
+            var url = flow.originalUrl.replace(/[?#].*/, '');
             if( flow.mime !== "*" ){ //其实这里应该让用户指定特定pathname开头为静态文件的目录名
-                var url = flow.originalUrl.replace(/[?#].*/, '');
                 var cache = $.staticCache[ url ],lm
                 if( cache ){
                     if(( lm = cache.headers && cache.headers["Last-Modified"] )){
@@ -16,7 +16,7 @@ $.define("no_action", function(){
                     this.fire("send_file", cache);
                 }else{
                     //从硬盘中读取对应路径下的文件
-                    var file = $.path.join("app/public/",flow.originalUrl);
+                    var file = $.path.join("app/public/", url);
                     $.readFile(file, function(err, data){
                         var code = 200
                         if(err){
