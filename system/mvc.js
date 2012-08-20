@@ -77,15 +77,26 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
         var go = $.router.routeWithQuery( method, url );
         if( go ){//如果当前URL请求匹配路由规则（app/routes）中的某一项，则交由MVC系统去处理
             flow.params = go.params || {};//重写params
+            
             var value = go.value;
             if(typeof value === "string"){
                 var match = value.split("#");
                 var cname = match[0];//取得控制器的名字
                 var aname = match[1];//取得action的名字
+
                 var instance = $.controllers[cname];
                 if( instance && typeof instance[aname] == "function" ){
                     clearTimeout( flow.timeoutID );
-                    instance[aname]( flow );//到达指定action
+                    if("__get_cookie" in flow.root){
+                        console.log("__get_cookie" in flow.root)
+                        flow.bind("get_cookie,open_session",function(){
+                             instance[aname]( flow );//到达指定action
+                        })
+
+                    }else{
+                         instance[aname]( flow );//到达指定action
+                    }
+                   
                 }else{  //如果不存在此控制器，报500报错误
                     flow.fire("send_error",500)
                 }
