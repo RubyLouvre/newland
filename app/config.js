@@ -1,8 +1,6 @@
 $.define("configs", function(){
     // $.log("已加载用户配置模块");
     return $.config = {
-        //栏截器"favicon",
-        //"mime","location","static","postData","methodOverride","json","render","matcher"
         services: [],
         http_method: "_method",//用于模拟PUT,DELETE方法
         environments: "development",
@@ -18,11 +16,11 @@ $.define("configs", function(){
             type: "memory",
             sid:   "mass_sid",
             table: "sessions",
-            life: 14 * 24 * 60 * 60
+            life: 60 * 5 //实验用,减少为5分种,
         },
         cookie: {
             path: "/",
-            life: 14 * 24 * 60 * 60
+            life:60 * 5// 实验用,减少为5分种,其实至少要两星期  14 * 24 * 60 * 60
         },
         db: {
             name: "mongodb",
