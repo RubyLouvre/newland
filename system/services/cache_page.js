@@ -44,7 +44,7 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                 $.writeFile( pageurl , html, function(){
                     if( /doc\//.test(url) ){//同步到rubylouvre项目
                         $.updateFile(rubylouvre, pageurl, function(){
-                            $.log(rubylouvre+" 同步成功");
+                            $.log(rubylouvre+" 同步成功", "> 5");
                         })
                     }
                 })

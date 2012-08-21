@@ -10,7 +10,7 @@ $.define("mongo","mongodb", function(mongodb){
         }).toArray(function(e, docs){
             if(!docs.length){//不存在就新建一个键
                 sid = flow.uuid();
-                $.log('<code style="color:cyan;">不存在就创建一个新的</code>', true);
+                $.log('不存在就创建一个新的', "cyan");
                 col.insert({
                     sid: sid,
                     data: {}
@@ -20,7 +20,7 @@ $.define("mongo","mongodb", function(mongodb){
                     write( col, docs[0], flow, sid, s )
                 })
             }else{
-                $.log('<code style="color:cyan;">继续使用原先的文档</code>', true);
+                $.log('继续使用原先的文档',  "cyan");
                 write( col, docs[0], flow, sid, s )
             }
         })

@@ -1,5 +1,5 @@
 $.define("lang","more/callbacks, more/spec",function(  ){
-    $.log("已加载text/callbacks模块");
+    $.log("已加载text/callbacks模块", "> 6");
     $.fixture("callbacks", function(){
         //===================================回调列队相关==========================================
         var indexOf = function ( fn ) {//fix 古老浏览器Array没有indexOf方法

@@ -35,13 +35,13 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/config", function()
             var text = $.readFileSync( url, "utf-8");
             var rubylouvre = url.replace(/\\/g,"/").replace("newland/system/mass","rubylouvre/scripts");
             $.updateFile( rubylouvre, text, function(){
-                //   $.log(rubylouvre+" 更新成功");
-                }, 1);
+                $.log(rubylouvre+" 更新成功", "> 5");
+            }, 1);
             files.push( text )
             $.updateFile( $.path.join( "app/public/scripts/", name +".js" ), text, $.noop, 1 );
 
         }catch(e){
-            $.log( e + "  "+url);
+            $.log( e + "  "+url, "red", ">= 2");
         }
     });
 
@@ -68,10 +68,10 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/config", function()
     var merge_url = "app/public/scripts/mass_merge.js"
     $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
         if(e) {
-            $.log("合并出错 "+e);
+            $.log("合并出错 "+e ,"red", "> 6");
         }else{
             $.updateFile(  "D:/rubylouvre/scripts/mass_merge.js", replaced, function(){
-                $.log("mass_merge.js 合并成功");
+                $.log("mass_merge.js 合并成功", "> 6");
             },1);
         }
     })

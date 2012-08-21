@@ -1,5 +1,5 @@
 $.define("controller","mass/class",function(){
-   // $.log( "已加载控制器模块")
+  //所有控制器的抽象类
     var opts = {}
     "index,new,create,show,edit,update,destroy".replace($.rword, function( action ){
         opts[ action ] = function(){

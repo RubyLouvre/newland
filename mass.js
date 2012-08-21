@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
     //后端部分　2012.7.11 by 司徒正美
     function $(){}
     var class2type = {  //类型映射
@@ -216,7 +216,7 @@
                     var  ret = collect_rets( id, obj.args ||[], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
-                        //   $.log('<code style="color:cyan;">已加载', id, '模块</code>', true);
+                        $.log("已加载" + id + "模块","cyan", "> 5" );
                         $._checkDeps();
                     }
                 }
@@ -256,7 +256,7 @@
             }
             require( filename );
         }catch( e ){
-            $.log("<code style='color:red'>",e , "</code>", true);
+            $.log( e, "red", ">= 3");
             for(var fn; fn = errorStack.shift(); ){
                 fn();//打印错误堆栈
             }
@@ -284,7 +284,7 @@
     $.log.level = 1;
     //暴露到全局作用域下,所有模块可见!!
     exports.$ = global.$ = $;
-    $.log("<code style='color:green'>后端mass框架</code>",true);
+    $.log("后端mass框架","green");
 
     //生成mass framework所需要的页面
     $.require("system/page_generate");

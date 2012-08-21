@@ -5,7 +5,7 @@ $.define("memory", function(){
         var now = +new Date;
         for (var sid in memory) {
             if ( memory[ sid ] && memory[ sid ].mtime < now){
-                $.log("清洗过其sesiion : "+sid)
+                $.log("清洗过其sesiion : "+sid,  "cyan");
                 delete memory[ sid ];
             }
         }
@@ -26,7 +26,7 @@ $.define("memory", function(){
             delete memory[ sid ]
         }
         flow.store.open( s.life, data );
-        $.log('<code style="color:cyan;">已调用memory session服务</code>', true);
+        $.log('已调用memory session服务', "cyan");
         //每次都重置sessionID的cookie
         flow.addCookie( s.sid, sid,{
             maxAge: s.life,
@@ -37,7 +37,7 @@ $.define("memory", function(){
                 data: flow.session,
                 mtime: Date.now() + s.life
             }; //将它放进$.memory,等待清理
-            $.log('<code style="color:cyan;">已关闭memory session服务</code>', true);
+            $.log('已关闭memory session服务</code>',  "cyan");
         });
        
     }

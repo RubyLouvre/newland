@@ -1,5 +1,4 @@
 $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
-    $.log("生成页面")
     var url = $.path.join( process.cwd(),"app/views/").replace(/\\/g,"/"),layouts = {};
     $.walk(url, function(files){
         var pending = files.length;
@@ -21,7 +20,7 @@ $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
                                 html =  $.readFileSync( layout_url , "utf-8");
                                 layouts[layout] = html;
                             }catch(e){
-                                $.log('<code style="color:red;">找不到必需的布局模板: ', layout_url, '</code>', true);
+                                $.log("找不到必需的布局模板: " + layout_url, "red","> 3");
                             }
                         }
                         fn = $.ejs.compile(html,array[1]);

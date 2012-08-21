@@ -25,7 +25,7 @@ $.define("get_less", function(){
     }
     return function( flow ){
         flow.bind("get_less", function( path ){
-            $.log("已进入get_less栏截器")
+            $.log("已进入get_less栏截器", "> 6");
             toCSS(path, function (err, less) {
                 $.writeFile(path.replace(/\.less$/,".css"), less, function(e){
                     if(e){
