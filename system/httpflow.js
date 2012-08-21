@@ -29,7 +29,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         open: function(life, data){
             this.data = this.flow.session  = data;
             this.mtime = Date.now() + life;
-            $.log('<code style="color:green;">fire open session</code>', true);
+            $.log('fire open session', "green");
             this.flow.fire("open_session")
         }
     }

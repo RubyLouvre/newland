@@ -1,5 +1,5 @@
 $.define("mvc", "httpflow, http, system",function( Flow, http ){
-    $.log("已加载MVC模块")
+    $.log("已加载MVC模块","> 6");
     //所有默认要加载的拦截器
     var defaults = ["send_file","no_action","get_page","get_view","cache_page",
     "get_layout","500","send_error","get_cookie","session", "timeout","get_less"]

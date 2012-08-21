@@ -124,9 +124,10 @@ $.define( "lang_fix", !!Array.isArray, function(){
     $.mix(String[P],{
         //ecma262v5 15.5.4.20
         //http://www.cnblogs.com/rubylouvre/archive/2009/09/18/1568794.html
+        // Make sure we trim BOM and NBSP (here's looking at you, Safari 5.0 and IE)
         //'      dfsd '.trim() === 'dfsd''
         trim: function(){
-            return  this.replace(/^[\s\xA0]+/,"").replace(/[\s\xA0]+$/,'')
+            return  this.replace(/^[\s\uFEFF\xA0]+/,"").replace(/[\s\uFEFF\xA0]+$/,'')
         }
     },false);
 

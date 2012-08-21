@@ -1,5 +1,5 @@
 $.define("ejs", "../lang",function(){
-    $.log("已加载ejs模块")
+    $.log("已加载ejs模块","> 6")
     $.ejs = function( id,data,opts){
         var el, source
         if( !$.ejs.cache[ id] ){

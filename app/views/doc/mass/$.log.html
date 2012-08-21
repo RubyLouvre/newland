@@ -1,14 +1,18 @@
 <%  set_title("$.log") %>
 <%  set_layout("doc_layout.html") %>
-<h3>$.log(s, [ force ])</h3>
+<h3>$.log(str, [ showInPage,  priority ])</h3>
 <p><span class="stress">描述：</span></p>
-<p>用于调试，默认是打印到window.console上，但对于不支持window.console的浏览器（如IE6）则会直接打印到页面底部。</p>
+<p>用于调试，默认是打印到window.console上，但对于不支持window.console的浏览器（如IE6），我们可以添加showInPage=true强制在页面上显示。</p>
 <p><span class="stress">参数：</span></p>
 <dl>
-    <dt>s</dt>
-    <dd>必需。要打印的内容。如果不是字符串会转换成字符串再打印。</dd>
-    <dt>force</dt>
+    <dt>str</dt>
+    <dd>必需。要打印的内容。</dd>
+    <dt>showInPage</dt>
     <dd>可选。Boolean。强逼打印到页面上，默认false。</dd>
+    <dt>priority</dt>
+    <dd>可选。String。用于决定是否打印此日志。格式为前面是“〉”，“〈”，“=”，“<=”，“>=”中的一个，加上一个数字，如“>5”。
+        在默认情况下，$.log.level=1，如果你使用了此参数，1 〉 5为false是不会打印此日志。这在调试时非常有用。
+    </dd>
 </dl>
 
 <fieldset><legend>例子</legend>

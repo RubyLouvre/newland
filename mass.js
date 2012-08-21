@@ -113,11 +113,11 @@
             return [d.getDate(), d.getMonth(), time].join(' ');
         },
         // $.log(str, [], color, timestamp, show )
-        log : function (str, color){
+        log : function (str){
             if(arguments.length === 1){
                 return console.log( str );
             }
-            var args = $.slice(arguments), timestamp = false, show = true, util = require("util");
+            var args = $.slice(arguments), show = true, timestamp = false, util = require("util");
             str = args.shift();
             for(var i = 0 ; i < args.length; i++){
                 var el = args[i]
