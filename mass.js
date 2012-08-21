@@ -35,7 +35,9 @@
         }
         return receiver;
     };
-
+    function pad(n) {
+        return n < 10 ? '0' + n.toString(10) : n.toString(10);
+    }
     mix( $, {//为此版本的命名空间对象添加成员
         rword: /[^, ]+/g,
         mix:  mix,
@@ -102,6 +104,44 @@
         //模块加载的定义函数
         define: function( name, deps, factory ){//模块名,依赖列表,模块本身
         //这里只是一个空接口
+        },
+        timestamp: function () {
+            var d = new Date();
+            var time = [pad(d.getHours()),
+            pad(d.getMinutes()),
+            pad(d.getSeconds())].join(':');
+            return [d.getDate(), d.getMonth(), time].join(' ');
+        },
+        // $.log(str, [], color, timestamp, show )
+        log : function (str, color){
+            if(arguments.length === 1){
+                return console.log( str );
+            }
+            var args = $.slice(arguments), timestamp = false, show = true, util = require("util");
+            str = args.shift();
+            for(var i = 0 ; i < args.length; i++){
+                var el = args[i]
+                if(Array.isArray(el)){
+                    el.unshift(str);
+                    str = util.format.apply(0,el)
+                }else if(typeof el == "string"){
+                    if(colors[el]){
+                        str = '\u001b[' + colors[el][0] + 'm' + str + '\u001b[' + colors[el][1] + 'm';
+                    //是否在前面加上时间戮
+                    }else if(el === "timestamp"){
+                        timestamp = true;
+                    //匹配优先级，用于显示或隐藏   前面是< > <= >= =，后面是一个数字
+                    }else if(/^\s*(?:[<>]=?|=)\s*\d\s*$/.test(el)){//  /\s*(?:[<>]=?|=)\s*\d/
+                        show = Function ( "return "+ $.log.level + el)()
+                    }
+                }
+            }
+            if(show){
+                if(timestamp){
+                    str = $.timestamp() +"  "+ str
+                }
+                console.log(str)
+            }
         },
         //模块加载的请求函数
         require: function( deps, factory, errback ){
@@ -225,67 +265,23 @@
 
     //用于模块加载失败时的错误回调
     var errorStack = [];
-    //实现漂亮的五颜六色的日志打印
-    new function(){
-        var rformat = /<code\s+style=(['"])(.*?)\1\s*>([\d\D]+?)<\/code>/ig
-        , colors = {}
-        , index  = 0
-        , formats = {
-            bold      : [1, 22],
-            italic    : [3, 23],
-            underline : [4, 24],
-            inverse   : [7, 27],
-            strike    : [9, 29]
-        };
-        "black,red,green,yellow,blue,magenta,cyan,white".replace($.rword, function(word){
-            colors[word] = index++;
-        });
-        colors.gray = 99;
-        function format (arr, str) {
-            return '\x1b[' + arr[0] + 'm' + str + '\x1b[' + arr[1] + 'm';
-        }
-        /**
-         * 用于调试
-         * @param {String} s 要打印的内容
-         * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
-         * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
-         */
-        $.log = function (s, color){
-            if(arguments.length === 1){
-                return console.log( s );
-            }
-            var args = $.slice(arguments);
-            if( args.pop() === true){
-                s = args.join("").replace( rformat, function( a, b, style,ret){
-                    style.toLowerCase().split(";").forEach(function(arr){
-                        arr = arr.split(":");
-                        var type = arr[0].trim(),val = (arr[1]||"").trim();
-                        switch(type){
-                            case "format":
-                                val.replace(/\w+/g,function(word){
-                                    if(formats[word]){
-                                        ret = format(formats[word],ret)
-                                    }
-                                });
-                                break;
-                            case "background":
-                            case "color":
-                                var array = type == "color" ? [30,39] : [40,49]
-                                if( colors[val]){
-                                    array[0] += colors[val]
-                                    ret = format(array,ret)
-                                }
-                        }
-                    });
-                    return ret;
-                });
-            }else{
-                s  = [].join.call(arguments,"")
-            }
-            console.log( s );
-        }
-    }
-
+    //用于实现漂亮的五颜六色的日志打印
+    var colors = {
+        'bold' : [1, 22],
+        'italic' : [3, 23],
+        'underline' : [4, 24],
+        'inverse' : [7, 27],
+        'white' : [37, 39],
+        'grey' : [90, 39],
+        'black' : [30, 39],
+        'blue' : [34, 39],
+        'cyan' : [36, 39],
+        'green' : [32, 39],
+        'magenta' : [35, 39],
+        'red' : [31, 39],
+        'yellow' : [33, 39]
+    }; 
+    $.log.level = 1;
     //暴露到全局作用域下,所有模块可见!!
     exports.$ = global.$ = $;
     $.log("<code style='color:green'>后端mass框架</code>",true);
@@ -312,6 +308,7 @@
 //2011.12.17 $.define再也不用指定模块所在的目录了,
 //2012.7.12 重新开始搞后端框架
 //2012.8.9  添加parseUrl, parseQuery API
+//2012.8.21 重构$.log 添加$.timestamp
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
 //一个很好的前端工具 https://github.com/colorhook/att
 //http://blog.csdn.net/dojotoolkit/article/details/7820321

@@ -1,14 +1,74 @@
 <%  set_title("newland的文档") %>
 <%  set_layout("doc_layout.html") %>
 <h2>newland的文档</h2>
+<h3>配置相关</h3>
+<p>它位于app/config.js文件中</p>
+<h3>路由相关</h3>
+<p>所有路由规则都定义在app/routes.js文件中</p>
+<p>基础语法</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+mapper.add(method, pathname, controller+"#"+action)
+</pre>
+<ul>
+    <li>method，是指GET，POST，PUT，DELETE这四种请求类型</li>
+    <li>pathname，是指请求URL中去掉host,port,hash,query的部分,亦即req.url,它是以\隔开,如果是可选的请用小括号括起,
+        如果该值要放到参数对象中,请加:前缀.</li>
+    <li>controller+"#"+action,就是控制器的名字加action的名字</li>
+</ul>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+    mapper.add("GET","/","home#index")
+    mapper.add("GET","/about","home#about")
+    mapper.add("GET","/:yyyy/:mm/:dd","blog#page")  //flow.params => {yyyy:2012,mm:09, dd:02}
+    mapper.add("GET","doc/:modules(/:method)","doc#index") //flow.params => {modules:"flow",method:"append"}
+</pre>
+<p>它的一种变种,方法路由,就是省略最前面的参数</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+        mapper.get("/mongo/(:method)","mongo#index")
+        mapper.get("/tabs","home#tabs")
+        mapper.get("/newland","newland#index")
+        map.post('/add_comment','site#add_comment');
+</pre>
+<p>资源路由,一个路由规则对应七种规则的路径</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ map.resources('users');
+ //它相当于以下七条规则
+ mapper.add( "GET",     "/users(.:format)",         "users#inex")
+ mapper.add( "GET",     "/users/new(.:format)",     "users#new")
+ mapper.add("POST",     "/users(.:format)",         "users#create")
+ mapper.add( "GET",     "/users/:id(.:format)",     "users#show")
+ mapper.add( "GET",     "/users/:id/edit(.:format)","users#edit")
+ mapper.add( "PUT",     "/users/:id(.:format)",     "users#update")
+ mapper.add("DELETE",   "/users/:id(.:format)",     "users#destroy")
+
+</pre>
+<p>如果不想生成这么多,我们还可以对资源路由进行制定</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+//这样就只生成index,show两条规则
+map.resources('users', {only: ['index', 'show']})
+//这样就生成除create,destroy外的五条规则
+map.resources('users', {except: ['create', 'destroy']});
+</pre>
+
 <h3>cookie相关</h3>
 <p>查看cookie</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.log( flow.cookies ) //{ __atuvc: '2|25', myCookie: 'xxxxxxxxxx', newCookie: 'ddd', user 'yyy' }
 </pre>
+<p>命名空间路由,这意味着controller所在的目录外还多一个目录</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ map.namespace("tests",function(tests){
+     tests.resources('comments');
+ });
+</pre>
+<p>套嵌路由</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+ map.resources('posts', function (post) {
+       post.resources('users')
+ });
+</pre>
 <p>添加cookie</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">
-//flow.addCookie(name, val, opts)
+//格式：flow.addCookie(name, val, opts)
  flow.addCookie("ACookie","xxxxxxxxxx");
  flow.addCookie("BCookie","yyyyyyyyy");
  flow.addCookie('rememberme', 'yes', { expires: 0, httpOnly: true })
@@ -49,7 +109,7 @@ flow.removeCookie(["myCookie","uuer","newCookie"])
 <h3>flash相关</h3>
 
 
-<p>这个flash与Adobe/Macromedia Flash半毛线关系也没有</p>
+<p>这个flash与Adobe/Macromedia Flash半毛钱关系也没有</p>
 <p>flash是基于session的消息传送机制，我们可以把消息放到flash中并在下一个action访问到它们。</p>
 <p>flash的通常是使用重定向后,确保消息可用到下一个页面呈现。比如一个表单提交后,我们在跳转后的新页面显示成功消息,
     而不用在先前的页面让用户等待几秒钟才跳转.</p>
