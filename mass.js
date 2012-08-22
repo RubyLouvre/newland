@@ -110,27 +110,26 @@
             var time = [pad(d.getHours()),
             pad(d.getMinutes()),
             pad(d.getSeconds())].join(':');
-            return [d.getDate(), d.getMonth(), time].join(' ');
+            return [d.getFullYear(), pad(d.getMonth()), d.getDate(), time].join(' ');
         },
         logger: {
             write:function(){}
         },
         // $.log(str, [], color, timestamp, level )
         log : function (str){
-            var level = 9, orig = str;
+            var level = 9, orig = str, util = require("util"), show = true, timestamp = false;
             if(arguments.length === 1){
-                $.logger.write(9 ,orig);
+                $.logger.write(9, util.inspect(orig))
                 return console.log( orig );
             }
-            var show = true, timestamp = false, util = require("util");
             for(var i = 1 ; i < arguments.length; i++){
                 var el = arguments[i]
                 if(Array.isArray(el)){
                     el.unshift(str);
                     str = util.format.apply(0,el)
                 }else if(typeof el == "string"){
-                    if(colors[el]){
-                        str = '\u001b[' + colors[el][0] + 'm' + str + '\u001b[' + colors[el][1] + 'm';
+                    if(styles[el]){
+                        str = '\u001b[' + styles[el][0] + 'm' + str + '\u001b[' + styles[el][1] + 'm';
                     //是否在前面加上时间戮
                     }else if(el === "timestamp"){
                         timestamp = true;
@@ -140,7 +139,7 @@
                     level = el;
                 }
             }
-            $.logger.write(level,orig)
+            $.logger.write(level,util.inspect(orig))
             if(show){
                 if(timestamp){
                     str = $.timestamp() +"  "+ str
@@ -221,8 +220,7 @@
                     var  ret = collect_rets( id, obj.args ||[], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
-                        $.log(id,"cyan", 6 );
-                       // $.log("已加载" + id + "模块","cyan", 6 );
+                        $.log("已加载" + id + "模块","cyan", 6 );
                         $._checkDeps();
                     }
                 }
@@ -272,7 +270,7 @@
     //用于模块加载失败时的错误回调
     var errorStack = [];
     //用于实现漂亮的五颜六色的日志打印
-    var colors = {
+    var styles = {
         'bold' : [1, 22],
         'italic' : [3, 23],
         'underline' : [4, 24],
@@ -288,11 +286,10 @@
         'yellow' : [33, 39]
     };
     //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
-    $.log.level = 9;
+    $.log.level = 0;
     //暴露到全局作用域下,所有模块可见!!
     exports.$ = global.$ = $;
     $.log("后端mass框架","green");
-
     //生成mass framework所需要的页面
     $.require("system/page_generate");
     $.require("system/more/logger");

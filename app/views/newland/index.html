@@ -48,7 +48,42 @@ map.resources('users', {only: ['index', 'show']})
 //这样就生成除create,destroy外的五条规则
 map.resources('users', {except: ['create', 'destroy']});
 </pre>
-
+<h3>日志相关</h3>
+<p>这涉及到打印到控制台与指定文件中，全部由$.log方法包揽。</p>
+<p>如果没有加载logger服务，它是不会打印到指定文件中，但即使这样$.log还是强得逆天。</p>
+<p>$.log的语法，除了第一个参数，其他参数都是可选，并且位置是不固定的。</p>
+<pre>
+$.log(obj,[ color, formatArray,timestamp, level ] )
+</pre>
+<ul>
+    <li>obj <strong>任意类型</strong> 如果要打印到后台，它会调用util模块的inspect方法进行转换</li>
+    <li>style <strong>String</strong> 用于打印在控制台，能看到五颜六色与下划斜体等风格，必须是<br/>
+        <code> bold,italic,underline,inverse,white,grey,black,cyan,green,magentea,yellow,blue</code>中的一个
+    </li>
+    <li>timestamp <strong>String</strong> 就是"timestamp"这个单词，如果存在，则会在输出内容之前加个年月日与时间作前缀</li>
+    <li>formatArray <strong>Array</strong>util.format的参数列表。我们可以在第一个参数使用%j, %s, %d等占位符，然后传这个数组填空它。</li>
+    <li>level <strong>Number</strong>，通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，7则连普通的调试消息也打印出来。
+        显示算法为 level <= $.log.level。这个$.log.level默认为9。下面是level各代表的含义。
+    </li>
+</ul>
+<ul>
+    <li>0 <strong>EMERGENCY</strong> system is unusable</li>
+    <li>1 <strong>ALERT</strong> action must be taken immediately</li>
+    <li>2 <strong>CRITICAL</strong> the system is in critical condition</li>
+    <li>3 <strong>ERROR</strong> error condition</li>
+    <li>4 <strong>WARNING</strong> warning condition</li>
+    <li>5 <strong>NOTICE</strong> a normal but significant condition</li>
+    <li>6 <strong>INFO</strong> a purely informational message</li>
+    <li>7 <strong>DEBUG</strong> messages to debug an application</li>
+</ul>
+<p>如果要打印到文件中,我们需要system/more/logger.js这个模块,里面$.logger方法有两个参数,level与url,level即为$.log.level,url可以到app/config.js文件中配置</p>
+<pre>
+     logfile: $.path.join( process.cwd(),"/log/master.log"),
+</pre>
+<p>使用示例:</p>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+$.log("这是带日期显示的","timestamp",5)//只有当$.log.level >= 5才会在控制台显示此信息
+</pre>
 <h3>cookie相关</h3>
 <p>查看cookie</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">

@@ -20,7 +20,7 @@ $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
                                 html =  $.readFileSync( layout_url , "utf-8");
                                 layouts[layout] = html;
                             }catch(e){
-                                $.log("找不到必需的布局模板: " + layout_url, "red","> 3");
+                                $.log("找不到必需的布局模板: " + layout_url, "red", 3);
                             }
                         }
                         fn = $.ejs.compile(html,array[1]);
@@ -36,7 +36,7 @@ $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
                         //同步到rubylouvre项目
                         var rubylouvre = view_url.replace("/app/views","").replace("newland","rubylouvre")
                         $.updateFile(rubylouvre, html, function(){
-                            //   $.log(rubylouvre+"  同步完成");
+                               $.log(rubylouvre+"  同步完成", 6);
                             },1);
                     }
                 });

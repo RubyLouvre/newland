@@ -21,52 +21,46 @@ $.define("logger", "../hfs,../../app/config",function(){
     for(var i in levels){
         mapper[levels[i]] = i
     }
-    function Log(level,stream){
+    function Log(level,file){
         if ('string' == typeof level) level = levels[level.toUpperCase()];
         this.level = level || levels.DEBUG;
-        this.stream = stream || process.stdout;
-        if (this.stream.readable) this.read();
+        this.file = file;
+        this.stream = [];
     };
     var EOL = $.isWindows? "\r\n" :"\n"
     Log.prototype = {
         write: function(level, msg) {
             if (level == 10 || level <= this.level) {
-                console.log(msg)
-                this.stream.write(
-                    '[' + $.timestamp() + ']'
-                    + ' ' + mapper[level] || "DEBUG"
-                    + ' ' + msg
-                    + EOL );
+                var str =  '[' + $.timestamp() + ']'
+                + ' ' + (mapper[level] || "DEBUG")
+                + ' ' + msg
+                + EOL
+                this.stream.push( str );
+                if(!this.lock){
+                    this._write()
+                }
             }
+        },
+        _write: function(){
+            var self = this;
+            self.lock = true;
+            $.writeFile(this.file, this.stream.shift() ,"utf-8","append",function(){
+                if(self.stream.length){
+                    self._write()
+                }else{
+                    self.lock = false;
+                }
+            })
         }
     }
-    $.logger = new Log($.log.level, $.createWriteStream( $.config.logfile, {
-        flags: 'a',
-        encoding:"utf-8"
-    }));
+    $.logger = new Log($.log.level, $.config.logfile);
     return Log;
 
 });
-// 最重要的参考 https://github.com/jaekwon/nogg/tree/master/lib
-//https://github.com/joyent/node/wiki/modules#wiki-logs
-// https://github.com/LearnBoost/cluster/blob/master/lib/plugins/logger.js
-//  https://github.com/Gagle/Node-BufferedWriter
 
-//log: function() {
-//		var trace = getTrace(__stack[1]);
-//		var string = util.format("%s [log] in %s:%d \n%s", trace.timestamp, trace.file, trace.lineno, util.format.apply(this, arguments));
-//
-//		process.stdout.write(string + "\n");
-//	},
-//function getTrace(call) {
-//	return {
-//		file: call.getFileName(),
-//		lineno: call.getLineNumber(),
-//		timestamp: new Date().toUTCString()
-//	}
 //	<ul>
 /*
-<li>0 <strong>EMERGENCY</strong>  system is unusable</li>
+<li>0 <strong>EMERGENCY</strong> system is unusable</li>
 <li>1 <strong>ALERT</strong> action must be taken immediately</li>
 <li>2 <strong>CRITICAL</strong> the system is in critical condition</li>
 <li>3 <strong>ERROR</strong> error condition</li>
