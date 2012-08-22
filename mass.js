@@ -93,26 +93,16 @@
             }
             return result;
         },
-        md5: function(str, encoding){
-            return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
-        },
         path: require("path"),//将原生path模块劫持到命名空间中
-        //它的内容由app/configs模块提供
-        configs: {
-            intercepters:[]
+        //一个空对象,将被app/config模块所重写
+        config: {
+            services:[]
         },
         //模块加载的定义函数
         define: function( name, deps, factory ){//模块名,依赖列表,模块本身
-        //这里只是一个空接口
+        //这是一个空接口
         },
-        timestamp: function () {
-            var d = new Date();
-            var time = [pad(d.getHours()),
-            pad(d.getMinutes()),
-            pad(d.getSeconds())].join(':');
-            return [d.getFullYear(), pad(d.getMonth()), d.getDate(), time].join(' ');
-        },
-        logger: {
+        logger: {//这是一个空接口
             write:function(){}
         },
         // $.log(str, [], color, timestamp, level )
@@ -146,6 +136,11 @@
                 }
                 console.log(str)
             }
+        },
+        timestamp: function () {
+            var d = new Date();
+            var time = [pad(d.getHours()),  pad(d.getMinutes()),  pad(d.getSeconds())].join(':');
+            return [d.getFullYear(), pad(d.getMonth()), d.getDate(), time].join(' ');
         },
         //模块加载的请求函数
         require: function( deps, factory, errback ){

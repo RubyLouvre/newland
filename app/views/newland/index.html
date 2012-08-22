@@ -66,16 +66,19 @@ $.log(obj,[ color, formatArray,timestamp, level ] )
         显示算法为 level <= $.log.level。这个$.log.level默认为9。下面是level各代表的含义。
     </li>
 </ul>
-<ul>
-    <li>0 <strong>EMERGENCY</strong> system is unusable</li>
-    <li>1 <strong>ALERT</strong> action must be taken immediately</li>
-    <li>2 <strong>CRITICAL</strong> the system is in critical condition</li>
-    <li>3 <strong>ERROR</strong> error condition</li>
-    <li>4 <strong>WARNING</strong> warning condition</li>
-    <li>5 <strong>NOTICE</strong> a normal but significant condition</li>
-    <li>6 <strong>INFO</strong> a purely informational message</li>
-    <li>7 <strong>DEBUG</strong> messages to debug an application</li>
-</ul>
+<fieldset><legend></legend>
+    <ul>
+        <li>0 <strong>EMERGENCY</strong> system is unusable</li>
+        <li>1 <strong>ALERT</strong> action must be taken immediately</li>
+        <li>2 <strong>CRITICAL</strong> the system is in critical condition</li>
+        <li>3 <strong>ERROR</strong> error condition</li>
+        <li>4 <strong>WARNING</strong> warning condition</li>
+        <li>5 <strong>NOTICE</strong> a normal but significant condition</li>
+        <li>6 <strong>INFO</strong> a purely informational message</li>
+        <li>7 <strong>DEBUG</strong> messages to debug an application</li>
+    </ul>
+</fieldset>
+
 <p>如果要打印到文件中,我们需要system/more/logger.js这个模块,里面$.logger方法有两个参数,level与url,level即为$.log.level,url可以到app/config.js文件中配置</p>
 <pre>
      logfile: $.path.join( process.cwd(),"/log/master.log"),
