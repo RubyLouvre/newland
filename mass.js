@@ -112,15 +112,19 @@
             pad(d.getSeconds())].join(':');
             return [d.getDate(), d.getMonth(), time].join(' ');
         },
-        // $.log(str, [], color, timestamp, show )
+        logger: {
+            write:function(){}
+        },
+        // $.log(str, [], color, timestamp, level )
         log : function (str){
+            var level = 9, orig = str;
             if(arguments.length === 1){
-                return console.log( str );
+                $.logger.write(9 ,orig);
+                return console.log( orig );
             }
-            var args = $.slice(arguments), show = true, timestamp = false, util = require("util");
-            str = args.shift();
-            for(var i = 0 ; i < args.length; i++){
-                var el = args[i]
+            var show = true, timestamp = false, util = require("util");
+            for(var i = 1 ; i < arguments.length; i++){
+                var el = arguments[i]
                 if(Array.isArray(el)){
                     el.unshift(str);
                     str = util.format.apply(0,el)
@@ -130,12 +134,13 @@
                     //是否在前面加上时间戮
                     }else if(el === "timestamp"){
                         timestamp = true;
-                    //匹配优先级，用于显示或隐藏   前面是< > <= >= =，后面是一个数字
-                    }else if(/^\s*(?:[<>]=?|=)\s*\d\s*$/.test(el)){//  /\s*(?:[<>]=?|=)\s*\d/
-                        show = Function ( "return "+ $.log.level + el)()
                     }
+                }else if( typeof el == "number" ){
+                    show = el <= $.log.level
+                    level = el;
                 }
             }
+            $.logger.write(level,orig)
             if(show){
                 if(timestamp){
                     str = $.timestamp() +"  "+ str
@@ -216,7 +221,8 @@
                     var  ret = collect_rets( id, obj.args ||[], obj.callback );
                     if( id.indexOf("@cb") === -1 ){
                         returns[ id ] = ret;
-                        $.log("已加载" + id + "模块","cyan", "> 5" );
+                        $.log(id,"cyan", 6 );
+                       // $.log("已加载" + id + "模块","cyan", 6 );
                         $._checkDeps();
                     }
                 }
@@ -256,7 +262,7 @@
             }
             require( filename );
         }catch( e ){
-            $.log( e, "red", ">= 3");
+            $.log( e, "red", 3);
             for(var fn; fn = errorStack.shift(); ){
                 fn();//打印错误堆栈
             }
@@ -280,15 +286,16 @@
         'magenta' : [35, 39],
         'red' : [31, 39],
         'yellow' : [33, 39]
-    }; 
-    $.log.level = 1;
+    };
+    //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
+    $.log.level = 9;
     //暴露到全局作用域下,所有模块可见!!
     exports.$ = global.$ = $;
     $.log("后端mass框架","green");
 
     //生成mass framework所需要的页面
     $.require("system/page_generate");
-    
+    $.require("system/more/logger");
     $.require("system/mvc");
 
 //安装过程:
@@ -303,7 +310,13 @@
 
 
 })();
-
+  // worker log streams
+//        var access = fs.createWriteStream(dir + '/workers.access.log', { flags: 'a' })
+//          , error = fs.createWriteStream(dir + '/workers.error.log', { flags: 'a' });
+//
+//        // redirect stdout / stderr
+//        proc.stdout.pipe(access);
+//        proc.stderr.pipe(error);
 //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
 //2011.12.17 $.define再也不用指定模块所在的目录了,
 //2012.7.12 重新开始搞后端框架

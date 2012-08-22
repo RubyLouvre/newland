@@ -154,13 +154,13 @@ void function( global, DOC ){
             }
             return result;
         },
-        //$.log(str, showInPage=true, '>=5' )
-        log: function (){
-            var args = $.slice(arguments), show = true, page = false,  str = args.shift();
-            for(var i = 0 ; i < args.length; i++){
-                var el = args[i]
-                if(typeof el == "string" && /^\s*(?:[<>]=?|=)\s*\d\s*$/.test(el) ){
-                    show = Function ( "return "+ $.log.level + el)()
+        //$.log(str, showInPage=true, 5 )
+        log: function (str){
+            var  show = true, page = false
+            for(var i = 1 ; i < arguments.length; i++){
+                var el = arguments[i]
+                if(typeof el == "number"){
+                    show = el <=  $.log.level
                 }else if(el === true){
                     page = true;
                 }
@@ -209,7 +209,7 @@ void function( global, DOC ){
             return result;
         }
     });
-    $.log.level = 1;
+    $.log.level = 9;
     $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;

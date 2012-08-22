@@ -11,6 +11,7 @@ $.define("configs", function(){
         maxObjects: 128,
         maxLength: 1024 * 256,
         maxAge: 60*60*24*365,
+        logfile: $.path.join( process.cwd(),"/log/master.log"),
         //默认session配置,必需加载get_cookie服务，否则无效
         session: {
             type: "cookie",//可选值有mongo, cookie, memory
