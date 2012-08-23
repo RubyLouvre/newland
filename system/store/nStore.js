@@ -18,8 +18,9 @@ var nStore = function(filename, callback){
     this.dbLength = 0;
     this.busy = false;
     this.filterFn = null;
+    console.log(this.loadDatabase)
     this.loadDatabase(callback);
-    Object.seal(this);
+  //  Object.seal(this);
 }
 nStore.prototype = {
     get length() {
@@ -108,7 +109,7 @@ nStore.prototype = {
     },
     loadDatabase: function (callback) {
         var buffer = new Buffer(CHUNK_LENGTH);
-        var index = Hash.new();
+        var index = new Hash;
         var scanned = false;
         var self = this;
         var stale = 0;
