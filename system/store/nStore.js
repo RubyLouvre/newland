@@ -3,7 +3,7 @@ var Path = require('path'),
 Fs = require('fs'),
 Step = require('./step'),
 Hash = require('./hash'),
-File = require('.file');
+File = require('./file');
 
 var CHUNK_LENGTH = 40 * 1024, TAB = 9, NEWLINE = 10;
 
@@ -252,7 +252,7 @@ nStore.prototype = {
     }
 }
 
-
+exports.nStore = nStore
 
 function CachePlugin(maxSize) {
     var values = {},
