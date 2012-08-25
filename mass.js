@@ -147,10 +147,7 @@
             var array = [], ret;
             if(arguments.length === 1 && toString.call(deps) === "[object Object]"){
                 ret = deps;//如果是对象,那么它就是exports
-            }else if(typeof deps == "string" ){
-                deps = deps.match( $.rword );//如果依赖列表是字符串,则转换为数组
-            }
-            if(Array.isArray(deps)){//如果存在依赖关系,先加载依赖关系
+            }else if(Array.isArray(deps)){//如果存在依赖关系,先加载依赖关系
                 for(var i = 0, el; el = deps[i++]; ){
                     array[ array.length ] =  args[1]( el );//require某个模块
                 }
@@ -161,7 +158,7 @@
                 var a = common[match[0]];
                 var b = common[match[1]];
                 var c = common[match[2]];
-                if( a && b && c && a != b && b != c && a != c ){//exports, require, module的位置随便
+                if( a && b && a != b && b != c  ){//exports, require, module的位置随便
                     ret =  callback.apply(0, [a, b, c]);
                 }else{
                     ret =  callback.apply(0, array);
