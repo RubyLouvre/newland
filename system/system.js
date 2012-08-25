@@ -1,4 +1,6 @@
-$.define("system","hfs, more/mapper, hfs, controller, ../app/config", function(){
+//$.define("system","hfs, more/mapper, hfs, controller, ../app/config", function(){
+   
+
     var libs = "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx"
     var files = [];
     $.mix({
@@ -78,5 +80,5 @@ $.define("system","hfs, more/mapper, hfs, controller, ../app/config", function()
 //到这里为止的代码都与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
 //http://www.elmerzhang.com/2011/09/nodejs-module-develop-publish/
 //==================================================================
-})
+//})
 

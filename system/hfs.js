@@ -1,8 +1,7 @@
 //height level file system
 //高级文件系统操作API
-$.define( "hfs","fs,path", function(fs, path){
+define( ["fs","path"], function(fs, path){
     // $.log("已加载了hfs模块")
-
     var encodings = {
         ascii:1,
         utf8:1,

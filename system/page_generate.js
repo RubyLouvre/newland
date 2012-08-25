@@ -1,11 +1,11 @@
-$.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
+$.define( "./helper, ./more/ejs, ./hfs",function( hepler ){
     var url = $.path.join( process.cwd(),"app/views/").replace(/\\/g,"/"),layouts = {};
     $.walk(url, function(files){
         var pending = files.length;
         for(var i = 0; i < pending; i++){
             (function(view_url){
                 $.readFile(view_url,"utf-8", function(e, source){
-                    var array = get_hepler();
+                    var array = hepler();
                     var data = array[0]
                     var helpers = array[1]
                     var fn = $.ejs.compile(source, helpers);
@@ -36,7 +36,7 @@ $.define("page_generate","helper, mass/more/ejs, hfs",function(get_hepler){
                         //同步到rubylouvre项目
                         var rubylouvre = view_url.replace("/app/views","").replace("newland","rubylouvre")
                         $.updateFile(rubylouvre, html, function(){
-                               $.log(rubylouvre+"  同步完成", 6);
+                               $.log(rubylouvre+"  同步完成", 7);
                             },1);
                     }
                 });

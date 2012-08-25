@@ -1,4 +1,4 @@
-(function(){
++ function(){
     //后端部分　2012.7.11 by 司徒正美
     function $(){}
     var class2type = {  //类型映射
@@ -7,12 +7,9 @@
         "NaN"  : "NaN"  ,
         "undefined" : "Undefined"
     }
-    , rmodule =  /([^(\s]+)\(?([^)]*)\)?/   //用于从字符串中切割出模块名与真路路径
-    , loadings = []                         //正在加载中的模块列表
-    , returns  = {}                         //模块的返回值
-    , cbi      = 1e5                        //用于生成回调函数的名字
+    ,rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
     , uuid     = 1
-    , toString = returns.toString
+    , toString = class2type.toString
     //为[[class]] --> type 映射对象添加更多成员,用于$.type函数
     "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace(/\w+/g,function(name){
         class2type[ "[object " + name + "]" ] = name;
@@ -98,15 +95,12 @@
         config: {
             services:[]
         },
-        //模块加载的定义函数
-        define: function( name, deps, factory ){//模块名,依赖列表,模块本身
-        //这是一个空接口
-        },
+        noop: function(){},
         logger: {//这是一个空接口
             write:function(){}
         },
         // $.log(str, [], color, timestamp, level )
-        log : function (str){
+        log: function (str){
             var level = 9, orig = str, util = require("util"), show = true, timestamp = false;
             if(arguments.length === 1){
                 $.logger.write(9, util.inspect(orig))
@@ -125,7 +119,7 @@
                         timestamp = true;
                     }
                 }else if( typeof el == "number" ){
-                    show = el <= $.log.level
+                    show = el <= $.log.level;
                     level = el;
                 }
             }
@@ -142,128 +136,70 @@
             var time = [pad(d.getHours()),  pad(d.getMinutes()),  pad(d.getSeconds())].join(':');
             return [d.getFullYear(), pad(d.getMonth()), d.getDate(), time].join(' ');
         },
-        //模块加载的请求函数
-        require: function( deps, factory, errback ){
-            var _deps = {}, args = [], dn = 0, cn = 0;
-            factory = typeof factory == "function" ? factory : $.noop;
-            String(deps +"").replace( $.rword, function( str ){
-                if(str.indexOf("./") === 0){
-                    str = str.replace(/^\.\//, "" );
-                }
-                dn++;
-                var match = str.match( rmodule );
-                var id  = "@"+ match[1];//模块的ID
-                var filename = match[2];//模块的URL
-                if(!filename){
-                    id = id.replace(/\.js$/,"")
-                    filename = $.path.join( factory.parent || $.require.root, match[1] ); //path.join会自动处理../的情况
-                    filename = /\.js$/.test(filename) ? filename : filename +".js";
-                }
-                var input = id;
-                try{//先把它当成原生模块进行加载
-                    returns[ id ] = require( match[1] );//require自身是缓存请求的
-                    mapper[ id ] = {
-                        state : 2
-                    }
-                    process.nextTick( $._checkDeps );//每成功加载一个模块就进行依赖检测
-                }catch(e){
-                    input = filename
-                }
-                if( !_deps[ input ] ){
-                    args.push( input );
-                    _deps[ input ] = "司徒正美";
-                }
-                if( input === filename &&  !mapper[ input ] ){ //防止重复生成节点与请求
-                    mapper[ input ] = {};//state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                    loadJS( filename );
-                }else if( mapper[ input ].state === 2  ){
-                    cn++;
-                }
-            });
-            var id = factory.id || "@cb"+ ( cbi++ ).toString(32);
-            if( typeof errback == "function" ){
-                errorStack.push( errback );//压入错误堆栈
+        define: function(deps, callback){
+            var caller = arguments.callee.caller
+            var args = caller.arguments;//取得当前模块的参数列表,依次为exports, require, module, __filename,__dirname
+            var common = {
+                exports: args[0],
+                require: args[1],
+                module:  args[2]
             }
-            mapper[ id ] = mapper[ id ] || {}
-            $.mix( mapper[ id ], {//创建或更新模块的状态
-                callback: factory,
-                id:       id,
-                deps:     _deps,
-                args:     args,
-                state:    1
-            }, false);
-            //在正常情况下模块只能通过_checkDeps执行
-            loadings.unshift( id );
-            process.nextTick( $._checkDeps );
+            var array = [], ret;
+            if(arguments.length === 1 && toString.call(deps) === "[object Object]"){
+                ret = deps;//如果是对象,那么它就是exports
+            }else if(typeof deps == "string" && deps.indexOf(",") > 1){
+                deps = deps.match( $.rword );//如果依赖列表是字符串,则转换为数组
+            }
+            if(Array.isArray(deps)){//如果存在依赖关系,先加载依赖关系
+                for(var i = 0; i < deps.length;i++){
+                    array[ array.length ] =  args[1](deps[i]);//require某个模块
+                }
+            }
+            callback = arguments[arguments.length - 1];
+            if(typeof callback == "function"){
+                var match = callback.toString().replace(rparams,"$1") || [];
+                var a = common[match[0]];
+                var b = common[match[1]];
+                var c = common[match[2]];
+                if( a && b && c ){//exports, require, module的位置随便
+                    ret =  callback.apply(0, [a, b, c]);
+                }else{
+                    ret =  callback.apply(0, array);
+                }
+            }
+            if(typeof ret !== "undefined"){
+                args[2].exports = ret;
+            }
+            return args[2].exports;
         },
-
-        //  模块加载的检测依赖函数,如果一个模块所依赖的其他模块的状态都是2了,那么将它也改成2,并执行回调
-        _checkDeps: function (){
-            loop:
-            for ( var i = loadings.length, filename; filename = loadings[ --i ]; ) {
-                var obj = mapper[ filename ], deps = obj.deps || {};
-                for( var key in deps ){
-                    if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
-                        continue loop;
-                    }
-                }
-                //如果deps是空对象或者其依赖的模块的状态都是2
-                if( obj.state !== 2){
-                    loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
-                    obj.state = 2 ;
-                    var  id = obj.id;
-                    var  ret = collect_rets( id, obj.args ||[], obj.callback );
-                    if( id.indexOf("@cb") === -1 ){
-                        returns[ id ] = ret;
-                        $.log("已加载" + id + "模块","cyan", 6 );
-                        $._checkDeps();
-                    }
-                }
+        require: function(deps, callback){
+            if(typeof deps == "string"){
+                return require(deps)
             }
+            var array = [];
+            for(var i = 0, el; el = deps[i++];){
+                array.push( require(el) )
+            }
+            if(typeof callback == "function"){
+                callback.apply(0, array);
+            }
+            return array
         }
+
     });
-    //把模块有关信息都存放在这里
-    var mapper = $.require.cache = {}
+
     //模块加载的根路径,默认是mass.js种子模块所在的目录
     $.require.root = process.cwd();
-    //从returns对象取得依赖列表中的各模块的返回值
-    function collect_rets( name, args, fn ){
-        for(var i = 0, argv = []; i < args.length ; i++){
-            argv.push( returns[ args[i] ] );
-        }
-        var ret = fn.apply( null, argv );//执行模块工厂，然后把返回值放到returns对象中
-        $.debug( name );//想办法取得函法中的exports对象
-        return ret;
-    }
     $.parseQuery = require("querystring").parse;
-    $.parseUrl = require("url").parse; //将原生URL模块的parse劫持下来
-    $.noop = $.error = $.debug = function(){};//error, debug现在还是空接口
-
-    //模块加载的加载函数
-    function loadJS(  filename ){
-        try{
-            $.define = function(){//诡变的$.define
-                var args = Array.apply([],arguments);
-                if( typeof args[1] === "function" ){//处理只有两个参数的情况
-                    [].splice.call( args, 1, 0, "" );
-                }
-                args[2].id = filename; //模块名
-                args[2].parent =  filename.slice(0, filename.lastIndexOf( $.path.sep ) + 1) //取得父模块的文件夹
-                mapper[ filename ].state = 1;
-                process.nextTick( $._checkDeps );//每成功加载一个模块就进行依赖检测
-                $.require( args[1], args[2] );
-            }
-            require( filename );
-        }catch( e ){
-            $.log( e, "red", 3);
-            for(var fn; fn = errorStack.shift(); ){
-                fn();//打印错误堆栈
-            }
-        }
+    var _join = $.path.join;
+    $.path.join = function(){
+        var ret = _join.apply(0,arguments)
+        return  ret.replace(/\\/g,"/")
     }
+    $.parseUrl = require("url").parse; //将原生URL模块的parse劫持下来
+    $.error = require("util").error;
+    $.debug = require("util").debug;
 
-    //用于模块加载失败时的错误回调
-    var errorStack = [];
     //用于实现漂亮的五颜六色的日志打印
     var styles = {
         'bold' : [1, 22],
@@ -281,14 +217,17 @@
         'yellow' : [33, 39]
     };
     //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
-    $.log.level = 0;
+    $.log.level = 9;
     //暴露到全局作用域下,所有模块可见!!
+    global.define = $.define;
     exports.$ = global.$ = $;
     $.log("后端mass框架","green");
     //生成mass framework所需要的页面
-    $.require("system/page_generate");
-    $.require("system/more/logger");
-    $.require("system/mvc");
+    $.require(["./system/page_generate"],function(){
+        $.log("页面生成")
+    });
+  //  $.require("system/more/logger");
+  //  $.require("system/mvc");
 
 //安装过程:
 //安装数据库 http://www.mongodb.org/downloads,下载回来放到C盘解压,改名为mongodb
@@ -301,14 +240,7 @@
 //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
 //redis-server.exe .\redis.conf
 
-})();
-  // worker log streams
-//        var access = fs.createWriteStream(dir + '/workers.access.log', { flags: 'a' })
-//          , error = fs.createWriteStream(dir + '/workers.error.log', { flags: 'a' });
-//
-//        // redirect stdout / stderr
-//        proc.stdout.pipe(access);
-//        proc.stderr.pipe(error);
+}();
 //https://github.com/codeparty/derby/blob/master/lib/View.js 创建视图的模块
 //2011.12.17 $.define再也不用指定模块所在的目录了,
 //2012.7.12 重新开始搞后端框架

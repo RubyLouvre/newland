@@ -1,4 +1,5 @@
-$.define("helper", function(){
+define( function(){
+    $.log("视图助手生成模块")
     function make_helper(){
         var data = {
             links : [],

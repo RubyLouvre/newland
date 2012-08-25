@@ -87,6 +87,25 @@ $.log(obj,[ color, formatArray,timestamp, level ] )
 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.log("这是带日期显示的","timestamp",5)//只有当$.log.level >= 5才会在控制台显示此信息
 </pre>
+<h3>操作流</h3>
+<p>newland.js中用的操作流是mass Framework中的子类，增强版，可以说是整个架构的核心。</p>
+<p>它的相关属性与方法</p>
+<ul>
+    <li>req：就是ClientRequest的实例，将http.createServer的回调的第一参数绑在其上</li>
+    <li>res：就是ServerResponse的实例，将http.createServer的回调的第二参数绑在其上</li>
+    <li>url：就是req.url</li>
+    <li>pathname：就是req.url去掉hash与query的部分，req.url.replace(/[?#].*/, '')</li>
+    <li>params，就是路由规则中指定的pathname部分加query部分组成的对象</li>
+    <li>store，此对象只有该URL能进入action才存在，用于action间的通信</li>
+    <li>cookies，此对象只有该URL能进入action才存在，它将请求中的cookies首部解释成一个对象方便用户获取。</li>
+    <li>session，此对象只有该URL能进入action才存在，用于action间的通信，它基于store与cookies</li>
+    <li>flash，Function，一个用于保存上次请求需要发送到下一个页面的提示（警告或错误）信息，基于session</li>
+    <li>mime，用于获取请求资源的类型，返回像"html","js", "css", "gif"等字符串，如果URL是动态的，随参数的情况返回页面或图片什么的，
+        则返回"*"，表示不确定。</li>
+    <li>xhr，判定是否AJAX请求。</li>
+    <li>addCookie，Function，添加一个cookie到客户端</li>
+    <li>removeCookie，Function，删除客户端一个或多个cookie</li>
+</ul>
 <h3>cookie相关</h3>
 <p>查看cookie</p>
 <pre class="brush:javascript;gutter:false;toolbar:false">

@@ -103,7 +103,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             return this;
         },
         //Content-Type 相当于content-type
-        get: function(name){
+        getHeader: function(name){
             var headers = this.req.headers || {}
             switch (name = name.toLowerCase()) {
                 case 'referer':
@@ -115,7 +115,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             }
         },
 
-        set: function(field, val){
+        setHeader: function(field, val){
             var req = this.req
             if (2 == arguments.length) {
                 req.setHeader(field, '' + val);
@@ -137,7 +137,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
     HttpFlow.prototype.__defineGetter__("xhr", function(){
         if(!this.req)
             return false;
-        var val = this.get('X-Requested-With') || '';
+        var val = this.req.getHeader('X-Requested-With') || '';
         return 'xmlhttprequest' == val.toLowerCase();
     });
     
