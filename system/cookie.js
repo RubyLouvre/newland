@@ -1,4 +1,4 @@
-$.define("cookie", function(){
+define( function(){
     var encode = encodeURIComponent;
     var decode = decodeURIComponent;
     // serialize('foo', 'bar', { httpOnly: true })  => "foo=bar; httpOnly"

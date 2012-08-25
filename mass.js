@@ -147,12 +147,12 @@
             var array = [], ret;
             if(arguments.length === 1 && toString.call(deps) === "[object Object]"){
                 ret = deps;//如果是对象,那么它就是exports
-            }else if(typeof deps == "string" && deps.indexOf(",") > 1){
+            }else if(typeof deps == "string" ){
                 deps = deps.match( $.rword );//如果依赖列表是字符串,则转换为数组
             }
             if(Array.isArray(deps)){//如果存在依赖关系,先加载依赖关系
-                for(var i = 0; i < deps.length;i++){
-                    array[ array.length ] =  args[1](deps[i]);//require某个模块
+                for(var i = 0, el; el = deps[i++]; ){
+                    array[ array.length ] =  args[1]( el );//require某个模块
                 }
             }
             callback = arguments[arguments.length - 1];
@@ -161,7 +161,7 @@
                 var a = common[match[0]];
                 var b = common[match[1]];
                 var c = common[match[2]];
-                if( a && b && c ){//exports, require, module的位置随便
+                if( a && b && c && a != b && b != c && a != c ){//exports, require, module的位置随便
                     ret =  callback.apply(0, [a, b, c]);
                 }else{
                     ret =  callback.apply(0, array);
@@ -173,9 +173,10 @@
             return args[2].exports;
         },
         require: function(deps, callback){
-            if(typeof deps == "string"){
+            if(typeof deps == "string" && deps.indexOf(",") == -1 && !callback){
                 return require(deps)
             }
+            deps = String(deps).match($.rword)
             var array = [];
             for(var i = 0, el; el = deps[i++];){
                 array.push( require(el) )
@@ -228,7 +229,7 @@
     });
     $.require("./app/config");
     $.require("./system/more/logger");
-//  $.require("system/mvc");
+    $.require("./system/mvc");
 
 //安装过程:
 //安装数据库 http://www.mongodb.org/downloads,下载回来放到C盘解压,改名为mongodb

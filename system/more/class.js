@@ -1,7 +1,7 @@
 //=========================================
 // 类工厂模块
 //==========================================
-$.define("class", "lang",function(){
+$.define( "./lang",function(){
    //$.log("已加载类工厂模块")
     var
     unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),

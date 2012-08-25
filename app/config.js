@@ -1,4 +1,4 @@
-$.define("config", function(){
+define( function(){
     // 虽然说“约定优于配置”，但也不能没配置。不过如果只要配置配置就能搞定，总比写代码好多了。 
     return $.config = {
         services: [],

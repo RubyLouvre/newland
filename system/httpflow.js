@@ -1,4 +1,4 @@
-$.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_helper,Cookie ){
+$.define("./helper,./cookie,./more/flow", function( helper,cookie ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
@@ -37,7 +37,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
     
     HttpFlow = $.factory({
         init: function(){
-            this.helper = make_helper()
+            this.helper = helper()
         },
         inherit: $.Flow,
         //为flow添加一系列属性,并劫持res.writeHead,res.setHeader
@@ -86,7 +86,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
                     var array = []
                     for(var i in this.resCookies){
                         var arr = this.resCookies[i];
-                        array.push( Cookie.stringify(i, arr[0], arr[1] ) )
+                        array.push( cookie.stringify(i, arr[0], arr[1] ) )
                     }
                     this._setHeader.call(this.res, "Set-Cookie",array)
                 })
@@ -139,8 +139,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
             return false;
         var val = this.req.getHeader('X-Requested-With') || '';
         return 'xmlhttprequest' == val.toLowerCase();
-    });
-    
+    });   
     return HttpFlow
 
 });
