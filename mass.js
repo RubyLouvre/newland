@@ -226,8 +226,9 @@
     $.require(["./system/page_generate"],function(){
         $.log("页面生成")
     });
-  //  $.require("system/more/logger");
-  //  $.require("system/mvc");
+    $.require("./app/config");
+    $.require("./system/more/logger");
+//  $.require("system/mvc");
 
 //安装过程:
 //安装数据库 http://www.mongodb.org/downloads,下载回来放到C盘解压,改名为mongodb

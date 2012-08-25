@@ -1,4 +1,4 @@
-$.define("logger", "../hfs,../../app/config",function(){
+define( ["../hfs"], function(){
     var levels = {
         // System is unusable.
         EMERGENCY : 0,
@@ -55,7 +55,6 @@ $.define("logger", "../hfs,../../app/config",function(){
     }
     $.logger = new Log($.log.level, $.config.logfile);
     return Log;
-
 });
 
 //	<ul>
