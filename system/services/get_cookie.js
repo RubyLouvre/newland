@@ -1,8 +1,8 @@
 $.define("get_cookie","../cookie", function(Cookie){
     return function( flow ){
         var config = $.config.cookie
-        if ( /^(\*|html)$/i.test(flow.mime) && flow.originalUrl.indexOf(config.path) == 0 ){
-            $.log( "已调用get_cookie服务", "> 6" );
+        if ( /^(\*|html)$/i.test(flow.mime) && flow.url.indexOf(config.path) == 0 ){
+            $.log( "已调用get_cookie服务", 6 );
             var cookie = flow.req.headers.cookie;
             flow.cookies = cookie ?  Cookie.parse(cookie) : {}
         }

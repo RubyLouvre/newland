@@ -1,9 +1,9 @@
 var net = require("net"),
 
-Queue = require("./more/queue"),
+Queue = require("../more/queue"),
 events = require("events"),
 crypto = require("crypto"),
-parsers = [], commands,
+parsers = [require("../more/parse_js")], commands,
 connection_id = 0,
 default_port = 6379,
 default_host = "127.0.0.1";
@@ -11,7 +11,6 @@ default_host = "127.0.0.1";
 // can set this to true to enable for all connections
 exports.debug_mode = false;
 
-parsers.push(require("./more/parse_js"));
 function to_array(args) {
     var len = args.length,
     arr = new Array(len), i;
@@ -872,22 +871,9 @@ commands = set_union(["get", "set", "setnx", "setex", "append", "strlen", "del",
     "bgrewriteaof", "shutdown", "lastsave", "type", "multi", "exec", "discard", "sync", "flushdb", "flushall", "sort", "info", "monitor", "ttl",
     "persist", "slaveof", "debug", "config", "subscribe", "unsubscribe", "psubscribe", "punsubscribe", "publish", "watch", "unwatch", "cluster",
     "restore", "migrate", "dump", "object", "client", "eval", "evalsha"], [  "append",
-    "auth",  "bgrewriteaof", "bgsave",  "bitcount",  "bitop",
-    "blpop",
-    "brpop",
-    "brpoplpush",
-    "client kill",
-    "client list",
-    "config get",
-    "config set",
-    "config resetstat",
-    "dbsize",
-    "debug object",
-    "debug segfault",
-    "decr",
-    "decrby",
-    "del",
-    "discard",
+    "auth",  "bgrewriteaof", "bgsave",  "bitcount",  "bitop", "blpop",
+    "brpop","brpoplpush", "client kill", "client list", "config get", "config set", "config resetstat", "dbsize",
+    "debug object","debug segfault","decr", "decrby","del", "discard",
     "dump",
     "echo",
     "eval",

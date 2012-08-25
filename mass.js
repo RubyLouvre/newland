@@ -299,7 +299,7 @@
 //启动框架 node mass
 
 //现在我的首要任务是在瓦雷利亚的海滩上建立一个小渔村
-
+//redis-server.exe .\redis.conf
 
 })();
   // worker log streams

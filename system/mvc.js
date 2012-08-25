@@ -102,6 +102,7 @@ $.define("mvc", "httpflow, http, system",function( Flow, http ){
                 }
             }
         }else{ //如果没有对应的路由规则可用，则进入拦截器系统，比如绝大多数的静态资源
+            console.log(flow.originalUrl)
             flow.params = $.parseUrl(url, true).query
             flow.fire("no_action")
         }

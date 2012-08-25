@@ -6,7 +6,7 @@ $.define("session", "sessions/"+$.config.session.type ,function(fn){
             var res = flow.res;
             var end = res.end;
             res.end = function(data, encoding){
-                $.log('flow.fire("end")'+flow.originalUrl,'cyan');
+                $.log('flow.fire("end")'+flow.url,'cyan');
                 flow.fire("end")
                 end.call(res, data, encoding);
             };

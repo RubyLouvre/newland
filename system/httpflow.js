@@ -44,37 +44,11 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         patch: function(req, res){
             this.res =  res;
             this.req =  req;
-            this.originalUrl = req.url;
+            this.url = req.url;
+            this.pathname = req.url.replace(/[?#].*/, '')
             this.params = {};
             this.store = new Store(this)
-            this.flash =  function(type, msg){
-                switch(arguments.length){
-                    case 2:
-                        this.fire("set_session_"+this.id, function(){
-                            var data = this;
-                            var flash = data.flash ||  (data.flash  || {});
-                            if( flash[ type ] ){
-                                flash[ type ].push( msg )
-                            }else{
-                                flash[ type ] = [msg]
-                            }
-                        });
-                        break;
-                    case 1:
-                        this.fire("get_session_"+this.id, function(){
-                            var data = this;
-                            var flash = data.flash ||  (data.flash  || {});
-                            return  flash[ type ] || []
-                        });
-                        break;
-                    case 0:
-                        this.fire("remove_session_"+this.id, function(){
-                            var data = this;
-                            delete data.flash;
-                        });
-                        break;
-                }
-            }
+          
             var flow = this;
             var writeHead = res.writeHead;
             var setHeader = res.setHeader;
@@ -157,7 +131,7 @@ $.define("httpflow","helper,Cookie,mass/flow,mass/more/ejs", function( make_help
         if(this._mime){
             return this._mime;
         }
-        return  this._mime = /\.(\w+)$/.test( this.originalUrl.replace(/[?#].*/, '') ) ?
+        return  this._mime = /\.(\w+)$/.test( this.pathname ) ?
         RegExp.$1 : "*"
     })
     HttpFlow.prototype.__defineGetter__("xhr", function(){
