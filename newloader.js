@@ -1,12 +1,17 @@
 + function( global, DOC ){
 
-    var
-    _$ = global.$, //保存已有同名变量
-    namespace = DOC.URL.replace( /(#.+|\W)/g,''),
-    w3c = DOC.dispatchEvent, //w3c事件模型
-    HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0],
-    commonNs = global[ namespace ], mass = 1, postfix = "",
-    class2type = {
+    var  _$ = global.$//保存已有同名变量
+    var rmakeid = /(#.+|\W)/g
+    var namespace = DOC.URL.replace( rmakeid,'')
+    var w3c = DOC.dispatchEvent //w3c事件模型
+    var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    var commonNs = global[ namespace ];//公共命名空间
+    var mass = 1;//当前框架的版本号
+    var postfix = "";//用于强制别名
+    var loadings = [];//正在加载中的模块列表
+    var cbi = 1e5 ; //用于生成回调函数的名字
+    var all = "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx"
+    var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
         "[object StaticNodeList]" : "NodeList",
@@ -18,19 +23,12 @@
         "undefined"               : "Undefined"
     },
     toString = class2type.toString;
-
-    /**
-     * @class $
-     * mass Framework拥有两个命名空间,
-     * 第一个是DOC.URL.replace(/(\W|(#.+))/g,'')，根据页面的地址动态生成
-     * 第二个是$，我们可以使用别名机制重写它
-     */
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
-            $.require( "lang,flow,attr,event,fx,ready", expr );
+            return  $.require( all+",ready", expr );
         }else{
             if( !$.fn )
-                throw "@node module is required!"
+                throw "node module is required!"
             return new $.fn.init( expr, context );
         }
     }
@@ -74,15 +72,17 @@
         html: DOC.documentElement,
         head: HEAD,
         mix: mix,
-        cache: {},
         rword: /[^, ]+/g,
+        core: {
+            alias:{ }
+        },//放置框架的一些重要信息
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": w3c ? "addEventListener" : "attachEvent",
         //将内部对象挂到window下，此时可重命名，实现多库共存  name String 新的命名空间
         exports: function( name ) {
             _$ && ( global.$ = _$ );//多库共存
-            name = name || $[ "@name" ];//取得当前简短的命名空间
-            $[ "@name" ] = name;
+            name = name || $.core.name;//取得当前简短的命名空间
+            $.core.name = name;
             global[ namespace ] = commonNs;
             return global[ name ]  = this;
         },
@@ -201,31 +201,25 @@
         class2type[ "[object " + name + "]" ] = name;
     });
 
-    +function(scripts, node){
+    -function(scripts, node){
         node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
         var url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
-        $["@name"] = node.getAttribute("namespace") || "$"
+        $.core.name = node.getAttribute("namespace") || "$"
         var str = node.getAttribute("debug")
-        $["@debug"] = str == 'true' || str == '1';
-        $.base = url.substr( 0, url.lastIndexOf('/') )
+        $.core.debug = str == 'true' || str == '1';
+        $.core.url = url.substr( 0, url.lastIndexOf('/') ) +"/"
     }(DOC.getElementsByTagName( "script" ));
 
-    var
-    loadings = [],//正在加载中的模块列表
-    cbi = 1e5 ;//用于生成回调函数的名字
+  
     var Module = function (id, parent) {
         this.id = id;
         this.exports = {};
         this.parent = parent;
-        if (parent && parent.children) {
-            parent.children.push(this);
-        }
+        var m = Module._load[parent]
+        m && m.children.push(this);
         this.children = [];
     }
-    Module.prototype.require = function(path) {
-        return Module._load(path, this);
-    };
     Module._load = function( url, parent) {
         url = Module._resolveFilename( url, parent.id )[0];
         var module = Module._cache[url];
@@ -236,7 +230,7 @@
     Module.update = function(id, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
-            module = new Module(id, $.base);
+            module = new Module(id, $.core.url);
             Module._cache[id] = module;
         }
         module.callback = factory || $.noop;
@@ -244,22 +238,36 @@
         module.deps = deps || {};
         module.args = args || [];
     }
-    Module._resolveFilename = function(url, parent,ret, ext){
-        if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
-            ret = url
-        }else {
-            var tmp = url.charAt(0);
-            if( tmp !== "." && tmp != "/"){  //相对于根路径
-                ret = $.base +"/" +url;
-            }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
-                ret = parent + "/" + url.substr(2);
-            }else if( url.slice(0,2) == ".."){ //相对于父路径
-                var arr = parent.replace(/\/$/,"").split("/");
-                tmp = url.replace(/\.\.\//g,function(){
-                    arr.pop();
-                    return "";
-                });
-                ret = arr.join("/")+"/"+tmp;
+    Module.prototype.require = function(a){
+        var self = this;
+        if(typeof a == "string"){
+            return Module._load(path, self)
+        }
+        return function(path){
+            return Module._load(path, self)
+        }
+    }
+    Module._resolveFilename = function(url, parent, ret, ext){
+        if(/^\w+$/.test(url) && $.core.alias[url] ){
+            ret = $.core.alias[url]
+        }else{
+            parent = parent.substr( 0, parent.lastIndexOf('/') )
+            if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
+                ret = url
+            }else {
+                var tmp = url.charAt(0);
+                if( tmp !== "." && tmp != "/"){  //相对于根路径
+                    ret = $.core.url + url;
+                }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
+                    ret = parent + "/" + url.substr(2);
+                }else if( url.slice(0,2) == ".."){ //相对于父路径
+                    var arr = parent.replace(/\/$/,"").split("/");
+                    tmp = url.replace(/\.\.\//g,function(){
+                        arr.pop();
+                        return "";
+                    });
+                    ret = arr.join("/")+"/"+tmp;
+                }
             }
         }
         tmp = ret.replace(/[?#].*/, '');
@@ -277,7 +285,8 @@
     $.modules = modules
     Module.update("ready", 0, 1);
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
-    var rcomment  = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg
+    var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
+    var rlcoment = /^\s*\/\/.*$/mg // line comments
     var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
@@ -295,35 +304,8 @@
                 el.detachEvent( "on" + type, fn || $.noop );
             }
         },
+        resolveFilename: Module._resolveFilename,
         //file:///F:/phpnow/vhosts/ 
-        path: function(parent, user, ret, ext){
-            if(/^(\w+)(\d)?:.*/.test(user)){  //如果用户路径包含协议
-                ret = user
-            }else {
-                var tmp = user.charAt(0);
-                if( tmp !== "." && tmp != "/"){  //相对于根路径
-                    ret = $.base +"/" +user;
-                }else if(user.slice(0,2) == "./"){ //相对于兄弟路径
-                    ret = parent + "/" + user.substr(2);
-                }else if(user.slice(0,2) == ".."){ //相对于父路径
-                    var arr = parent.replace(/\/$/,"").split("/");
-                    tmp = user.replace(/\.\.\//g,function(){
-                        arr.pop();
-                        return "";
-                    });
-                    ret = arr.join("/")+"/"+tmp;
-                }
-            }
-            tmp = ret.replace(/[?#].*/, '');
-            if(/\.(\w+)$/.test( tmp )){
-                ext = RegExp.$1;
-            }
-            if(tmp == ret){//如果没有后缀名会补上.js
-                ret += ".js";
-                ext = "js";
-            }
-            return [ret, ext];
-        },
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
         require: function( list, factory, id ){
             var deps = {}, // 用于检测它的依赖是否都为2
@@ -331,12 +313,12 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, id || $.base), url = array[0]
+                var array = Module._resolveFilename(el, id || $.core.url ), url = array[0]
                 if(array[1] == "js"){
                     dn++
                     if( !modules[ url ] ){ //防止重复生成节点与请求
                         //state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                        loadJS( url );//将要安装的模块通过iframe中的script加载下来
+                        loadJS( url, id );//将要安装的模块通过iframe中的script加载下来
                     }else if( modules[ url ].state === 2 ){
                         cn++;
                     }
@@ -359,7 +341,7 @@
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
-        define: function( parent, deps, factory ){//模块名,依赖列表,模块本身
+        define: function( parent, deps ){//模块名,依赖列表,模块本身
             var args = arguments;
             if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
                 if( deps ){
@@ -367,13 +349,19 @@
                 }
                 [].splice.call( args, 1, 1 );
             }
-            if( typeof args[1] === "function" ){//处理只有两个参数的情况,补允依赖列表
+            if( args.length === 2 ){//处理只有两个参数的情况,补允依赖列表
                 [].splice.call( args, 1, 0, [] );
             }
-            var array = []
-            args[2].toString().replace(rcomment,"") .replace(rrequire,function(a,b){
-                array.push(b)
-            })
+            if(typeof args[2] == "function"){
+                args[2].toString().replace(rbcoment,"").replace(rlcoment,"").replace(rrequire,function(a,b){
+                    args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
+                });
+            }else{
+                var ret = args[2];
+                args[2] = function(){
+                    return ret
+                }
+            }
             this.require( args[1], args[2], parent );
         },
         _checkFail : function(  doc, id, error ){
@@ -399,16 +387,50 @@
                     $._checkDeps();
                 }
             }
+        },
+        config: function(o) {
+            var core = $.core
+            for (var k in o) {
+                if (!o.hasOwnProperty(k)) continue
+                var previous = core[k]
+                var current = o[k]
+                if (previous && k === 'alias') {
+                    for (var p in current) {
+                        if (current.hasOwnProperty(p)) {
+                            var prevValue = previous[p]
+                            var currValue = current[p]
+                            if(prevValue && previous !== current){
+                                throw p + "不能重命名"
+                            }
+                            previous[p] = currValue
+
+                        }
+                    }
+                }
+                else {
+                    core[k] = current
+                }
+            }
+            return this
         }
-       
     });
     function loadCSS(url){
-        
+        var id = url.replace(rmakeid,"");
+        if (DOC.getElementById(id))
+            return
+        var link =  DOC.createElement('link');
+        link.charset = "utf-8"
+        link.rel = 'stylesheet'
+        link.href = url;
+        link.type="text/css"
+        link.id = id
+        HEAD.insertBefore( link, HEAD.firstChild );
     }
-    function loadJS( url, parent ){
-        modules[ url ] = new Module( url, parent);
+
+    var loadJS = function( url, parent ){
+        modules[ url ] = new Module( url, parent || $.core.url);
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $["@name" ],
+        codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.core.name,
         '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
         (DOC.uniqueID ? 'onreadystatechange="' : 'onload="'),
         "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps();}",
@@ -429,6 +451,7 @@
             }
             doc.write( "<body/>" );//清空内容
             HEAD.removeChild( iframe );//移除iframe
+            iframe = null;
         });
     }
 
@@ -440,9 +463,11 @@
         args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
         var module = Ns.modules[ nick ];
         var last = args.length - 1;
-        //劫持最后一个参数,将$, exports, require, module等对象强塞进去
-        args[ last ] =  parent.Function( "$, module, require, exports","return "+ args[ last ] )
-        (Ns, module, module.require, module.exports);
+        if( typeof args[ last ] == "function"){
+            //劫持模块工厂,将$, exports, require, module等对象强塞进去
+            args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
+            (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
+        }
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
@@ -454,7 +479,7 @@
         var module = Object( modules[id] ), ret;
         var common = {
             exports: module.exports,
-            require: module.require,
+            require: module.require(),
             module:  module
         }
         var match = callback.toString().replace(rparams,"$1") || [];
@@ -468,10 +493,14 @@
         }
         module.state = 2;
         if(typeof ret !== "undefined"){
-            common.exports = ret;
+            modules[ id ].exports = ret
         }
         return ret;
     }
+    all.replace($.rword,function(a){
+        $.core.alias[a] = $.core.url+a+".js"
+    });
+    $.log($.core.alias)
     //domReady机制
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
@@ -503,9 +532,35 @@
             doScrollCheck();
     }
     var rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/;
-    function debug (){}
+    function debug(obj, name, module, p){
+        var fn = obj[name];
+        if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){
+            if( rdebug.test( name )){
+                fn["@debug"] = name;
+            }else{
+                var method = obj[name] = function(){
+                    try{
+                        return  method["@debug"].apply(this,arguments)
+                    }catch(e){
+                        $.log( module+"'s "+(p? "$.fn." :"$.")+name+" method error "+e);
+                        throw e;
+                    }
+                }
+                for(var i in fn){
+                    method[i] = fn[i];
+                }
+                method["@debug"] = fn;
+                method.toString = function(){
+                    return fn.toString()
+                }
+                method.valueOf = function(){
+                    return fn.valueOf();
+                }
+            }
+        }
+    }
     $.debug = function(name){
-        if(!$["@debug"])
+        if(!$.core.debug )
             return
         for( var i in $){
             debug($, i, name);
@@ -525,21 +580,86 @@
     }
     //https://developer.mozilla.org/en/DOM/window.onpopstate
     $.bind( global, "popstate", function(){
-        namespace = DOC.URL.replace(/(#.+|\W)/g,'');
+        namespace = DOC.URL.replace(rmakeid,'');
         $.exports();
     });
-  
-    // $.base += "/eee/dddd"
-    $.exports( $["@name"]+  postfix );//防止不同版本的命名空间冲突
-    $.require("./lang",function(){
-        console.log( "加载成功");
-        console.log(modules)
-    })
-/*combine modules*/
-// console.log($["@path"])
-
-
+    $.exports( $.core.name +  postfix );//防止不同版本的命名空间冲突
+    /*combine modules*/
+    // console.log($["@path"])
 }( this, this.document );
+
+/**
+ 2011.7.11
+@开头的为私有的系统变量，防止人们直接调用,
+dom.check改为dom["@emitter"]
+dom.namespace改为dom["mass"]
+去掉无用的dom.modules
+优化exports方法
+2011.8.4
+强化dom.log，让IE6也能打印日志
+重构fixOperaError与resolveCallbacks
+将provide方法合并到require中去
+2011.8.7
+重构define,require,resolve
+添加"@modules"属性到dom命名空间上
+增强domReady传参的判定
+2011.8.18 应对HTML5 History API带来的“改变URL不刷新页面”技术，让URL改变时让namespace也跟着改变！
+2011.8.20 去掉dom.K,添加更简单dom.noop，用一个简单的异步列队重写dom.ready与错误堆栈dom.stack
+2011.9.5  强化dom.type
+2011.9.19 强化dom.mix
+2011.9.24 简化dom.bind 添加dom.unbind
+2011.9.28 dom.bind 添加返回值
+2011.9.30 更改是否在顶层窗口的判定  global.frameElement == null --> self.eval === top.eval
+2011.10.1
+更改dom.uuid为dom["@uuid"],dom.basePath为dom["@path"]，以示它们是系统变量
+修复dom.require BUG 如果所有依赖模块之前都加载执行过，则直接执行回调函数
+移除dom.ready 只提供dom(function(){})这种简捷形式
+2011.10.4 强化对IE window的判定, 修复dom.require BUG dn === cn --> dn === cn && !callback._name
+2011.10.9
+简化fixOperaError中伪dom命名空间对象
+优化截取隐藏命名空间的正则， /(\W|(#.+))/g --〉  /(#.+|\\W)/g
+2011.10.13 dom["@emitter"] -> dom["@target"]
+2011.10.16 移除XMLHttpRequest的判定，回调函数将根据依赖列表生成参数，实现更彻底的模块机制
+2011.10.20 添加error方法，重构log方法
+2011.11.6  重构uuid的相关设施
+2011.11.11 多版本共存
+2011.12.19 增加define方法
+2011.12.22 加载用iframe内增加$变量,用作过渡.
+2012.1.15  更换$为命名空间
+2012.1.29  升级到v15
+2012.1.30 修正_checkFail中的BUG，更名_resolveCallbacks为_checkDeps
+2012.2.3 $.define的第二个参数可以为boolean, 允许文件合并后，在标准浏览器跳过补丁模块
+2012.2.23 修复内部对象泄漏，导致与外部$变量冲突的BUG
+2012.4.5 升级UUID系统，以便页面出现多个版本共存时，让它们共享一个计数器。
+2012.4.25  升级到v16
+简化_checkFail方法，如果出现死链接，直接打印模块名便是，不用再放入错误栈中了。
+简化deferred列队，统一先进先出。
+改进$.mix方法，允许只存在一个参数，直接将属性添加到$命名空间上。
+内部方法assemble更名为setup，并强化调试机制，每加入一个新模块， 都会遍历命名空间与原型上的方法，重写它们，添加try catch逻辑。
+2012.5.6更新rdebug,不处理大写开头的自定义"类"
+2012.6.5 对IE的事件API做更严格的判定,更改"@target"为"@bind"
+2012.6.10 精简require方法 处理opera11.64的情况
+2012.6.13 添加异步列队到命名空间,精简domReady
+2012.6.14 精简innerDefine,更改一些术语
+2012.6.25 domReady后移除绑定事件
+2012.7.23 动态指定mass Framewoke的命名空间与是否调试
+2012.8.26 升级到v17
+http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
+检测当前页面是否在iframe中（包含与普通方法的比较）
+http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
+https://github.com/eriwen/javascript-stacktrace
+不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
+重新发明东西并不会给我带来论文发表，但是它却给我带来了更重要的东西，这就是独立的思考能力。
+一旦一个东西被你“想”出来，而不是从别人那里 “学”过来，那么你就知道这个想法是如何产生的。
+这比起直接学会这个想法要有用很多，因为你知道这里面所有的细节和犯过的错误。而最重要的，
+其实是由此得 到的直觉。如果直接去看别人的书或者论文，你就很难得到这种直觉，因为一般人写论文都会把直觉埋藏在一堆符号公式之下，
+让你看不到背后的真实想法。如果得到了直觉，下一次遇到类似的问题，你就有可能很快的利用已有的直觉来解决新的问题。
+http://sourceforge.net/apps/trac/pies/wiki/TypeSystem/zh
+http://tableclothjs.com/ 一个很好看的表格插件
+http://layouts.ironmyers.com/
+*/
+
+
 
 
 
