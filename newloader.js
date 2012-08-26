@@ -213,7 +213,6 @@
 
     var
     loadings = [],//正在加载中的模块列表
-    errorStack = [],
     cbi = 1e5 ;//用于生成回调函数的名字
     var Module = function (id, parent) {
         this.id = id;
@@ -222,20 +221,29 @@
         if (parent && parent.children) {
             parent.children.push(this);
         }
-        this.filename = id;
-        this.loaded = false;
         this.children = [];
     }
     Module.prototype.require = function(path) {
         return Module._load(path, this);
     };
     Module._load = function( url, parent) {
-        var filename = Module._resolveFilename( url, parent.id )[0];
-        var module = Module._cache[filename];
+        url = Module._resolveFilename( url, parent.id )[0];
+        var module = Module._cache[url];
         if (module) {
             return module.exports;
         }
     };
+    Module.update = function(id, factory, state, deps, args){
+        var module =  Module._cache[id]
+        if( !module){
+            module = new Module(id, $.base);
+            Module._cache[id] = module;
+        }
+        module.callback = factory || $.noop;
+        module.state = state
+        module.deps = deps || {};
+        module.args = args || [];
+    }
     Module._resolveFilename = function(url, parent,ret, ext){
         if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
             ret = url
@@ -265,10 +273,9 @@
         return [ret, ext];
     }
 
-    var modules = Module._cache = {
-        "ready" : { }
-    }
+    var modules = Module._cache = {};
     $.modules = modules
+    Module.update("ready", 0, 1);
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
     var rcomment  = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg
     var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
@@ -318,13 +325,12 @@
             return [ret, ext];
         },
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
-        require: function( deps, factory, id ){
-            var list = {}, // 用于检测它的依赖是否都为2
+        require: function( list, factory, id ){
+            var deps = {}, // 用于检测它的依赖是否都为2
             args = [],      // 用于依赖列表中的模块的返回值
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
-            //  console.log(deps)
-            String(deps).replace( $.rword, function(el){
+            String(list).replace( $.rword, function(el){
                 var array = Module._resolveFilename(el, id || $.base), url = array[0]
                 if(array[1] == "js"){
                     dn++
@@ -334,9 +340,9 @@
                     }else if( modules[ url ].state === 2 ){
                         cn++;
                     }
-                    if( !list[ url ] ){
+                    if( !deps[ url ] ){
                         args.push( url );
-                        list[ url ] = "司徒正美";//去重
+                        deps[ url ] = "司徒正美";//去重
                     }
                 }else if(array[1] === "css"){
                     loadCSS( url );
@@ -346,14 +352,9 @@
             if( dn === cn ){//如果需要安装的等于已安装好的
                 return install( id, args, factory );//装配到框架中
             }
-            
-            modules[ id ] = {//创建或更新模块的状态
-                callback:factory,
-                id: id,
-                deps: list,
-                args: args,
-                state: 1
-            };//在正常情况下模块只能通过_checkDeps执行
+            //创建或更新模块的状态
+            Module.update(id, factory, 1, deps, args)
+            ;//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
@@ -373,7 +374,6 @@
             args[2].toString().replace(rcomment,"") .replace(rrequire,function(a,b){
                 array.push(b)
             })
-            console.log(array)
             this.require( args[1], args[2], parent );
         },
         _checkFail : function(  doc, id, error ){
@@ -408,8 +408,12 @@
     function loadJS( url, parent ){
         modules[ url ] = new Module( url, parent);
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ['<script>var id ="', url, '", $ = {}, Ns = parent.', $["@name" ],
-        '; $.define = ', innerDefine, ';var define = $.define<\/script><script src="',url,'" ><\/script>' ];
+        codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $["@name" ],
+        '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
+        (DOC.uniqueID ? 'onreadystatechange="' : 'onload="'),
+        "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps();}",
+        'Ns._checkFail(self.document, nick);',
+        '" onerror="Ns._checkFail(self.document, nick, true,5);" ><\/script>' ];
         iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框
@@ -419,6 +423,13 @@
         var doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.write( codes.join('') );
         doc.close();
+        $.bind( iframe, "load", function(){
+            if( global.opera && doc.ok == void 0 ){//ok写在$._checkFail里面
+                $._checkFail(doc, url, true );//模拟opera的script onerror
+            }
+            doc.write( "<body/>" );//清空内容
+            HEAD.removeChild( iframe );//移除iframe
+        });
     }
 
     var innerDefine = function(  ){
@@ -426,8 +437,8 @@
         if(typeof args[0] == "string"){
             args.shift()
         }
-        args.unshift( id );  //劫持第一个参数,置换为当前JS文件的URL
-        var module = Ns.modules[ id ];
+        args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
+        var module = Ns.modules[ nick ];
         var last = args.length - 1;
         //劫持最后一个参数,将$, exports, require, module等对象强塞进去
         args[ last ] =  parent.Function( "$, module, require, exports","return "+ args[ last ] )
@@ -459,14 +470,13 @@
         if(typeof ret !== "undefined"){
             common.exports = ret;
         }
-        console.log(ret)
         return ret;
     }
     //domReady机制
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
         modules[ "ready" ].state = 2;
-        //   $._checkDeps();
+        $._checkDeps();
         if( readyFn ){
             $.unbind( DOC, ready, readyFn );
         }
@@ -522,7 +532,8 @@
     // $.base += "/eee/dddd"
     $.exports( $["@name"]+  postfix );//防止不同版本的命名空间冲突
     $.require("./lang",function(){
-        console.log( "xxxxxxxx")
+        console.log( "加载成功");
+        console.log(modules)
     })
 /*combine modules*/
 // console.log($["@path"])
