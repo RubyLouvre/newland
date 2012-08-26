@@ -946,5 +946,12 @@ $.define("query", function(){
 2011.11.10 exec一律改为match,对parseNth的结果进行缓存
 2012.5.21 对body进行优化
 https://github.com/CNEYE/JReally
+实现nth-child的思路：
+nth-child的公式为：nth-child(x*n+y);
+n从0开始++，(x*n+y)要>0
+x *n + y = i; // n,为自然数,从0开始； i为要取的第几个元素(正整数)
+上面得到：n = (i-y) / x ; 整除，余0
+那么，当i满足：(i-y) % x === 0 && (i-y) / x >= 0，就是符合条件的了
+http://www.fantxi.com/blog/category/dev/2/
 */
 

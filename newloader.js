@@ -2,7 +2,8 @@
 
     var
     _$ = global.$, //保存已有同名变量
-    namespace = DOC.URL.replace( /(#.+|\W)/g,''),
+    rmakeid = /(#.+|\W)/g
+    namespace = DOC.URL.replace( rmakeid,''),
     w3c = DOC.dispatchEvent, //w3c事件模型
     HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0],
     commonNs = global[ namespace ], mass = 1, postfix = "",
@@ -18,7 +19,6 @@
         "undefined"               : "Undefined"
     },
     toString = class2type.toString;
-
     /**
      * @class $
      * mass Framework拥有两个命名空间,
@@ -208,7 +208,7 @@
         $["@name"] = node.getAttribute("namespace") || "$"
         var str = node.getAttribute("debug")
         $["@debug"] = str == 'true' || str == '1';
-        $.base = url.substr( 0, url.lastIndexOf('/') )
+        $.baseUrl = url.substr( 0, url.lastIndexOf('/') ) +"/"
     }(DOC.getElementsByTagName( "script" ));
 
     var
@@ -218,14 +218,10 @@
         this.id = id;
         this.exports = {};
         this.parent = parent;
-        if (parent && parent.children) {
-            parent.children.push(this);
-        }
+        var m = Module._load[parent]
+        m && m.children.push(this);
         this.children = [];
     }
-    Module.prototype.require = function(path) {
-        return Module._load(path, this);
-    };
     Module._load = function( url, parent) {
         url = Module._resolveFilename( url, parent.id )[0];
         var module = Module._cache[url];
@@ -236,7 +232,7 @@
     Module.update = function(id, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
-            module = new Module(id, $.base);
+            module = new Module(id, $.baseUrl);
             Module._cache[id] = module;
         }
         module.callback = factory || $.noop;
@@ -244,13 +240,23 @@
         module.deps = deps || {};
         module.args = args || [];
     }
-    Module._resolveFilename = function(url, parent,ret, ext){
+    Module.prototype.require = function(a){
+        var self = this;
+        if(typeof a == "string"){
+            return Module._load(path, self)
+        }
+        return function(path){
+            return Module._load(path, self)
+        }
+    }
+    Module._resolveFilename = function(url, parent, ret, ext){
+        parent = parent.substr( 0, parent.lastIndexOf('/') )
         if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
             ret = url
         }else {
             var tmp = url.charAt(0);
             if( tmp !== "." && tmp != "/"){  //相对于根路径
-                ret = $.base +"/" +url;
+                ret = $.baseUrl + url;
             }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
                 ret = parent + "/" + url.substr(2);
             }else if( url.slice(0,2) == ".."){ //相对于父路径
@@ -277,7 +283,8 @@
     $.modules = modules
     Module.update("ready", 0, 1);
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
-    var rcomment  = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg
+    var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
+    var rlcoment = /^\s*\/\/.*$/mg // line comments
     var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
@@ -295,35 +302,8 @@
                 el.detachEvent( "on" + type, fn || $.noop );
             }
         },
+        resolveFilename: Module._resolveFilename,
         //file:///F:/phpnow/vhosts/ 
-        path: function(parent, user, ret, ext){
-            if(/^(\w+)(\d)?:.*/.test(user)){  //如果用户路径包含协议
-                ret = user
-            }else {
-                var tmp = user.charAt(0);
-                if( tmp !== "." && tmp != "/"){  //相对于根路径
-                    ret = $.base +"/" +user;
-                }else if(user.slice(0,2) == "./"){ //相对于兄弟路径
-                    ret = parent + "/" + user.substr(2);
-                }else if(user.slice(0,2) == ".."){ //相对于父路径
-                    var arr = parent.replace(/\/$/,"").split("/");
-                    tmp = user.replace(/\.\.\//g,function(){
-                        arr.pop();
-                        return "";
-                    });
-                    ret = arr.join("/")+"/"+tmp;
-                }
-            }
-            tmp = ret.replace(/[?#].*/, '');
-            if(/\.(\w+)$/.test( tmp )){
-                ext = RegExp.$1;
-            }
-            if(tmp == ret){//如果没有后缀名会补上.js
-                ret += ".js";
-                ext = "js";
-            }
-            return [ret, ext];
-        },
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
         require: function( list, factory, id ){
             var deps = {}, // 用于检测它的依赖是否都为2
@@ -331,7 +311,7 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, id || $.base), url = array[0]
+                var array = Module._resolveFilename(el, id || $.baseUrl), url = array[0]
                 if(array[1] == "js"){
                     dn++
                     if( !modules[ url ] ){ //防止重复生成节点与请求
@@ -370,10 +350,9 @@
             if( typeof args[1] === "function" ){//处理只有两个参数的情况,补允依赖列表
                 [].splice.call( args, 1, 0, [] );
             }
-            var array = []
-            args[2].toString().replace(rcomment,"") .replace(rrequire,function(a,b){
-                array.push(b)
-            })
+            args[2].toString().replace(rbcoment,"").replace(rlcoment,"").replace(rrequire,function(a,b){
+                args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
+            });
             this.require( args[1], args[2], parent );
         },
         _checkFail : function(  doc, id, error ){
@@ -403,7 +382,16 @@
        
     });
     function loadCSS(url){
-        
+        var id = url.replace(rmakeid,"");
+        if (DOC.getElementById(id))
+            return
+        var link =  DOC.createElement('link');
+        link.charset = "utf-8"
+        link.rel = 'stylesheet'
+        link.href = url;
+        link.type="text/css"
+        link.id = id
+        HEAD.insertBefore( link, HEAD.firstChild );
     }
     function loadJS( url, parent ){
         modules[ url ] = new Module( url, parent);
@@ -429,6 +417,7 @@
             }
             doc.write( "<body/>" );//清空内容
             HEAD.removeChild( iframe );//移除iframe
+            iframe = null
         });
     }
 
@@ -441,8 +430,8 @@
         var module = Ns.modules[ nick ];
         var last = args.length - 1;
         //劫持最后一个参数,将$, exports, require, module等对象强塞进去
-        args[ last ] =  parent.Function( "$, module, require, exports","return "+ args[ last ] )
-        (Ns, module, module.require, module.exports);
+        args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
+        (Ns, module, module.exports, module.require());
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
@@ -451,10 +440,11 @@
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
         }
+        console.log(modules[id])
         var module = Object( modules[id] ), ret;
         var common = {
             exports: module.exports,
-            require: module.require,
+            require: module.require(),
             module:  module
         }
         var match = callback.toString().replace(rparams,"$1") || [];
@@ -466,9 +456,13 @@
         }else{
             ret =  callback.apply(0, array);
         }
+        // console.log(ret+id)
         module.state = 2;
+        if(id.indexOf("lang")!== -1){
+            console.log(module.exports)
+        }
         if(typeof ret !== "undefined"){
-            common.exports = ret;
+            modules[ id ].exports = ret
         }
         return ret;
     }
@@ -503,7 +497,33 @@
             doScrollCheck();
     }
     var rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/;
-    function debug (){}
+    function debug(obj, name, module, p){
+        var fn = obj[name];
+        if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){
+            if( rdebug.test( name )){
+                fn["@debug"] = name;
+            }else{
+                var method = obj[name] = function(){
+                    try{
+                        return  method["@debug"].apply(this,arguments)
+                    }catch(e){
+                        $.log( module+"'s "+(p? "$.fn." :"$.")+name+" method error "+e);
+                        throw e;
+                    }
+                }
+                for(var i in fn){
+                    method[i] = fn[i];
+                }
+                method["@debug"] = fn;
+                method.toString = function(){
+                    return fn.toString()
+                }
+                method.valueOf = function(){
+                    return fn.valueOf();
+                }
+            }
+        }
+    }
     $.debug = function(name){
         if(!$["@debug"])
             return
@@ -525,11 +545,9 @@
     }
     //https://developer.mozilla.org/en/DOM/window.onpopstate
     $.bind( global, "popstate", function(){
-        namespace = DOC.URL.replace(/(#.+|\W)/g,'');
+        namespace = DOC.URL.replace(rmakeid,'');
         $.exports();
     });
-  
-    // $.base += "/eee/dddd"
     $.exports( $["@name"]+  postfix );//防止不同版本的命名空间冲突
     $.require("./lang",function(){
         console.log( "加载成功");
