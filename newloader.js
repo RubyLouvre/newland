@@ -10,6 +10,7 @@
     var postfix = "";//用于强制别名
     var loadings = [];//正在加载中的模块列表
     var cbi = 1e5 ; //用于生成回调函数的名字
+    var all = "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx"
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -24,7 +25,7 @@
     toString = class2type.toString;
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
-            return  $.require( "lang,flow,attr,event,fx,ready", expr );
+            return  $.require( all+",ready", expr );
         }else{
             if( !$.fn )
                 throw "node module is required!"
@@ -73,7 +74,7 @@
         mix: mix,
         rword: /[^, ]+/g,
         core: {
-            alias:{}
+            alias:{ }
         },//放置框架的一些重要信息
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": w3c ? "addEventListener" : "attachEvent",
@@ -247,29 +248,33 @@
         }
     }
     Module._resolveFilename = function(url, parent, ret, ext){
-        parent = parent.substr( 0, parent.lastIndexOf('/') )
-        if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
-            ret = url
-        }else {
-            var tmp = url.charAt(0);
-            if( tmp !== "." && tmp != "/"){  //相对于根路径
-                ret = $.core.url + url;
-            }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
-                ret = parent + "/" + url.substr(2);
-            }else if( url.slice(0,2) == ".."){ //相对于父路径
-                var arr = parent.replace(/\/$/,"").split("/");
-                tmp = url.replace(/\.\.\//g,function(){
-                    arr.pop();
-                    return "";
-                });
-                ret = arr.join("/")+"/"+tmp;
+        if(/^\w+$/.test(url) && $.core.alias[url] ){
+            ret = $.core.alias[url]
+        }else{
+            parent = parent.substr( 0, parent.lastIndexOf('/') )
+            if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
+                ret = url
+            }else {
+                var tmp = url.charAt(0);
+                if( tmp !== "." && tmp != "/"){  //相对于根路径
+                    ret = $.core.url + url;
+                }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
+                    ret = parent + "/" + url.substr(2);
+                }else if( url.slice(0,2) == ".."){ //相对于父路径
+                    var arr = parent.replace(/\/$/,"").split("/");
+                    tmp = url.replace(/\.\.\//g,function(){
+                        arr.pop();
+                        return "";
+                    });
+                    ret = arr.join("/")+"/"+tmp;
+                }
             }
         }
         tmp = ret.replace(/[?#].*/, '');
         if(/\.(\w+)$/.test( tmp )){
             ext = RegExp.$1;
         }
-        if(tmp == ret){//如果没有后缀名会补上.js
+         if(tmp == ret && ret.substr(-3,3) != ".js"){//如果没有后缀名会补上.js
             ret += ".js";
             ext = "js";
         }
@@ -387,17 +392,13 @@
             var core = $.core
             for (var k in o) {
                 if (!o.hasOwnProperty(k)) continue
-
                 var previous = core[k]
                 var current = o[k]
-
                 if (previous && k === 'alias') {
                     for (var p in current) {
                         if (current.hasOwnProperty(p)) {
-
                             var prevValue = previous[p]
                             var currValue = current[p]
-
                             if(prevValue && previous !== current){
                                 throw p + "不能重命名"
                             }
@@ -412,7 +413,6 @@
             }
             return this
         }
-       
     });
     function loadCSS(url){
         var id = url.replace(rmakeid,"");
@@ -497,6 +497,10 @@
         }
         return ret;
     }
+    all.replace($.rword,function(a){
+        $.core.alias[a] = $.core.url+a+".js"
+    });
+  //  $.log($.core.alias)
     //domReady机制
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
@@ -580,15 +584,8 @@
         $.exports();
     });
     $.exports( $.core.name +  postfix );//防止不同版本的命名空间冲突
-    $.require("./ccc",function(a){
-        console.log( "加载成功");
-        console.log(modules);
-        console.log(a)
-    })
-/*combine modules*/
-// console.log($["@path"])
-
-
+    /*combine modules*/
+    // console.log($["@path"])
 }( this, this.document );
 
 

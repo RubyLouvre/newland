@@ -515,6 +515,7 @@ dom.namespace改为dom["mass"]
 2012.6.14 精简innerDefine,更改一些术语
 2012.6.25 domReady后移除绑定事件
 2012.7.23 动态指定mass Framewoke的命名空间与是否调试
+2012.8.26 升级到v17
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript

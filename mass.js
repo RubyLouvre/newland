@@ -7,7 +7,7 @@
         "NaN"  : "NaN"  ,
         "undefined" : "Undefined"
     }
-    ,rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
+    , rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
     , uuid     = 1
     , toString = class2type.toString
     //为[[class]] --> type 映射对象添加更多成员,用于$.type函数
@@ -38,7 +38,6 @@
     mix( $, {//为此版本的命名空间对象添加成员
         rword: /[^, ]+/g,
         mix:  mix,
-        "@debug" : true,
         isWindows: process.platform === 'win32',//判定当前平台是否为window
         //将类数组对象转换成真正的数组，并进行切片操作(如果第二第三参数存在的情况下)
         slice: function ( nodes, start, end ) {
@@ -91,9 +90,10 @@
             return result;
         },
         path: require("path"),//将原生path模块劫持到命名空间中
-        //一个空对象,将被app/config模块所重写
-        config: {
-            services:[]
+        core: {
+            services:[],
+            alias: {},
+            debug: true
         },
         noop: function(){},
         logger: {//这是一个空接口
@@ -182,8 +182,32 @@
                 callback.apply(0, array);
             }
             return array
-        }
+        },
+        config: function(o) {
+            var core = $.config
+            for (var k in o) {
+                if (!o.hasOwnProperty(k)) continue
+                var previous = core[k]
+                var current = o[k]
+                if (previous && k === 'alias') {
+                    for (var p in current) {
+                        if (current.hasOwnProperty(p)) {
+                            var prevValue = previous[p]
+                            var currValue = current[p]
+                            if(prevValue && previous !== current){
+                                throw p + "不能重命名"
+                            }
+                            previous[p] = currValue
 
+                        }
+                    }
+                }
+                else {
+                    core[k] = current
+                }
+            }
+            return this
+        }
     });
 
     //模块加载的根路径,默认是mass.js种子模块所在的目录
