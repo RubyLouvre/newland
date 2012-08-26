@@ -35,6 +35,22 @@
     function pad(n) {
         return n < 10 ? '0' + n.toString(10) : n.toString(10);
     }
+    function alias (deps, array, el){
+        if(typeof deps == "string"){
+            array = deps.match($.rword)
+        }else if(Array.isArray(deps)){
+            array = deps;
+        }else{
+            throw "arguments error"
+        }
+        for(var i = 0, n = array.length; i < n; i++){
+            el = array[i]
+            if(/^[\w$]+$/.test(el) && $.core.alias[el] ){
+                array[i] = $.core.alias[el]
+            }
+        }
+        return array;
+    }
     mix( $, {//为此版本的命名空间对象添加成员
         rword: /[^, ]+/g,
         mix:  mix,
@@ -93,6 +109,7 @@
         core: {
             services:[],
             alias: {},
+            base: process.cwd()+"/",
             debug: true
         },
         noop: function(){},
@@ -136,24 +153,37 @@
             var time = [pad(d.getHours()),  pad(d.getMinutes()),  pad(d.getSeconds())].join(':');
             return [d.getFullYear(), pad(d.getMonth()), d.getDate(), time].join(' ');
         },
-        define: function(deps, callback){
-            var caller = arguments.callee.caller
+        define: function(id, deps, factory){
+            var caller = arguments.callee.caller, array = [], callback, ret;
             var args = caller.arguments;//取得当前模块的参数列表,依次为exports, require, module, __filename,__dirname
             var common = {
                 exports: args[0],
                 require: args[1],
                 module:  args[2]
             }
-            var array = [], ret;
+            //一个参数时Object或Function任选其一 ，两个是ID+回调或依赖+回调，三个是ID+依赖+回调
             if(arguments.length === 1 && toString.call(deps) === "[object Object]"){
                 ret = deps;//如果是对象,那么它就是exports
-            }else if(Array.isArray(deps)){//如果存在依赖关系,先加载依赖关系
-                for(var i = 0, el; el = deps[i++]; ){
-                    array[ array.length ] =  args[1]( el );//require某个模块
+            }else{
+                var list = Array.apply([], arguments);//将参数列表转换为一个数组
+                if(typeof list[0] == "string"){
+                    list.shift();// 去掉模块ID
+                }
+                if(Array.isArray(list[0])){
+                    array = list.shift();//去掉依赖列表
+                }
+                if(typeof list[0] === "function"){
+                    callback = list[0];
+                }else{
+                    throw "参数错误"
                 }
             }
-            callback = arguments[arguments.length - 1];
-            if(typeof callback == "function"){
+            if(array.length){//如果存在依赖关系,先加载依赖关系
+                array = alias(array).map(function( url ){
+                    return  args[1]( url );//require某个模块
+                });
+            }
+            if( callback ){
                 var match = callback.toString().replace(rparams,"$1") || [];
                 var a = common[match[0]];
                 var b = common[match[1]];
@@ -170,10 +200,10 @@
             return args[2].exports;
         },
         require: function(deps, callback){
-            if(typeof deps == "string" && deps.indexOf(",") == -1 && !callback){
-                return require(deps)
+            deps = alias(deps);
+            if( deps.length === 1 && !callback){
+                return require( deps[0] )
             }
-            deps = String(deps).match($.rword)
             var array = [];
             for(var i = 0, el; el = deps[i++];){
                 array.push( require(el) )
@@ -198,7 +228,6 @@
                                 throw p + "不能重命名"
                             }
                             previous[p] = currValue
-
                         }
                     }
                 }
@@ -210,14 +239,15 @@
         }
     });
 
-    //模块加载的根路径,默认是mass.js种子模块所在的目录
-    $.require.root = process.cwd();
     $.parseQuery = require("querystring").parse;
     var _join = $.path.join;
     $.path.join = function(){
         var ret = _join.apply(0,arguments)
         return  ret.replace(/\\/g,"/")
     }
+    $.core.alias.lang = $.core.base + "system/mass/lang.js";
+    $.core.alias.$ejs = $.core.base + "system/mass/more/ejs.js";
+    //console.log($.core.alias.lang)
     $.parseUrl = require("url").parse; //将原生URL模块的parse劫持下来
     $.error = require("util").error;
     $.debug = require("util").debug;
@@ -245,12 +275,14 @@
     exports.$ = global.$ = $;
     $.log("后端mass框架","green");
     //生成mass framework所需要的页面
-    $.require(["./system/page_generate"],function(){
+
+
+    $.require( "./system/page_generate", function(){
         $.log("页面生成")
     });
     $.require("./app/config");
-    $.require("./system/more/logger");
-    $.require("./system/mvc");
+//    $.require("./system/more/logger");
+//    $.require("./system/mvc");
 
 //安装过程:
 //安装数据库 http://www.mongodb.org/downloads,下载回来放到C盘解压,改名为mongodb

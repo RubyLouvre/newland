@@ -1,5 +1,5 @@
-$.define( "./helper, ./more/ejs, ./hfs",function( hepler ){
-    var url = $.path.join( process.cwd(),"app/views/").replace(/\\/g,"/"),layouts = {};
+define( "./helper, ./hfs, $ejs".match($.rword),function( hepler ){
+    var url = $.path.join( process.cwd(),"app/views/"),layouts = {};
     $.walk(url, function(files){
         var pending = files.length;
         for(var i = 0; i < pending; i++){
@@ -36,8 +36,8 @@ $.define( "./helper, ./more/ejs, ./hfs",function( hepler ){
                         //同步到rubylouvre项目
                         var rubylouvre = view_url.replace("/app/views","").replace("newland","rubylouvre")
                         $.updateFile(rubylouvre, html, function(){
-                               $.log(rubylouvre+"  同步完成", 7);
-                            },1);
+                            $.log(rubylouvre+"  同步完成", 7);
+                        },1);
                     }
                 });
             })( files[i].replace(/\\/g,"/") );//要处理路径时必须先统一path.sep,因为你不知它是/,还是\

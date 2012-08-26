@@ -1,6 +1,7 @@
-define( function(){
-    // 虽然说“约定优于配置”，但也不能没配置。不过如果只要配置配置就能搞定，总比写代码好多了。 
-    return $.config = {
+define("config", function(){
+    // 虽然说“约定优于配置”，但也不能没配置。不过如果只要配置配置就能搞定，总比写代码好多了。
+    $.log("已加载用户配置","green",7)
+    $.mix( $.config,{
         services: [],
         http_method: "_method",//用于模拟PUT,DELETE方法
         environments: "development",
@@ -28,5 +29,5 @@ define( function(){
             host:  "localhost",//连接数据库时用
             port:  27017       //连接数据库时用
         }
-    }
+    })
 })

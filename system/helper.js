@@ -1,5 +1,5 @@
 define( function(){
-    $.log("视图助手生成模块")
+    $.log("视图助手生成模块", 7)
     function make_helper(){
         var data = {
             links : [],
