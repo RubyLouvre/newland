@@ -111,6 +111,7 @@
             services:[],
             alias: {},
             base: process.cwd()+"/",
+            charset: "utf-8",
             debug: true,
             //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
             level: 9
@@ -132,14 +133,14 @@
                     el.unshift(str);
                     str = util.format.apply(0,el)
                 }else if(typeof el == "string"){
-                    if(styles[el]){
+                    if( styles[el]){
                         str = '\u001b[' + styles[el][0] + 'm' + str + '\u001b[' + styles[el][1] + 'm';
                     //是否在前面加上时间戮
                     }else if(el === "timestamp"){
                         timestamp = true;
                     }
                 }else if( typeof el == "number" ){
-                    show = el <= $.log.level;
+                    show = el <= $.core.level;
                     level = el;
                 }
             }
@@ -264,17 +265,21 @@
     };
     String("red31green32yellow33blue34magenta35cyan36gray37").replace(/([a-z]+)(\d+)/g,function(a,b,c){
         c = Number(c);
-        styles["l"+b] =    [c,     39];
-        styles[b] =        [c+60,  39];
-        styles["bg_l"+b] = [c+ 10, ''];
-        styles["bg_"+b] =  [c+ 70, ''];
+        styles["l"+b] =    [c,      39];//暗淡的字体颜色
+        styles[ b ] =      [c + 60, 39];//明亮的字体颜色
+        styles["bg_l"+b] = [c + 10, ''];//暗淡的背景颜色
+        styles["bg_" +b] = [c + 70, ''];//明亮的背景颜色
     });
-    styles.black = [30, 39];//没有黑色背景,因为默认是黑的
-    styles.gray = [90, 39];
-    styles.white = [97, 39];
-    styles.bg_gray = [100, ''];
+    styles.black =    [30,  39];//没有黑色背景,因为默认是黑的
+    styles.gray =     [90,  39];
+    styles.white =    [97,  39];
+    styles.bg_gray =  [100, ''];
     styles.bg_white = [107, ''];
-  
+    for(var color in styles){
+        if(color.indexOf("magenta")!= -1){
+            styles[ color.replace("magenta", "purple") ] = styles[color];
+        }
+    }
     //暴露到全局作用域下,所有模块可见!!
     global.define = $.define;
     exports.$ = global.$ = $;
@@ -285,16 +290,21 @@
     });
     $.core.alias[ "$hfs" ] =   $.path.join($.core.base , "system/more/hfs.js")
 
-    $.log("后端mass框架","green");
-
-     $.log("后端mass框架","magenta");
-//生成mass framework所需要的页面
-//    $.require( "./system/page_generate", function(){
-//        $.log("页面生成",7)
-//    });
-//    $.require("./app/config");
-//    $.require("./system/more/logger");
-//    $.require("./system/mvc");
+    $.log("后端mass框架","magenta");
+    //生成mass framework所需要的页面
+    $.require( "./system/page_generate", function(){
+        $.log("页面生成","lgreen",7)
+    });
+    $.require("./app/config");
+    $.require("./system/more/logger");
+     $.require("./system/mvc");
+//var cc = function(str, color){
+//        var str = '\u001b[' +color + 'm' + str + '\u001b[' +39 + 'm';
+//        console.log(str)
+//    }
+//    for(var i = 30; i < 128; i++){
+//        cc("测试颜色值" +i,i)
+//    }
 
 //安装过程:
 //安装数据库 http://www.mongodb.org/downloads,下载回来放到C盘解压,改名为mongodb
@@ -316,3 +326,5 @@
 //两个文件观察者https://github.com/andrewdavey/vogue/blob/master/src/Watcher.js https://github.com/mikeal/watch/blob/master/main.js
 //一个很好的前端工具 https://github.com/colorhook/att
 //http://blog.csdn.net/dojotoolkit/article/details/7820321
+
+//http://css3lib.alloyteam.com/#image_effects/Billboard
