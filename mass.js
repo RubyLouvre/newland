@@ -242,11 +242,13 @@
 
     $.parseQuery = require("querystring").parse;
     var _join = $.path.join;
+    //mac下的路径为     app/controllers/doc_controller.js
+    //window下的路径为  app\\controllers\\doc_controller.js
+    //统一一下风格
     $.path.join = function(){   
         var ret = _join.apply(0,arguments)
         return  ret.replace(/\\/g,"/")
     }
-   
     //console.log($.core.alias.lang)
     $.parseUrl = require("url").parse; //将原生URL模块的parse劫持下来
     $.error = util.error;

@@ -15,21 +15,29 @@ define( ["../controller"], function(){
                     if(!controller){//如果不存在才加载
                         var path =  $.path.join( cpath ,cname +"_controller");
                         $.require( path, function( option ){
-                            option.inherit =  $.core.controller
+                            //进行控制反转，构建我们所需要的控制器子类与它的实例
+                            option.inherit = $.core.controller;
                             var klass = $.factory(option);
                             controller = $.controllers[ cname  ] = new klass;
                         });
                     }
                     if( controller && typeof controller[aname] == "function" ){
                         var action = controller[aname];
-                        flow.fire("create_cookie")
+                       
                         $.log("开始调用action", "magenta", 7)
                         //如果调用了get_cookie服务,肯定会调用session服务,但如果session服务还没有到位,
                         //就通过bind("open_session",fn)这加锁机制等待服务过错成才进入action
                         flow.bind("open_session",function(){
                             $.log("已经到达指定action","green",7)
+                            console.log(flow.url)
+                            flow.res.writeHead(200, {
+                                'Set-Cookie': 'myCookie=test',
+                                'Content-Type': 'text/plain;charset=utf-8'
+                            });
+                            flow.res.end('这是到达action时生成的\n');
                         // action( flow );//到达指定action
-                        })
+                        });
+                        flow.fire("create_cookie")
                         
                     }else{
                         //如果已找不到，抛500内部错误

@@ -29,8 +29,8 @@ $.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
         open: function(life, data){
             this.data = this.flow.session  = data;
             this.mtime = Date.now() + life;
-            $.log('fire open session', "green");
-            this.flow.fire("open_session")
+            this.flow.fire("open_session");
+            $.log('fire open_session', "green",6);
         }
     }
     

@@ -4,7 +4,7 @@ define( ["./sessions/" + $.config.session.type] , function(fn){//
             var res = flow.res;
             var end = res.end;
             res.end = function(data, encoding){
-                $.log('flow.fire("end")'+flow.url,'cyan');
+                $.log("响应完成","cyan",7);
                 flow.fire("end")
                 end.call(res, data, encoding);
             };
