@@ -1,4 +1,4 @@
-define( [ "qs" ], function(qs){
+define( [ "querystring" ], function(qs){
     //这是必经的第一个服务
     return function( flow ){
         flow.body = {};
