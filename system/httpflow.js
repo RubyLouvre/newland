@@ -33,12 +33,34 @@ $.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
             $.log('fire open_session', "green",6);
         }
     }
-    
+    var formats = {
+        txt:  [ 'text/plain'],
+        html: ['text/html'],
+        json: ['application/json', 'text/json'],
+        xml:  ['application/xml', 'text/xml'],
+        js:   ['application/javascript', 'text/javascript']
+    }
+    for(var key in formats){
+        var arr = formats[key];
+        formats[key] = new RegExp(  arr.join('|').replace(/(\/)/g, "\\$1"))
+    }
     HttpFlow = $.factory({
         init: function(){
             this.helper = helper()
         },
         inherit: $.Flow,
+        render: function(){
+            if(!this.rendered){
+                var accept = this.req.headers.accept || 'text/plain';
+                for (var key in formats) {
+                    if (  formats[key].test(accept) ) {
+                        console.log(key)
+                        this.fire("respond_to", key)
+                        return;
+                    }
+                }
+            }
+        },
         //为flow添加一系列属性,并劫持res.writeHead,res.setHeader
         patch: function(req, res){
             this.res =  res;
@@ -67,8 +89,8 @@ $.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
                         flow.addCookie(arr[0], arr[1])
                     })
                 } else{
-                    if ('content-type' == key && this.charset) {
-                        val += '; charset=' + this.charset;
+                    if ('content-type' == key ) {
+                        val += '; charset=' + $.core.charset
                     }
                     setHeader.call(this, field, val);
                 }
