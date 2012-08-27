@@ -21,11 +21,6 @@ define( ["./httpflow", "http", "fs", "./mapper"], function( Flow, http, fs ){
         services.forEach(function(fn){
             fn(flow);//将拦截器绑到流程对象上
         });
-//        flow.res.writeHead(200, {
-//            'Set-Cookie': 'myCookie=test',
-//            'Content-Type': 'text/plain'
-//        });
-//        flow.res.end('这是到达action时生成的\n');
     }).listen( $.config.port );
     $.log($.config.port,"red", 7)
 
