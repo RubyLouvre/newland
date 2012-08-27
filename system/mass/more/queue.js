@@ -1,4 +1,4 @@
-$.define("queue", function(){
+define("queue", function(){
     //高性能列队模块
     function Queue() {
         this.tail = [];

@@ -1,4 +1,4 @@
-define("ejs", ["../lang"],function(){
+define( ["$lang"],function(){
     $.log("已加载ejs模块", 7)
     $.ejs = function( id,data,opts){
         var el, source
