@@ -1,4 +1,4 @@
-define( function(){
+define( ["../controller"], function(){
     //这是必经的第三个服务
     return function( flow ){
         flow.bind("route_dispatch", function(){
@@ -14,21 +14,23 @@ define( function(){
                     var controller = $.controllers[ cname  ];
                     if(!controller){//如果不存在才加载
                         var path =  $.path.join( cpath ,cname +"_controller");
-                        $.require( path, function( ret){
-                            controller = $.controllers[ cname  ] = ret
+                        $.require( path, function( option ){
+                            option.inherit =  $.core.controller
+                            var klass = $.factory(option);
+                            controller = $.controllers[ cname  ] = new klass;
                         });
                     }
                     if( controller && typeof controller[aname] == "function" ){
                         var action = controller[aname];
+                        flow.fire("create_cookie")
+                        $.log("开始调用action", "magenta", 7)
                         //如果调用了get_cookie服务,肯定会调用session服务,但如果session服务还没有到位,
                         //就通过bind("open_session",fn)这加锁机制等待服务过错成才进入action
-                        if( flow.cookies && !flow.session){//如果调用了cookie服务
-                            flow.bind("open_session",function(){
-                                action( flow );//到达指定action
-                            })
-                        }else{
-                            action( flow );//到达指定action
-                        }
+                        flow.bind("open_session",function(){
+                            $.log("已经到达指定action","green",7)
+                        // action( flow );//到达指定action
+                        })
+                        
                     }else{
                         //如果已找不到，抛500内部错误
                         $.log("找不到对应controller或action","red", 3)

@@ -1,4 +1,4 @@
-$.define("memory", function(){
+define( function(){
     //它要在app上创建一个hash,
     var memory = $.memory ||  ($.memory = {});
     function sweep (){//清理过期的session
