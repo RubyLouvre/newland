@@ -34,7 +34,7 @@
         return receiver;
     };
     function pad(n) {
-        return n < 10 ? '0' + n.toString(10) : n.toString(10);
+        return n < 10 ? '0' + n : n;
     }
     function alias (deps, array, el){
         if(typeof deps == "string"){
@@ -242,8 +242,7 @@
 
     $.parseQuery = require("querystring").parse;
     var _join = $.path.join;
-    $.path.join = function(){
-        
+    $.path.join = function(){   
         var ret = _join.apply(0,arguments)
         return  ret.replace(/\\/g,"/")
     }

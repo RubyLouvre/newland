@@ -1,4 +1,4 @@
-$.define("get_layout", function(){
+define( function(){
     function cache_page(fn, url){
         var html = fn( this.helper[0], this.helper[1] );
         this.fire('cache_page', html, url);

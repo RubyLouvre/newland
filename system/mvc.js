@@ -1,6 +1,16 @@
 define( ["./httpflow", "http", "fs"], function( Flow, http, fs ){
-    //var server_names = fs.readdirSync(__dirname +"/services");
-   // console.log(server_names)
+    var services_path = __dirname +"/services";
+    var server_names = fs.readdirSync(services_path);
+    var urls = []
+    server_names.forEach(function(name){
+        if(name.substr(-3,3) ==".js")
+            urls.push( $.path.join(services_path, name) )
+    });
+    console.log(urls)
+
+    var b =  $.require(urls);
+    console.log(b)
+//  console.log(server_names)
 
 
 

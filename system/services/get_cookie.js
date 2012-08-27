@@ -1,4 +1,4 @@
-$.define("get_cookie","../cookie", function(Cookie){
+define( ["$cookie"], function(Cookie){
     return function( flow ){
         var config = $.config.cookie
         if ( /^(\*|html)$/i.test(flow.mime) && flow.url.indexOf(config.path) == 0 ){

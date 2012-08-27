@@ -1,4 +1,4 @@
-$.define("get_page", function(){
+define( function(){
     //本拦截器是用于取得拼装好的页面
     //http://d.hatena.ne.jp/scalar/20120508/1336488868
     return function( flow ){
@@ -36,10 +36,7 @@ $.define("get_page", function(){
                 }.bind(this));
             }
         });
-
-
     }
-
 
 });
 /**

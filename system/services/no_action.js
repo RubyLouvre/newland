@@ -1,4 +1,4 @@
-$.define("no_action", function(){
+define(  function(){
     return function(flow){
         flow.bind("no_action", function( ){
             // $.log("已调用no_action服务")

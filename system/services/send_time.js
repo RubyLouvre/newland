@@ -1,4 +1,4 @@
-$.define("send_time", function(){
+define( function(){
     //用于监听服务器一共花了多少时间响应这个请求
     return function(flow){
         if(!flow.response_time){

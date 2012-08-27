@@ -1,4 +1,4 @@
-$.define("session", "util" ,function(util){
+define(  ["util"] ,function(util){
     return function(flow){
         //劫持res.end方法
         flow.bind("open_session", function(){

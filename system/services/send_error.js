@@ -1,5 +1,4 @@
-$.define("send_error","http", function( http ){
-
+define( ["http"], function( http ){
     return function( flow ){
         flow.bind("send_error", function( code ){
             var text = $.readFileSync( "app/views/error.html", 'utf-8')//读取内容

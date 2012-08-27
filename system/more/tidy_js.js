@@ -55,7 +55,7 @@
 
 
 */
-$.define("tidy_js", function(){
+define("tidy_js", function(){
 
 
     function js_beautify(js_source_text, options) {

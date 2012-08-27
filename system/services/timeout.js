@@ -1,4 +1,4 @@
-$.define("timeout", function(){
+define( function(){
     return function( flow ){
         flow.timeoutID = setTimeout(function(){
             if(this.timeoutID){

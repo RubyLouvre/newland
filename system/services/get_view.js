@@ -1,4 +1,4 @@
-$.define("get_view", function(){
+define( function(){
     return function( flow ){
         flow.bind("get_view", function( view_url, url ){
             //$.log( "已进入get_view栏截器" );
@@ -25,7 +25,6 @@ $.define("get_view", function(){
                 }.bind(this) );
             }
         })
-
     }
 })
 

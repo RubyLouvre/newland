@@ -1,7 +1,7 @@
-$.define("session", "sessions/"+$.config.session.type ,function(fn){
+define(function(fn){//  "./session/"+$.config.session.type ,
+   
     return function(flow){
         //劫持res.end方法
-        
         if(flow.cookies){
             var res = flow.res;
             var end = res.end;

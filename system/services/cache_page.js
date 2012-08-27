@@ -1,4 +1,4 @@
-$.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",function(tidy_css,tidy_html,tidy_js){
+define( ["../more/tidy_css","../more/tidy_html","../more/tidy_js"], function(tidy_css,tidy_html,tidy_js){
     return function( flow ){
         var matchAll = /<pre(?:.)+?class\s*=\s*([\'\"])\s*brush\b(?:.|\n|\r)+?\1\s*>(?:.|\n|\r)+?<\/pre>/gi
         var matchOne = /<pre class="brush:(\w+)(?:[^"]+)">((?:.|\n|\r)+?)<\/pre>/i
@@ -32,13 +32,13 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
                     return "\n"+buffer[index++]+"\n"
                 });
             }
-          
+
             var cache = {
                 code: 200,
                 data: html,
                 type: this.contentType("html")
             }
-            if( $.config.write_page ){
+            if( false ){//$.config.write_page
                 var pageurl = $.path.join("app","pages", url );
                 var rubylouvre = $.path.join("D:/rubylouvre/", url )
                 $.writeFile( pageurl , html, function(){
@@ -53,4 +53,4 @@ $.define("cache_page","../more/tidy_css,../more/tidy_html,../more/tidy_js",funct
             this.fire("send_file", cache)
         })
     }
-});
+})

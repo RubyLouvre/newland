@@ -36,7 +36,7 @@
     });
 */
 
-$.define("tidy_html", function(){
+define("tidy_html", function(){
     return  function style_html(html_source, options) {
         //Wrapper function to invoke all the necessary constructors and deal with the output.
 

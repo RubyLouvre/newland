@@ -1,5 +1,4 @@
-$.define("get_less", function(){
-    var less = require("../more/less/index")
+define( ["../more/less/index"], function(less){
     function toCSS(path, callback) {
         var tree, css;
         $.readFile(path, 'utf-8', function (e, str) {
@@ -25,7 +24,7 @@ $.define("get_less", function(){
     }
     return function( flow ){
         flow.bind("get_less", function( path ){
-            $.log("已进入get_less栏截器", "> 6");
+            $.log("已进入get_less栏截器", 7);
             toCSS(path, function (err, less) {
                 $.writeFile(path.replace(/\.less$/,".css"), less, function(e){
                     if(e){

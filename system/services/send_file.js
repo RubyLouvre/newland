@@ -1,4 +1,4 @@
-$.define("send_file", function(){
+define( function(){
     return function(flow){
         flow.bind("send_file", function( page ){
             $.log( "已调用send_file服务",6 );
