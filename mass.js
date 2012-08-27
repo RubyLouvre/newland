@@ -45,9 +45,9 @@
             throw "arguments error"
         }
         for(var i = 0, n = array.length; i < n; i++){
-            el = array[i]
-            if(/^[\w$]+$/.test(el) && $.core.alias[el] ){
-                array[i] = $.core.alias[el]
+            el = array[ i ];
+            if(/^[-a-z0-9_$]{2,}$/i.test(el) && $.core.alias[ el ] ){
+                array[ i ] = $.core.alias[ el ];
             }
         }
         return array;
@@ -111,7 +111,9 @@
             services:[],
             alias: {},
             base: process.cwd()+"/",
-            debug: true
+            debug: true,
+            //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
+            level: 9
         },
         noop: function(){},
         logger: {//这是一个空接口
@@ -203,16 +205,16 @@
         require: function(deps, callback){
             deps = alias(deps);
             if( deps.length === 1 && !callback){
-                return require( deps[0] )
+                return require( deps[0] );
             }
             var array = [];
             for(var i = 0, el; el = deps[i++];){
-                array.push( require(el) )
+                array.push( require(el) );
             }
             if(typeof callback == "function"){
                 callback.apply(0, array);
             }
-            return array
+            return array;
         },
         config: function(o) {
             var core = $.config
@@ -231,12 +233,10 @@
                             previous[p] = currValue
                         }
                     }
-                }
-                else {
+                } else {
                     core[k] = current
                 }
             }
-            return this
         }
     });
 
@@ -256,22 +256,25 @@
 
     //用于实现漂亮的五颜六色的日志打印
     var styles = {
-        'bold' : [1, 22],
-        'italic' : [3, 23],
-        'underline' : [4, 24],
-        'inverse' : [7, 27],
-        'white' : [37, 39],
-        'grey' : [90, 39],
-        'black' : [30, 39],
-        'blue' : [34, 39],
-        'cyan' : [36, 39],
-        'green' : [32, 39],
-        'magenta' : [35, 39],
-        'red' : [31, 39],
-        'yellow' : [33, 39]
+        bold:      [1, 22],
+        italic:    [3, 23],
+        underline: [4, 24],
+        inverse:   [7, 27],
+        strike:    [9, 29]
     };
-    //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
-    $.log.level = 9;
+    String("red31green32yellow33blue34magenta35cyan36gray37").replace(/([a-z]+)(\d+)/g,function(a,b,c){
+        c = Number(c);
+        styles["l"+b] =    [c,     39];
+        styles[b] =        [c+60,  39];
+        styles["bg_l"+b] = [c+ 10, ''];
+        styles["bg_"+b] =  [c+ 70, ''];
+    });
+    styles.black = [30, 39];//没有黑色背景,因为默认是黑的
+    styles.gray = [90, 39];
+    styles.white = [97, 39];
+    styles.bg_gray = [100, ''];
+    styles.bg_white = [107, ''];
+  
     //暴露到全局作用域下,所有模块可见!!
     global.define = $.define;
     exports.$ = global.$ = $;
@@ -280,16 +283,18 @@
         $.core.alias["$" + method.replace("more/","") ] = 
         $.path.join($.core.base , "system/mass/", method +".js")
     });
-    $.core.alias["$hfs" ] =   $.path.join($.core.base , "system/more/hfs.js")
+    $.core.alias[ "$hfs" ] =   $.path.join($.core.base , "system/more/hfs.js")
 
     $.log("后端mass框架","green");
-    //生成mass framework所需要的页面
-    $.require( "./system/page_generate", function(){
-        $.log("页面生成",7)
-    });
-    $.require("./app/config");
-    $.require("./system/more/logger");
-    $.require("./system/mvc");
+
+     $.log("后端mass框架","magenta");
+//生成mass framework所需要的页面
+//    $.require( "./system/page_generate", function(){
+//        $.log("页面生成",7)
+//    });
+//    $.require("./app/config");
+//    $.require("./system/more/logger");
+//    $.require("./system/mvc");
 
 //安装过程:
 //安装数据库 http://www.mongodb.org/downloads,下载回来放到C盘解压,改名为mongodb
