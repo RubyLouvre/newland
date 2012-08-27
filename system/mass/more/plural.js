@@ -1,15 +1,16 @@
-$.define("plural","../lang",function(){//处理单词的单复数
+define( ["$lang"], function(){//处理单词的单复数
     var PLURALS = [],
     SINGULARS = [],
     UNCOUNTABLES = [];
+    //复数
     var plural = function (rule, replacement) {
         PLURALS.unshift([rule, replacement]);
     }
-
+    //单数
     var singular = function (rule, replacement) {
         SINGULARS.unshift([rule, replacement]);
     }
-
+    //不可数名词
     var uncountable = function (word) {
         UNCOUNTABLES.unshift(word);
     }
@@ -121,5 +122,4 @@ $.define("plural","../lang",function(){//处理单词的单复数
             }
         }
     }
-// console.log(mass.String.singularize+"")
 });

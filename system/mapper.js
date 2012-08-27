@@ -1,4 +1,7 @@
-$.define("mapper","router,../../app/routes,plural", function(Router, curry ){
+//=========================================
+//  路由映射模块，提供系统级支撑
+//==========================================
+define( ["./router", "../app/routes", "./mass/more/plural"], function(Router, curry ){
     //此类用于建立从路由到控制器的映射
     /* @param {String} name 资源的名字，必须是复数
      * @param {Object} options 可选。包含only,except键名的普通对象,或as, path, sensitive等值
@@ -97,7 +100,7 @@ DELETE     /photos/1      Photos          destroy  用于删除photo的POST请�
         for(var action in activeRoutes){
             var path = activeRoutes[ action ].replace( "mass", name);
             var match = path.match(/\S+/g);
-            router.add( match[0],$.path.join( prefix + match[1] ), name+"#"+action )
+            router.add( match[0], $.path.join( prefix + match[1] ), name+"#"+action )
         }
     }
     mapper.namespace = function( name, callback ){
@@ -110,10 +113,6 @@ DELETE     /photos/1      Photos          destroy  用于删除photo的POST请�
         router.add(method, path, value)
     }
     curry( mapper );
-
-//    mapper.resources('workers',function(admin){
-//        admin.resources('users');
-//    });
 })
 
 

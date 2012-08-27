@@ -1,4 +1,4 @@
-$.define("home_controller",function(){
+define( function(){
     return {
         index: function(flow){
             $.log("已进入home#index action")

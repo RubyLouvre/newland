@@ -1,5 +1,5 @@
-$.define("controller","mass/class",function(){
-  //所有控制器的抽象类
+define( ["$class"],function(){
+    //所有控制器的抽象类
     var opts = {}
     "index,new,create,show,edit,update,destroy".replace($.rword, function( action ){
         opts[ action ] = function(){
@@ -7,5 +7,5 @@ $.define("controller","mass/class",function(){
         }
     })
     var klass = $.factory(opts);
-    $.base_controller = klass;
+    $.core.controller = klass;
 });

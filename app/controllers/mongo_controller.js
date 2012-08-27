@@ -1,4 +1,4 @@
-$.define("mongo_controller",function(){
+define("mongo_controller", function(){
     return {
         index: function(flow){
             $.log("这里是用于放置芒果的文档")

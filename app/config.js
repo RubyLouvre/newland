@@ -22,10 +22,10 @@ define("config", function(){
         },
         cookie: {
             path: "/",
-            life:60 * 10// 实验用,减少为10分种,其实至少要两星期  14 * 24 * 60 * 60
+            life: 60 * 10// 实验用,减少为10分种,其实至少要两星期  14 * 24 * 60 * 60
         },
         db: {
-            name: "mongodb",   //数据库的名字
+            name:  "memory",   //数据库的名字
             host:  "localhost",//连接数据库时用
             port:  27017       //连接数据库时用
         }

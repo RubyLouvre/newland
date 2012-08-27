@@ -1,5 +1,5 @@
-$.define("router", function(){
-    $.log("已加载路由器模块", "> 6")
+define( function(){
+    $.log("已加载路由器模块", 7)
     //表的结构：method+segments.length 普通字段
     function _tokenize (pathStr) {
         var stack = [''];
