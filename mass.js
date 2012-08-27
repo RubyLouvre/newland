@@ -7,9 +7,10 @@
         "NaN"  : "NaN"  ,
         "undefined" : "Undefined"
     }
-    , rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
-    , uuid     = 1
-    , toString = class2type.toString
+    var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
+    var uuid     = 1
+    var toString = class2type.toString
+    var util = require("util")
     //为[[class]] --> type 映射对象添加更多成员,用于$.type函数
     "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace(/\w+/g,function(name){
         class2type[ "[object " + name + "]" ] = name;
@@ -118,7 +119,7 @@
         },
         // $.log(str, [], color, timestamp, level )
         log: function (str){
-            var level = 9, orig = str, util = require("util"), show = true, timestamp = false;
+            var level = 9, orig = str, show = true, timestamp = false;
             if(arguments.length === 1){
                 $.logger.write(9, util.inspect(orig))
                 return console.log( orig );
@@ -242,15 +243,15 @@
     $.parseQuery = require("querystring").parse;
     var _join = $.path.join;
     $.path.join = function(){
+        
         var ret = _join.apply(0,arguments)
         return  ret.replace(/\\/g,"/")
     }
-    $.core.alias.lang = $.core.base + "system/mass/lang.js";
-    $.core.alias.$ejs = $.core.base + "system/mass/more/ejs.js";
+   
     //console.log($.core.alias.lang)
     $.parseUrl = require("url").parse; //将原生URL模块的parse劫持下来
-    $.error = require("util").error;
-    $.debug = require("util").debug;
+    $.error = util.error;
+    $.debug = util.debug;
 
     //用于实现漂亮的五颜六色的日志打印
     var styles = {
@@ -273,16 +274,22 @@
     //暴露到全局作用域下,所有模块可见!!
     global.define = $.define;
     exports.$ = global.$ = $;
+    //重要的别名
+    "lang,class,flow,more/ejs,more/cookie".replace($.rword, function(method){
+        $.core.alias["$" + method.replace("more/","") ] = 
+        $.path.join($.core.base , "system/mass/", method +".js")
+    });
+    $.core.alias["$hfs" ] =   $.path.join($.core.base , "system/more/hfs.js")
+    console.log($.core.alias)
     $.log("后端mass框架","green");
     //生成mass framework所需要的页面
-
 
     $.require( "./system/page_generate", function(){
         $.log("页面生成")
     });
     $.require("./app/config");
-//    $.require("./system/more/logger");
-//    $.require("./system/mvc");
+    $.require("./system/more/logger");
+    $.require("./system/mvc");
 
 //安装过程:
 //安装数据库 http://www.mongodb.org/downloads,下载回来放到C盘解压,改名为mongodb

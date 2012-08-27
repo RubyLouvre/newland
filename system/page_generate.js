@@ -1,4 +1,4 @@
-define( "./helper, ./hfs, $ejs".match($.rword),function( hepler ){
+define( "./helper, $hfs, $ejs".match($.rword),function( hepler ){
     var url = $.path.join( process.cwd(),"app/views/"),layouts = {};
     $.walk(url, function(files){
         var pending = files.length;

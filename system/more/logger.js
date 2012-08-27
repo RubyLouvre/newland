@@ -1,4 +1,4 @@
-define( ["../hfs"], function(){
+define( [ "$hfs" ], function(){
     var levels = {
         // System is unusable.
         EMERGENCY : 0,

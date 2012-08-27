@@ -1,6 +1,6 @@
-define( "./httpflow, http,fs",function( Flow, http,fs ){
-    var server_names = fs.readdirSync(__dirname +"/services");
-    console.log(server_names)
+define( ["./httpflow", "http", "fs"], function( Flow, http, fs ){
+    //var server_names = fs.readdirSync(__dirname +"/services");
+   // console.log(server_names)
 
 
 

@@ -1,4 +1,4 @@
-$.define("./helper,./cookie,./more/flow", function( helper,cookie ){
+$.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
@@ -33,7 +33,6 @@ $.define("./helper,./cookie,./more/flow", function( helper,cookie ){
             this.flow.fire("open_session")
         }
     }
-
     
     HttpFlow = $.factory({
         init: function(){
