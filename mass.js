@@ -279,12 +279,11 @@
         $.path.join($.core.base , "system/mass/", method +".js")
     });
     $.core.alias["$hfs" ] =   $.path.join($.core.base , "system/more/hfs.js")
-    console.log($.core.alias)
+
     $.log("后端mass框架","green");
     //生成mass framework所需要的页面
-
     $.require( "./system/page_generate", function(){
-        $.log("页面生成")
+        $.log("页面生成",7)
     });
     $.require("./app/config");
     $.require("./system/more/logger");
