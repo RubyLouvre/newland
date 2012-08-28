@@ -1,7 +1,8 @@
 + function( global, DOC ){
 
     var  _$ = global.$//保存已有同名变量
-    var rmakeid = /(#.+|\W)/g
+    var rmakeid = /(#.+|\W)/g;
+ 
     var namespace = DOC.URL.replace( rmakeid,'')
     var w3c = DOC.dispatchEvent //w3c事件模型
     var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
@@ -492,7 +493,7 @@
         var module = Object( modules[id] ), ret;
         var common = {
             exports: module.exports,
-            require: module.require(),
+            require: typeof module.require == "function" ? module.require() : $.noop,
             module:  module
         }
         var match = callback.toString().replace(rparams,"$1") || [];
@@ -500,18 +501,18 @@
         var b = common[match[1]];
         var c = common[match[2]];
         if( a && b && a != b && b != c  ){//exports, require, module的位置随便
-            ret =  callback.apply(0, [a, b, c]);
+            ret =  callback.apply(global, [a, b, c]);
         }else{
-            ret =  callback.apply(0, array);
+            ret =  callback.apply(global, array);
         }
         module.state = 2;
-        if(typeof ret !== "undefined" && d){
-            modules[ d ].exports = ret
+        if( ret !== void 0 ){
+            modules[ id ].exports = ret
         }
         return ret;
     }
     all.replace($.rword,function(a){
-        $.core.alias["$"+a] = $.core.base+a+".js"
+        $.core.alias[ "$"+a ] = $.core.base+a+".js"
     });
     //domReady机制
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
