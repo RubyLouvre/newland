@@ -22,6 +22,8 @@ define( function(){
                     res.setHeader('Content-Type', 'text/plain');
                     break;
             }
+            //不要使用str.length，会导致页面等内容传送不完整
+            res.setHeader('Content-Length', Buffer.byteLength(str));
             res.end(str);
         })
     }
