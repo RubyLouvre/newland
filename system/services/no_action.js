@@ -14,8 +14,7 @@ define(  function(){
                         }
                     }
                     this.fire("send_file", cache);
-                }else{
-                    //从硬盘中读取对应路径下的文件
+                }else{  //从硬盘中读取对应路径下的文件 css js gif png
                     var file = $.path.join("app/public/", url);
                     $.readFile(file, function(err, data){
                         var code = 200
@@ -38,6 +37,7 @@ define(  function(){
                                 "Last-Modified":new Date().toGMTString()
                             }
                         }
+                        $.log("send_file "+ url, "cyan", 7)
                         $.staticCache[ url ] = cache;
                         this.fire("send_file", cache)
                     }.bind(this));
@@ -48,3 +48,4 @@ define(  function(){
         })
     }
 })
+//https://github.com/felixge/node-paperboy/blob/master/lib/paperboy.js
