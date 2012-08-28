@@ -34,20 +34,12 @@ define( ["../controller"], function(){
                         //就通过bind("open_session",fn)这加锁机制等待服务过错成才进入action
                         flow.bind("open_session",function(){
                             $.log("已经到达指定action","green",7)
-                     //       flow.render()
-//                            flow.res.writeHead(200, {
-//                                'Set-Cookie': 'myCookie=test',
-//                                'Content-Type': 'text/plain;charset=utf-8'
-//                            });
-//                            flow.res.end('这是到达action时生成的\n');
-                       action( flow );//到达指定action
-                                                    if( !flow.rendered ){
-                                                        flow.render()
-                                                    }
-
+                            action( flow );//到达指定action
+                            if( !flow.rendered ){
+                                flow.render();
+                            }
                         });
-                        flow.fire("create_cookie")
-                        
+                        flow.fire("create_cookie");
                     }else{
                         //如果已找不到，抛500内部错误
                         $.log("找不到对应controller或action","red", 3)
