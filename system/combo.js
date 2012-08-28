@@ -60,12 +60,14 @@ define( [ "$hfs"], function(){
     replaced = first.replace("/*combine modules*/", replaced+"\r\n" ).replace(rcomments,"");
     //console.log(replaced)
     var merge_url = "app/public/scripts/mass_merge.js"
+    var trunk = __dirname.indexOf("trunk") !== -1 ? "trunk/" : ""
+    console.log(trunk)
     $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
         if(e) {
             $.log("合并出错 "+e ,"red", 3);
         }else{
             $.log("merge.js 合并成功","green", 7);
-            $.updateFile(  "D:/2012/trunk/mass_merge.js", replaced, function(){
+            $.updateFile(  "D:/2012/" + trunk+"mass_merge.js", replaced, function(){
                 $.log("merge.js 更新成功","green", 7);
             },1);
         }
