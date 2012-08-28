@@ -29,8 +29,8 @@ $.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
         open: function(life, data){
             this.data = this.flow.session  = data;
             this.mtime = Date.now() + life;
+            $.log('fire open_session', "green", 6);
             this.flow.fire("open_session");
-            $.log('fire open_session', "green",6);
         }
     }
     var formats = {
@@ -54,12 +54,13 @@ $.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
                 var accept = this.req.headers.accept || 'text/plain';
                 for (var key in formats) {
                     if (  formats[key].test(accept) ) {
-                        console.log(key)
                         this.fire("respond_to", key)
                         return;
                     }
                 }
+            //这里会提示错误
             }
+
         },
         //为flow添加一系列属性,并劫持res.writeHead,res.setHeader
         patch: function(req, res){
