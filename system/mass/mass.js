@@ -144,8 +144,8 @@
         },
         //$.log(str, showInPage=true, 5 )
         //level Number，通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，
-        //7则连普通的调试消息也打印出来。 显示算法为 level <= $.log.level。
-        //这个$.log.level默认为9。下面是level各代表的含义。
+        //7则连普通的调试消息也打印出来。 显示算法为 level <= $.core.level。
+        //这个$.colre.level默认为9。下面是level各代表的含义。
         //0 EMERGENCY 致命错误,框架崩溃
         //1 ALERT 需要立即采取措施进行修复
         //2 CRITICAL 危急错误
@@ -265,7 +265,7 @@
             return ["ready", "js"];
         }
         if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.core.alias[url] ){
-            ret = $.core.alias[url]
+            ret = $.core.alias[url];
         }else{
             parent = parent.substr( 0, parent.lastIndexOf('/') )
             if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
@@ -291,7 +291,7 @@
         if(/\.(\w+)$/.test( tmp )){
             ext = RegExp.$1;
         }
-        if( tmp == ret && ret.substr(-3,3) != ".js"){//如果没有后缀名会补上.js
+        if( tmp == ret && !/\.js$/.test(ret)){//如果没有后缀名会补上.js
             ret += ".js";
         }
         return [ret, ext];
@@ -599,7 +599,7 @@
     $.exports( $.core.name +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 // console.log($["@path"])
-}( this, this.document );
+}( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
 
 
 /**
@@ -660,6 +660,7 @@ dom.namespace改为dom["mass"]
 2012.7.23 动态指定mass Framewoke的命名空间与是否调试
 2012.8.26 升级到v17
 2012.8.27 将$.log.level改到$.core.level中去
+2012.8.28 将最后一行的this改成self
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
