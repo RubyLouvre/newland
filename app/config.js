@@ -1,6 +1,6 @@
 define("config", function(){
     // 虽然说“约定优于配置”，但也不能没配置。不过如果只要配置配置就能搞定，总比写代码好多了。
-    $.log("已加载用户配置","green",7)
+    $.log("已加载用户配置","black","bg_green",7);
     $.mix( $.config,{
         services: [],
         http_method: "_method",//用于模拟PUT,DELETE方法
@@ -15,7 +15,7 @@ define("config", function(){
         logfile: $.path.join( process.cwd(),"/log/master.log"),
         //默认session配置,必需加载get_cookie服务，否则无效
         session: {
-            type: "cookie",//可选值有mongo, cookie, memory
+            type: "memory",//可选值有mongo, cookie, memory
             sid:   "mass_sid",//sessionID
             table: "sessions",//这个type=mongo时，决定存放在哪个集合中
             life: 60 * 10 //生命周期，单位ms 实验用,减少为10分种,
