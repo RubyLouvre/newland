@@ -42,10 +42,10 @@ define( [ "$hfs"], function(){
             }
             return $.define.apply($, arguments)
         }
-        var __core__ =  "@@@@@".match(/\w+/g)
-        for( var c = 0, cn ; cn = __core__[c++];){
+      // var __core__ =  "@@@@@".match(/\w+/g)
+        for( var c = 0, cn ; cn = all[c++];){
             if(cn !== "mass"){
-                Module.update($.core.base + cn + ".js", 0, 2);
+                Module.update($.core.base + cn + ".js", 0, 0, 2);
             }
         }
     }
@@ -55,7 +55,7 @@ define( [ "$hfs"], function(){
     var replaced = merge.toString()
     .replace(rbody, '$1')
     .replace(/^\s*|\s*$/g, '')
-    .replace("@@@@@",libs);
+   // .replace("@@@@@",libs);
     replaced = replaced + files.join("\n")
     replaced = first.replace("/*combine modules*/", replaced+"\r\n" ).replace(rcomments,"");
     //console.log(replaced)
