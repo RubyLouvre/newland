@@ -60,8 +60,7 @@ define( [ "$hfs"], function(){
     replaced = first.replace("/*combine modules*/", replaced+"\r\n" ).replace(rcomments,"");
     //console.log(replaced)
     var merge_url = "app/public/scripts/mass_merge.js"
-    var trunk = __dirname.indexOf("trunk") !== -1 ? "trunk/" : ""
-    console.log(trunk)
+    var trunk = __dirname.indexOf("trunk") !== -1 ? "trunk/" : "";
     $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
         if(e) {
             $.log("合并出错 "+e ,"red", 3);
@@ -71,7 +70,7 @@ define( [ "$hfs"], function(){
                 $.log("merge.js 更新成功","green", 7);
             },1);
         }
-    })
+    });
 //到这里为止的代码都与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
 //http://www.elmerzhang.com/2011/09/nodejs-module-develop-publish/
 //==================================================================
