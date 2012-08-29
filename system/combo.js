@@ -34,7 +34,7 @@ define( [ "$hfs"], function(){
             $.log( e + "  "+url, "red", 3);
         }
     });
-
+    // ===============这里是合并脚本===============
     var merge = function(){
         var define = function(a){
             if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
@@ -42,7 +42,6 @@ define( [ "$hfs"], function(){
             }
             return $.define.apply($, arguments)
         }
-      // var __core__ =  "@@@@@".match(/\w+/g)
         for( var c = 0, cn ; cn = all[c++];){
             if(cn !== "mass"){
                 Module.update($.core.base + cn + ".js", 0, 0, 2);
@@ -55,10 +54,9 @@ define( [ "$hfs"], function(){
     var replaced = merge.toString()
     .replace(rbody, '$1')
     .replace(/^\s*|\s*$/g, '')
-   // .replace("@@@@@",libs);
+
     replaced = replaced + files.join("\n")
     replaced = first.replace("/*combine modules*/", replaced+"\r\n" ).replace(rcomments,"");
-    //console.log(replaced)
     var merge_url = "app/public/scripts/mass_merge.js"
     var trunk = __dirname.indexOf("trunk") !== -1 ? "trunk/" : "";
     $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
