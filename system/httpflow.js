@@ -120,12 +120,12 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
         },
 
         setHeader: function(field, val){
-            var req = this.req
+            var res = this.res
             if (2 == arguments.length) {
-                req.setHeader(field, '' + val);
+                res.setHeader(field, '' + val);
             } else {
                 for (var key in field) {
-                    req.setHeader(key, '' + field[key]);
+                    res.setHeader(key, '' + field[key]);
                 }
             }
             return this;
