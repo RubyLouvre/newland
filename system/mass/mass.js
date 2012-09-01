@@ -2,7 +2,7 @@
 
     var  _$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
- 
+
     var namespace = DOC.URL.replace( rmakeid,'')
     var w3c = DOC.dispatchEvent //w3c事件模型
     var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
@@ -52,6 +52,7 @@
      * @param {Object} supplier 提供者
      * @return  {Object} 目标对象
      */
+    var has = Object.prototype.hasOwnProperty
     function mix( receiver, supplier ){
         var args = Array.apply([], arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
@@ -61,7 +62,7 @@
         }
         while((supplier = args[i++])){
             for ( key in supplier ) {//允许对象糅杂，用户保证都是对象
-                if (supplier.hasOwnProperty(key) && (ride || !(key in receiver))) {
+                if ( has.call(supplier,key) && (ride || !(key in receiver))) {
                     receiver[ key ] = supplier[ key ];
                 }
             }
@@ -227,7 +228,6 @@
         this.id = id;
         this.exports = {};
         this.parent = parent;
-        this.state = 1
         var m = Module._load[parent]
         m && m.children.push(this);
         this.children = [];
@@ -300,12 +300,10 @@
 
     var modules = Module._cache = {};
     $.modules = modules
-    Module._update("ready");
-    var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
-    var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
-    var rlcoment = /^\s*\/\/.*$/mg // line comments
-    var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g
-    var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
+    Module._update( "ready" );
+    var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
+    var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g;
+    var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*/;//用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
@@ -349,11 +347,9 @@
             id = id || "@cb"+ ( cbi++ ).toString(32);
             //创建或更新模块的状态
             Module._update(id, 0, factory, 1, deps, args);
-            
             if( dn === cn ){//如果需要安装的等于已安装好的
                 return install( id, args, factory );//装配到框架中
             }
-            
             ;//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
@@ -385,8 +381,8 @@
         },
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
-            $.log( (error || modules[ id ].state )+" "+id)
             if( error || !modules[ id ].state ){
+                $.log( (error || modules[ id ].state )+"   "+id, 3);
                 this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
             }
         },
@@ -423,7 +419,6 @@
                                 throw p + "不能重命名"
                             }
                             previous[p] = currValue
-
                         }
                     }
                 }
@@ -453,8 +448,8 @@
         codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.core.name,
         '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
         (DOC.uniqueID ? 'onreadystatechange="' : 'onload="'),
-        "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps();}",
-        'Ns._checkFail(self.document, nick);',
+        "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps(); ",
+        'Ns._checkFail(self.document, nick);}',
         '" onerror="Ns._checkFail(self.document, nick, true);" ><\/script>' ];
         iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
@@ -466,7 +461,7 @@
         doc.write( codes.join('') );
         doc.close();
         $.bind( iframe, "load", function(){
-            if( global.opera && doc.ok == void 0 ){//ok写在$._checkFail里面
+            if( global.opera && doc.ok != 1 ){//ok写在$._checkFail里面
                 $._checkFail(doc, url, true );//模拟opera的script onerror
             }
             doc.write( "<body/>" );//清空内容
@@ -481,6 +476,7 @@
         }
         args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
         var module = Ns.modules[ nick ];
+        module.state =1
         var last = args.length - 1;
         if( typeof args[ last ] == "function"){
             //劫持模块工厂,将$, exports, require, module等对象强塞进去
@@ -681,5 +677,7 @@ http://sourceforge.net/apps/trac/pies/wiki/TypeSystem/zh
 http://tableclothjs.com/ 一个很好看的表格插件
 http://layouts.ironmyers.com/
 http://baidu.365rili.com/wnl.html?bd_user=1392943581&bd_sig=23820f7a2e2f2625c8945633c15089dd&canvas_pos=search&keyword=%E5%86%9C%E5%8E%86
+http://unscriptable.com/2011/10/02/closures-for-dummies-or-why-iife-closure/
+http://unscriptable.com/2011/09/30/amd-versus-cjs-whats-the-best-format/
 */
 

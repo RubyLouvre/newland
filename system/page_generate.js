@@ -1,4 +1,4 @@
-define( "./helper, $hfs, $ejs".match($.rword),function( hepler ){
+define( "./helper,$hfs, $ejs".match($.rword),function( helper ){
     var url = $.path.join( process.cwd(),"app/views/"),layouts = {};
     $.walk(url, function(files){
         var pending = files.length;
@@ -6,10 +6,12 @@ define( "./helper, $hfs, $ejs".match($.rword),function( hepler ){
             (function(view_url){
                 $.readFile(view_url,"utf-8", function(e, source){
                     var array = hepler();
-                    var data = array[0]
-                    var helpers = array[1]
-                    var fn = $.ejs.compile(source, helpers);
-                    var html = fn(data, helpers);
+                    var data = $.ejs.data = {
+                        links: [],
+                        scripts: []
+                    }
+                    var fn = $.ejs.compile(source, helper);
+                    var html = fn(data);
                     if( typeof data.layout == "string" ){//如果它需要布局模板
                         data.partial = html;
                         var layout = data.layout;
@@ -23,7 +25,7 @@ define( "./helper, $hfs, $ejs".match($.rword),function( hepler ){
                                 $.log("找不到必需的布局模板: " + layout_url, "red", 3);
                             }
                         }
-                        fn = $.ejs.compile(html,array[1]);
+                        fn = $.ejs.compile(html, helper);
                         html = fn(data);
                     }
                     if(html){//必须确保其有内容

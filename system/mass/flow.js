@@ -39,7 +39,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
         flow.fire("ccc"),flow.fire("ddd")，那么fn就会第一次被触发！
         然后我再调用flow.fire("aaa"),fn就会被第二次触发；反正我们无论是fire上述那个操作，bbb也好，ccc也好，fn都会立即执行,
         不用着等到四个都触发才执行！只有当reload设置为true时，我们才需要每次把这个步骤都执行了一遍才触发fn。*/
-        bind: function(names,callback,reload){
+        bind: function(names,callback,reload, first){
             var root = this.root, deps = {},args = []
             String(names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
@@ -50,7 +50,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
                         state : 0
                     }
                 }else{
-                    root[name].unfire.unshift(callback)
+                    root[name].unfire[first ? "unshift" : "push" ](callback)
                 }
                 if(!deps[name]){//去重
                     args.push(name);
@@ -61,6 +61,9 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
             callback.args = args;
             callback.reload = !!reload;//默认每次重新加载
             return this;
+        },
+        first: function(names,callback,reload){
+           return  this.bind(names,callback,reload, true)
         },
         //用于取回符合条件的回调 opts = {match：正则,names:字符串,fired: 布尔}
         find: function(names,opts){
@@ -131,7 +134,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
                             state : 0
                         }
                     }else {
-                        root[name].unfire.unshift(fn)
+                        root[name].unfire.push(fn)
                     }
                 }
             });

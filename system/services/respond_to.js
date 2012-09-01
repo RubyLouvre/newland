@@ -1,4 +1,4 @@
-define( ["$ejs"], function(){
+define( ["../helper","$ejs"], function(helper){
     function getFile(url, type){
         try{
             var temp = $.readFileSync( url,"utf8");
@@ -10,29 +10,24 @@ define( ["$ejs"], function(){
     }
     return function(flow){
         flow.bind("respond_to", function( format,params ){
-            var url, res = flow.res
+            var url, res = flow.res, cache, fn
             if(typeof format == "string"){
                 url = $.path.join($.core.base, "app/views", flow._cname, flow._aname + "."+ format);
             }else {
                 url = $.path.join("app/public/",flow.pathname);
             }
-           
-            $.log("flow.mime "+ flow.mime, "white", 7)
+            $.log("flow.mime "+ flow.mime, "white", 7);
+            $.ejs.data = {
+                links:   [],
+                scripts: []
+            }
             if( flow.mime == "*" ){//如果是页面
-                var cache = $.pagesCache[ url ];
-                var array = this.helper;
-             //   var context = array[0];
-                var context = {
-                    links:[],
-                    scripts:[],
-                    sign: true
-                }
-                var helpers = array[1];
+                cache = $.pagesCache[ url ];
                 var temp, html //用于保存erb或html
                 if(!cache){//如果不存在,先尝试打模板
                     try{
                         temp = $.readFileSync(url.replace(/\.html$/,".erb"),"utf8");
-                        temp = $.ejs.compile( temp, helpers );//转换成编译函数
+                        temp = $.ejs.compile( temp, helper );//转换成编译函数
                         cache = $.pagesCache[ url ] = {
                             data: temp,
                             type: "erb"
@@ -47,30 +42,26 @@ define( ["$ejs"], function(){
                     res.setHeader('Content-Length', Buffer.byteLength("404"));
                     res.end("404");
                     return
-                }else if(typeof cache.data == "function"){
-                   //   console.log(context)
-                        console.log(context)
-                    html = cache.data( context, helpers );//转换成页面
-                    console.log("context.layout "+context.layout);
-                    console.log(context)
+                }
+                if(typeof cache.data == "function"){
+                    $.log("开始编译页面模板","yellow",7)
+                    html = cache.data();//转换成页面
+                    var context = $.ejs.data;
                     if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
                         context.partial = html;
                         var layout_url = $.path.join("app","views/layout", context.layout );
-                        var fn = $.pagesCache[ layout_url ]
-                        //    console.log(fn)
-                        if( ! fn ){
+                        cache = $.pagesCache[ layout_url ];
+                        if( ! cache ){
                             try{
-                                temp = $.readFileSync(layout_url,"utf8");
-                                fn = $.ejs.compile( temp, helpers );//转换成编译函数
-                                $.pagesCache[ layout_url ] = {
-                                    data: fn,
+                                temp  = $.readFileSync(layout_url,"utf8");
+                                cache = $.pagesCache[ layout_url ] = {
+                                    data:  $.ejs.compile( temp, helper ),
                                     type: "erb"
                                 }
                             }catch(e){ }//这里不存在应该抛错
                         }
-                        html = fn( context, helpers );//这时已是完整页面了
+                        html = cache.data( context );//这时已是完整页面了
                     }
-                    //这时应该调用sendFile
                     cache = {
                         data: html,
                         type: "html"
@@ -81,14 +72,12 @@ define( ["$ejs"], function(){
                 if(!cache){
                     cache = getFile( url, flow.mime );
                 }
-                console.log("==================");
-                console.log( cache.type );
+                $.log("这里是输出其他请求资源 "+cache.type,"bg_blue","blod",7);
             }
             var data = cache.data;//要返回给前端的数据
             if(data.type  === "json"){
                 data = JSON.stringify(data);
             }
-            console.log(cache.type)
             res.setHeader('Content-Type',  flow.contentType(cache.type));
             //不要使用str.length，会导致页面等内容传送不完整
             res.setHeader('Content-Length', Buffer.byteLength(data));
@@ -100,4 +89,4 @@ define( ["$ejs"], function(){
         })
     }
 })
-    //https://github.com/felixge/node-paperboy/blob/master/lib/paperboy.js
+//https://github.com/felixge/node-paperboy/blob/master/lib/paperboy.js

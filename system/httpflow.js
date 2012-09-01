@@ -1,4 +1,4 @@
-$.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
+$.define(  [ "$cookie", "$flow" ], function( cookie ){
     var type_mine = {
         "css": "text/css",
         "gif": "image/gif",
@@ -45,9 +45,6 @@ $.define(  ["./helper", "$cookie", "$flow" ], function( helper,cookie ){
         formats[key] = new RegExp(  arr.join('|').replace(/(\/)/g, "\\$1"))
     }
     HttpFlow = $.factory({
-        init: function(){
-            this.helper = helper()
-        },
         inherit: $.Flow,
         render: function(){
             if(!this.rendered){

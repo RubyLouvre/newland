@@ -1,70 +1,65 @@
 define( function(){
     $.log("视图助手生成模块", 7)
-    function make_helper(){
-        var data = {
-            links : [],
-            scripts : []
+
+    var helpers = {
+        set_layout: function( str ){
+            $.ejs.data.layout = str
+        },
+        set_title: function( str ){
+            $.ejs.data.title = str
+        },
+        push_css: function( file ) {
+            var opts = {
+                media: 'screen',
+                rel: 'stylesheet',
+                type: 'text/css'
+            };
+            var tag = create_tag( file, opts, arguments );
+            $.ejs.data.links.push( tag+"\n" );
+        },
+        unshift_css: function( file ){
+            var opts = {
+                media: 'screen',
+                rel: 'stylesheet',
+                type: 'text/css'
+            };
+            var tag = create_tag( file, opts, arguments );
+            $.ejs.data.links.unshift( tag+"\n" );
+        },
+        add_css : function ( file ) {
+            var opts = {
+                media: 'screen',
+                rel: 'stylesheet',
+                type: 'text/css',
+                root: 1
+            };
+            return create_tag( file, opts, arguments );
+        },
+        push_js: function( file, more ) {
+            var opts = {
+                type: 'text/javascript'
+            };
+            $.mix(opts, more || {})
+            var tag = create_tag( file, opts, arguments );
+            $.ejs.data.scripts.push( tag+"\n" );
+        },
+        unshift_js: function( file ){
+            var opts = {
+                type: 'text/javascript'
+            };
+            var tag = create_tag( file, opts, arguments );
+            $.ejs.data.scripts.unshift( tag+"\n" );
+        },
+        add_js: function( file, more){
+            var opts = {
+                type: 'text/javascript',
+                root: 1
+            };
+            $.mix(opts, more || {})
+            return create_tag( file, opts, arguments );
         }
-        var helpers = {
-            set_layout: function( str ){
-                data.layout = str
-            },
-            set_title: function( str ){
-                data.title = str
-            },
-            push_css: function( file ) {
-                var opts = {
-                    media: 'screen',
-                    rel: 'stylesheet',
-                    type: 'text/css'
-                };
-                var tag = create_tag( file, opts, arguments );
-                data.links.push( tag+"\n" );
-            },
-            unshift_css: function( file ){
-                var opts = {
-                    media: 'screen',
-                    rel: 'stylesheet',
-                    type: 'text/css'
-                };
-                var tag = create_tag( file, opts, arguments );
-                data.links.unshift( tag+"\n" );
-            },
-            add_css : function ( file ) {
-                var opts = {
-                    media: 'screen',
-                    rel: 'stylesheet',
-                    type: 'text/css',
-                    root: 1
-                };
-                return create_tag( file, opts, arguments );
-            },
-            push_js: function( file, more ) {
-                var opts = {
-                    type: 'text/javascript'
-                };
-                $.mix(opts, more || {})
-                var tag = create_tag( file, opts, arguments );
-                data.scripts.push( tag+"\n" );
-            },
-            unshift_js: function( file ){
-                var opts = {
-                    type: 'text/javascript'
-                };
-                var tag = create_tag( file, opts, arguments );
-                data.scripts.unshift( tag+"\n" );
-            },
-            add_js: function( file, more){
-                var opts = {
-                    type: 'text/javascript',
-                    root: 1
-                };
-                $.mix(opts, more || {})
-                return create_tag( file, opts, arguments );
-            }
-        }
-        return [data, helpers]
     }
+
 
     var reg_full_path = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/
     function create_tag(file, opts, args){
@@ -113,7 +108,7 @@ define( function(){
     function genericTagSelfclosing(name, params, override) {
         return '<' + name + htmlTagParams(params, override) + ' />';
     }
-    
+
     function htmlTagParams(params, override) {
         var maybe_params = '';
         $.mix(params, override, false);
@@ -124,8 +119,24 @@ define( function(){
         }
         return maybe_params;
     };
-    return make_helper
+    return helpers
 })
+
+//function make(){
+//
+//  var data = {};
+//  var helper = {
+//     setTitle : function(title){
+//       data.title = title;
+//     }
+//  }
+//     return [data, helper]
+//  }
+// var array = make()
+// array[1].setTitle("xxx")
+// console.log(array[0])
+// array2 = make()
+// console.log(array2[0])
 //nodeで空いているポートを見つける http://d.hatena.ne.jp/sugyan/20110403/1301769822
 // node-flowless http://d.hatena.ne.jp/koichik/20120304
 /*
@@ -142,5 +153,3 @@ quote.q=[ ['"', "'"], [/(')/g, /(")/g] ];
 //ecma 时代的类系统
 //https://github.com/Benvie/Node.js-Ultra-REPL/blob/master/lib/utility/object-utils.js
 //https://github.com/Benvie/Node.js-Ultra-REPL/blob/master/lib/utility/explorePath.js
-
-
