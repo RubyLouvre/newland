@@ -41,8 +41,9 @@ define( ["../controller"], function(){
                         });
                         flow.fire("create_cookie");
                     }else{
-                        //如果已找不到，抛500内部错误
-                        $.log("找不到对应controller或action","red", 3)
+                        var msg = "找不到对应controller或action"
+                        $.log(msg,"red", 3)
+                        flow.fire("send_error", 501, msg)
                     }
                 }
             }else{

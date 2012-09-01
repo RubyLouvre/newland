@@ -9,8 +9,8 @@ define( ["../helper","$ejs"], function(helper){
         }catch(e){ }
     }
     return function(flow){
-        flow.bind("respond_to", function( format,params ){
-            var url, res = flow.res, cache, fn
+        flow.bind("respond_to", function( format ){
+            var url, res = flow.res, cache
             if(typeof format == "string"){
                 url = $.path.join($.core.base, "app/views", flow._cname, flow._aname + "."+ format);
             }else {
@@ -32,16 +32,15 @@ define( ["../helper","$ejs"], function(helper){
                             data: temp,
                             type: "erb"
                         }
-                    }catch(e){ }
+                    }catch(e){
+                        return flow.fire("send_error", 500, e, "html")
+                    }
                 }
                 if(!cache){//如果再不存在则找静态页面
                     cache = getFile( url, "html" );
                 }
                 if(!cache){//如果还是没有找到404
-                    res.setHeader('Content-Type', "text/plain");
-                    res.setHeader('Content-Length', Buffer.byteLength("404"));
-                    res.end("404");
-                    return
+                    return flow.fire("send_error", 404, "找不到对应的视图", "html")
                 }
                 if(typeof cache.data == "function"){
                     $.log("开始编译页面模板","yellow",7)
@@ -58,7 +57,9 @@ define( ["../helper","$ejs"], function(helper){
                                     data:  $.ejs.compile( temp, helper ),
                                     type: "erb"
                                 }
-                            }catch(e){ }//这里不存在应该抛错
+                            }catch(e){ 
+                                return flow.fire("send_error", 500, e, "html")
+                            }
                         }
                         html = cache.data( context );//这时已是完整页面了
                     }
