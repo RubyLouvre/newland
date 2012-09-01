@@ -21,18 +21,7 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
         'manifest': 'text/cache-manifest'
     };
 
-    var Store = function(flow){
-        this.mtime = Date.now()
-        this.flow = flow;
-    }
-    Store.prototype = {
-        open: function(life, data){
-            this.data = this.flow.session  = data;
-            this.mtime = Date.now() + life;
-            $.log('fire open_session', "green", 6);
-            this.flow.fire("open_session");
-        }
-    }
+
     var formats = {
         txt:  [ 'text/plain'],
         html: ['text/html'],
@@ -50,14 +39,12 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
             if(!this.rendered){
                 var accept = this.req.headers.accept || 'text/plain';
                 for (var key in formats) {
-                    if (  formats[key].test(accept) ) {
-                        this.fire("respond_to", key)
-                        return;
+                    if ( formats[key].test(accept) ) {
+                        return this.fire("respond_to", key)
                     }
-                }
-            //这里会提示错误
+                }  //这里会提示错误
             }
-
+            this.fire("send_error", 403, "不能重复调用render方法")
         },
         //为flow添加一系列属性,并劫持res.writeHead,res.setHeader
         patch: function(req, res){
@@ -65,9 +52,7 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
             this.req =  req;
             this.url = req.url;
             this.pathname = req.url.replace(/[?#].*/, '')
-            this.params = {};
-            this.store = new Store(this)
-          
+            this.params = this.store = {}
             var flow = this;
             var writeHead = res.writeHead;
             var setHeader = res.setHeader;
