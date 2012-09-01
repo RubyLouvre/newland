@@ -22,6 +22,7 @@ define( ["./httpflow", "http", "fs", "./mapper"], function( Flow, http, fs ){
             fn(flow);//将拦截器绑到流程对象上
         });
     }).listen( $.config.port );
-    $.log($.config.port,"red", 7)
+
+    $.log("Server running at http://127.0.0.1 " + $.config.port,"red", 7)
 
 })
