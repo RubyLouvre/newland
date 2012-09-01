@@ -54,3 +54,26 @@ define( ["../more/tidy_css","../more/tidy_html","../more/tidy_js"], function(tid
         })
     }
 })
+//http://www.w3.org/html/ig/zh/wiki/Contributions#bugs
+//http://yiminghe.iteye.com/blog/618432
+
+//doTaskList = function(dataList, doAsync, callback){
+//    dataList = dataList.slice();
+//    var ret = [];
+//    var next = function(){
+//        if(dataList.length < 1)
+//            return callback(null, ret)
+//        var d = dataList.shift();
+//        try{
+//            doAsync(d, function(err,data){
+//                if(err)
+//                    return callback(err);
+//                ret.push(data);
+//                next();
+//            })
+//        }catch(err){
+//            return callback(err)
+//        }
+//    }
+//    next();
+//}

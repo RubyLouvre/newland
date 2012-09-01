@@ -4,7 +4,7 @@ define( ["$cookie"], function(Cookie){
             var config = $.config.cookie;
             flow.cookies = {};
             if ( /^(\*|html)$/i.test(flow.mime) && flow.url.indexOf(config.path) == 0 ){
-                $.log( "已调用get_cookie服务", "green", 6 );
+                $.log( "flow.cookies已经可用", "green", 6 );
                 var cookie = flow.req.headers.cookie;
                 try{
                     if(cookie.length){

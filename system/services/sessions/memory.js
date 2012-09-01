@@ -26,7 +26,6 @@ define( function(){
             delete memory[ sid ]
         }
         flow.store.open( s.life, data );
-        $.log('已调用memory session服务', "cyan");
         //每次都重置sessionID的cookie
         flow.addCookie( s.sid, sid,{
             maxAge: s.life,
@@ -37,7 +36,6 @@ define( function(){
                 data: flow.session,
                 mtime: Date.now() + s.life
             }; //将它放进$.memory,等待清理
-            $.log('已关闭memory session服务</code>',  "cyan");
         });
        
     }

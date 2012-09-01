@@ -43,7 +43,6 @@ define( ["../helper","$ejs"], function(helper){
                     return flow.fire("send_error", 404, "找不到对应的视图", "html")
                 }
                 if(typeof cache.data == "function"){
-                    $.log("开始编译页面模板","yellow",7)
                     html = cache.data();//转换成页面
                     var context = $.ejs.data;
                     if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
@@ -73,7 +72,7 @@ define( ["../helper","$ejs"], function(helper){
                 if(!cache){
                     cache = getFile( url, flow.mime );
                 }
-                $.log("这里是输出其他请求资源 "+cache.type,"bg_blue","blod",7);
+                $.log("这里是输出其他请求资源 "+cache.type,"bg_blue",7);
             }
             var data = cache.data;//要返回给前端的数据
             if(data.type  === "json"){
@@ -82,6 +81,7 @@ define( ["../helper","$ejs"], function(helper){
             res.setHeader('Content-Type',  flow.contentType(cache.type));
             //不要使用str.length，会导致页面等内容传送不完整
             res.setHeader('Content-Length', Buffer.byteLength(data));
+            $.log("==================","green",7)
             res.end(data);
         //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，
         //而要用new Date().toGMTString()，因为前者可能出现中文乱码

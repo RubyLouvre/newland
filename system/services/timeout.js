@@ -1,14 +1,11 @@
 define( function(){
     return function( flow ){
-        flow.timeoutID = setTimeout(function(){
-            if(this.timeoutID){
-                flow.fire("send_error", 408);
-            }
-        }, $.config.timeout);
-        
-        flow.bind("send_file", function(  ){
-            clearTimeout(this.timeoutID);
-            delete this.timeoutID
-        })
+        var ms = $.config.timeout || 5000;
+        var id = setTimeout(function(){
+            flow.fire("send_error", 408, "Request timeout");
+        }, ms);
+        flow.bind('header', function(){
+            clearTimeout(id);
+        });
     }
 })
