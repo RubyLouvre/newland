@@ -15,7 +15,7 @@ define( [ "querystring" ], function(qs){
             });
             req.on('end', function(){
                 try {
-                    req.body = buf.length ? qs.parse(buf) : {};
+                    flow.body = buf.length ? qs.parse(buf) : {};
                 } catch (err){}
                 flow.fire("method_override")
             });

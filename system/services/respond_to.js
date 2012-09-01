@@ -9,10 +9,11 @@ define( ["../helper","$ejs"], function(helper){
         }catch(e){ }
     }
     return function(flow){
-        flow.bind("respond_to", function( format ){
+        flow.bind("respond_to", function( format, obj ){
             var url, res = flow.res, cache
             if(typeof format == "string"){
                 url = $.path.join($.core.base, "app/views", flow._cname, flow._aname + "."+ format);
+                console.log(url)
             }else {
                 url = $.path.join("app/public/",flow.pathname);
             }
@@ -33,7 +34,7 @@ define( ["../helper","$ejs"], function(helper){
                             type: "erb"
                         }
                     }catch(e){
-                        return flow.fire("send_error", 500, e, "html")
+                      //  return flow.fire("send_error", 500, e, "html")
                     }
                 }
                 if(!cache){//如果再不存在则找静态页面
@@ -43,7 +44,7 @@ define( ["../helper","$ejs"], function(helper){
                     return flow.fire("send_error", 404, "找不到对应的视图", "html")
                 }
                 if(typeof cache.data == "function"){
-                    html = cache.data();//转换成页面
+                    html =  cache.data(obj || {}) ;//转换成页面
                     var context = $.ejs.data;
                     if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
                         context.partial = html;
