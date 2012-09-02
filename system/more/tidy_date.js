@@ -1,4 +1,4 @@
-$.define("tidy_date", function(){
+define("tidy_date", function(){
     return {
         //http://ejohn.org/blog/javascript-pretty-date/
         prettify : function (d) {

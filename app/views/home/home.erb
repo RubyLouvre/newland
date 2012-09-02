@@ -1,0 +1,270 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <%=  add_css('/styles/bootstrap.css' );  %>
+        <%=  add_css('/styles/rubylouvre.css' ); %>
+        <%=  add_js('/scripts/doc/shCore.js' ) ; %>
+
+        <script>
+
+            window.SyntaxHighlighter && SyntaxHighlighter.all();
+
+        </script>
+        <%=  add_js('/scripts/doc/shBrushJScript.js' ) ;   %>
+        <%=  add_js('/scripts/doc/shBrushCss.js' ) ;   %>
+        <%=  add_js('/scripts/doc/shBrushXml.js' ) ;   %>
+        <%=  add_js('/scripts/mass.js' ) ;   %>
+        <%=  add_css('/styles/doc/shCore.css' );  %>
+        <%=  add_css('/styles/doc/shThemeRDark.css' );  %>
+        <script>  </script>
+
+        <title>newland.js 易用易学、智能化、前后端一体化的网站构建JS框架</title>
+    </head>
+
+
+    <body>
+
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+
+                    <a class="btn btn-navbar" data-toggle="collapse"
+                       data-target=".nav-collapse">
+                        <span class="i-bar"></span>
+                        <span class="i-bar"></span>
+                        <span class="i-bar"></span>
+                    </a>
+
+                    <a class="brand" href="/">newland</a>
+
+                    <div class="nav-collapse">
+                        <ul class="nav">
+                            <li class="active"><a href="/">首页</a></li>
+                            <li><a href="https://github.com/RubyLouvre/newland">下载</a></li>
+                            <li><a href="doc/index.html">mass文档</a></li>
+                            <li><a href="/newland">newland文档</a></li>
+                            <li><a href="/database" >mongo文档</a></li>
+                            <li><a href="http://www.cnblogs.com/rubylouvre/">文章</a></li>
+                            <li><a href="test/index.html">测试</a></li>
+                            <li><a href="https://github.com/vert-x/vert.x">实验</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+
+            <div class="row">
+                <div class="span12">
+                    <div class="hero-unit" style="padding: 30px;">
+                        <h1>newland.js</h1>
+                        <p class="title">开拓javascript新天地，实现真正的大前端!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="span3">
+                    <div class="well">
+                        <h3 class="title">易学易用</h3>
+                        <br/>
+                        <p>采用jquery式的API处理DOM，使用MVVM机制进行最小化刷新，强大的语言模块屏蔽各种底部BUG，并提供琳琅满目的工具函数对字符串，数组，对象进行便捷操作</p>
+                    </div>
+                </div>
+                <div class="span3">
+                    <div class="well">
+                        <h3 class="title">前后端一体化</h3>
+                        <br/>
+                        <p>前后端都使用同种语言，同种模板系统，同样的模块加载器，精心设计的JS模块可以前后端通用，UI插件遵循相同的规格编写，知一晓十。</p>
+                        <br/>
+                    </div>
+                </div>
+                <div class="span3">
+                    <div class="well">
+                        <h3 class="title">智能化</h3>
+                        <br/>
+                        <p>后端会根据第一请求，裁剪出最合适的前端框架mass核心库与bootstrap样式库与UI库，并根据后续请求进行更优的JS与CSS打包</p>
+                        <br/>
+                    </div>
+                </div>
+                <div class="span3">
+                    <div class="well">
+                        <h3 class="title">易扩展</h3>
+                        <br/>
+                        <p>自由制定前端框架的命名空间，并支持多库共存，多版本共存，通过模块加载器不断加入新的模块来扩展自己！</p>
+                        <br/><br/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="span3">
+                    <div class="well">
+                        <h3 class="title">特性</h3>
+                        <br/>
+                        <ul>
+                            <li>
+                                <p><strong>多库共存</strong> </p>
+                            </li>
+                            <li>
+                                <p><strong>多版本共存</strong></p>
+                            </li>
+                            <li>
+                                <p><strong>模块化</strong>，即便是合并，也不用着复杂的build工具。</p>
+                            </li>
+                            <li>
+                                <p><strong>模板机制</strong> 提供format，hereDoc，tag, ejs（v9） 这四种级别的字符串拼接方法（后两个是用于生成HTML代码片断）</p>
+                            </li>
+                            <li>
+                                <p><strong>操作流</strong> ，一种比异步列队（Deferred）更为强大的处理异步的机制，避免回调套嵌，
+                                    将串行等待变成并行等待,一处合并，多处触发。</p>
+                            </li>
+                            <li>
+                                <p><strong>易于调试</strong>，$.log在后端带着色效果，在前端允许打印在页面（为IE6开小灶） </p>
+                            </li>
+                            <li>
+                                <p><strong>强大的类工厂</strong> </p>
+                            </li>
+                            <li>
+                                <p><strong>AS3式的补帧动画系统</strong>， 支持回放</p>
+                            </li>
+                            <li>
+                                <p><strong>CSS3 transform2D支持</strong>， 您可以轻松旋转图片角度了</p>
+                            </li>
+                            <li>
+                                <p><strong>第五代选择器引擎Icarus</strong>全面兼容CSS3高级伪类与jQuery自定义伪类的。</p>
+                            </li>
+                            <li>
+                                <p><strong>丰富的工具函数</strong>,让你轻松处理字符串与数组!
+                            </li>
+                            <li>
+                                <p><strong>优雅的配置</strong>当框架载入那一刻，决定您的命名空间与应用环境（是开发，测试还是生产）</a></p>
+                            </li>
+
+                        </ul>
+
+                    </div>
+                </div>
+
+                <div class="span9">
+
+                    <div class="row">
+                        <div class="span9">
+
+                            <div class="well">
+
+                                <h3 class="title">最新动态：前端mass framework模块体系统介绍</h3>
+
+                                <br/>
+                                <p>mass framework现在作为newland.js项目的子项目而存在，属于它的客户端子框架。</p>
+                                <p>它的模块按其重要性与功用分为四大类，分别是</p>
+                                <ol>
+                                    <li>种子模块， mass.js，最精简的内核， 包含模块加载系统。</li>
+                                    <li>补丁模块， lang_fix.js, css_fix.js, event_fix.js,主要是用于兼容旧式IE的，在chrome1+, FF4+, opera10+, safari4+是不会加载它们的。</li>
+                                    <li>核心模块， 所有位于mass-Framework/src目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
+                                    <li>外围模块， 位于mass-Framework/src/more的JS文件。</li>
+                                </ol>
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#js-mass" data-toggle="tab">种子模块</a></li>
+                                    <li><a href="#js-lang" data-toggle="tab">语言扩展模块</a></li>
+                                    <li><a href="#js-class" data-toggle="tab">类工厂模块</a></li>
+                                    <li><a href="#js-node" data-toggle="tab">节点模块</a></li>
+                                    <li><a href="#js-event" data-toggle="tab">事件模块</a></li>
+                                </ul>
+
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="js-mass">
+
+                                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready",function(){
+    var ret = $.oneObject([1,2,3],false)
+    //{1:false,2:false,3:false}
+});
+                                        </pre>
+                                    </div>
+                                    <div class="tab-pane" id="js-lang">
+
+                                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang",function(){
+    $.range(10);//[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    $.range(1, 11) //[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    $.range(0, 30, 5) //[0, 5, 10, 15, 20, 25]
+});
+                                        </pre>
+
+                                    </div>
+                                    <div class="tab-pane" id="js-class">
+
+                                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("class",function(){
+    $.factroy({
+        init: function(name,sex){
+            this.name = name;
+            this.sex  = sex
+        },
+        getName: function(){
+            return this.name;
+        }
+    })
+});
+                                        </pre>
+
+                                    </div>
+                                    <div class="tab-pane" id="js-node">
+
+                                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node",function(){
+     $(".inner").append('&lt;em&gt;aaa&lt;/em&gt;&lt;script&gt;alert("内嵌脚本")&lt;\/script&gt;');
+});
+                                        </pre>
+
+                                    </div>
+                                    <div class="tab-pane" id="js-event">
+                                        <p>Save the following in <code>Server.java</code></p>
+                                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event,attr",function(){
+    $('.add-on :checkbox').on('click', function () {
+        var $this = $(this)
+        , method = $this.attr('checked') ? 'addClass' : 'removeClass'
+        $(this).parents('.add-on')[method]('active')
+    })
+});
+                                        </pre>
+
+                                    </div>
+                                </div>
+                                <div>
+                                    <p>安装</p>
+                                    <p><code>&lt;script src="mass.js"&gt;&lt;/script&gt;</code></p>
+                                    <p>默认命名空间是<span style="color:#a9ea00">$</span>，如果想使用其他命名空间，可以在当前script标签中指定一个name属性，更换你的命名空间，即</p>
+                                    <pre class="brush:xml;gutter:false;toolbar:false">
+    <script name="MS" src="/scripts/mass.js"></script>
+                                    </pre>
+                                    <p>mass Framework是一个非常注重调试的框架，您也可以在当前script标签指定一个debug属性，打印日志。</p>
+                                    <pre class="brush:xml;gutter:false;toolbar:false">
+   <script debug="true" src="/scripts/mass.js"></script>
+                                    </pre>
+                                </div>
+
+                            </div>
+
+                            <div class="well">
+                                <p>注:mass Framework的文档正重新编写中,现先奉上种子模块的文档<a href="doc/index.html">点我</a>.</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="http://s20.cnzz.com/stat.php?id=4465624&web_id=4465624&show=pic" language="JavaScript"></script>
+
+    </body>
+</html>

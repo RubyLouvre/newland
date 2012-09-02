@@ -1,0 +1,11 @@
+<%  set_title("这是测试用的") %>
+<%  set_layout("sample.erb") %>
+<%=  add_js('/scripts/mass.js' );  %>
+<form action="/" method="post" >
+  <input type="text" name="name" value="<%= @name || "" %>" />
+  <input type="password" name="password" value="<%= @password || "" %>"  />
+  <input type="checkbox" name="fruit" value ="apple" >苹果<br>
+  <input type="checkbox" name="fruit" value ="orange">桔子<br>
+  <input type="checkbox" name="fruit" value ="mango">芒果<br>
+  <input type="submit" value="提交" />
+</form>  

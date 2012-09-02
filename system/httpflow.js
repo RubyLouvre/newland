@@ -35,12 +35,13 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
     }
     HttpFlow = $.factory({
         inherit: $.Flow,
-        render: function(){
+        render: function(obj){
             if(!this.rendered){
+                this.rendered = true;
                 var accept = this.req.headers.accept || 'text/plain';
                 for (var key in formats) {
                     if ( formats[key].test(accept) ) {
-                        return this.fire("respond_to", key)
+                        return this.fire("respond_to", key, obj);
                     }
                 }  //这里会提示错误
             }

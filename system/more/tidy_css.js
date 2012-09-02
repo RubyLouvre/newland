@@ -1,4 +1,4 @@
-$.define("tidy_css", function(){
+define("tidy_css", function(){
     /*
 
  CSS Beautifier

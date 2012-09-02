@@ -1,11 +1,11 @@
 define( [ "querystring" ], function(qs){
     //这是必经的第一个服务
     return function( flow ){
-        flow.body = {};
-        var req = flow.req;
-        var str = req.headers['content-type'] || ''
-        if(str.indexOf("application/x-www-form-urlencoded")!==-1){
+        if ( !flow._body &&  flow.getHeader("content-type") == "application/x-www-form-urlencoded" ){
+            flow._body = true;
+            flow.body = {}  ;
             var buf = "";//收集post请求的参数
+            var req = flow.req;
             req.setEncoding('utf8');
             function buildBuffer(chunk){
                 buf += chunk
@@ -16,7 +16,9 @@ define( [ "querystring" ], function(qs){
             req.on('end', function(){
                 try {
                     flow.body = buf.length ? qs.parse(buf) : {};
-                } catch (err){}
+                } catch (err){
+                    flow.fire("send_error", 500, err);
+                }
                 flow.fire("method_override")
             });
         }else{
