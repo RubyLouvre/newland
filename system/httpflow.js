@@ -52,6 +52,7 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
             this.res =  res;
             this.req =  req;
             this.url = req.url;
+            this.method = req.method;
             this.pathname = req.url.replace(/[?#].*/, '')
             this.params = this.store = {}
             var flow = this;
@@ -116,7 +117,7 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
                     return headers.referrer
                     || headers.referer;
                 default:
-                    return headers[ name ];
+                    return headers[ name ] || "";
             }
         },
 

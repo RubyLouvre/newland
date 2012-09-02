@@ -1,7 +1,9 @@
 define( [ "querystring" ], function(qs){
     //这是必经的第一个服务
     return function( flow ){
-        if ( !flow._body &&  flow.getHeader("content-type") == "application/x-www-form-urlencoded" ){
+        var type = flow.getHeader("content-type");
+        if ( (flow._body!== true) &&  type == "application/x-www-form-urlencoded" ){
+            $.log("这里是普通数据上传服务")
             flow._body = true;
             flow.body = {}  ;
             var buf = "";//收集post请求的参数
@@ -21,8 +23,9 @@ define( [ "querystring" ], function(qs){
                 }
                 flow.fire("method_override")
             });
-        }else{
+        }else if( type.indexOf("multipart/form-data") == -1 ){
             flow.fire("method_override")
         }
+                 
     }
 });

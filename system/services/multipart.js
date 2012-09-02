@@ -1,8 +1,11 @@
 define( [ "./formidable","querystring" ], function(formidable,qs){
     //这是必经的第一个服务
     return function( flow ){
-        if ( !flow._body && flow.method == "POST"  &&
-            flow.getHeader("content-type") == "multipart/form-data" ){
+
+        var type = flow.getHeader("content-type");
+        if ( (flow._body != true) && flow.method == "POST"  &&
+            type.indexOf( "multipart/form-data") == 0 ){
+            $.log("这里是文件上传服务")
             var form = new formidable.IncomingForm, data = {}, files = {}, done;
             flow._body = true;
             flow.body = {};
@@ -33,8 +36,8 @@ define( [ "./formidable","querystring" ], function(formidable,qs){
             form.on('end', function(){
                 if (done) return;
                 try {
-                    flow.body = qs.parse(data);
-                    flow.files = qs.parse(files);
+                    flow.body = data
+                    flow.files = files;
                     flow.fire("method_override")
                 } catch (err) {
                     flow.fire("send_error", 500, err);
@@ -46,7 +49,7 @@ define( [ "./formidable","querystring" ], function(formidable,qs){
 });
 //https://github.com/travis4all/file-uploader/blob/master/index.js
 //https://github.com/mikeal/request
-
+//http://stackoverflow.com/questions/5149545/uploading-images-using-nodejs-express-and-mongo
 //var fs = require('fs');
 //var sys = require('util')
 //exports.defaultBoundary = '48940923NODERESLTER3890457293';

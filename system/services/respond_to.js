@@ -13,7 +13,6 @@ define( ["../helper","$ejs"], function(helper){
             var url, res = flow.res, cache
             if(typeof format == "string"){
                 url = $.path.join($.core.base, "app/views", flow._cname, flow._aname + "."+ format);
-                console.log(url)
             }else {
                 url = $.path.join("app/public/",flow.pathname);
             }

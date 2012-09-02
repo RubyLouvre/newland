@@ -3,13 +3,13 @@ define( function(){
         index: function(flow){
             $.log("已进入home#index action")
             //链式写法，同名cookie前者会覆盖后者的，前端只生成“aaa=2; bbb=1”
-             console.log(flow.params)
-             if(flow.method == "POST"){
-                 console.log("这里是post请求")
-                   console.log(flow.body)
-                 flow.render(flow.body)
-             }
-          //   console.log(flow.body)
+            if(flow.method == "POST"){
+                console.log("这里是post请求")
+                console.log(flow.body)
+                console.log(flow.files)
+                flow.render(flow.body)
+            }
+        //   console.log(flow.body)
         },
         tabs: function(flow){
             $.log("已进入home#tabs action")
