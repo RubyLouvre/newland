@@ -33,7 +33,7 @@ define( ["../helper","$ejs"], function(helper){
                             type: "erb"
                         }
                     }catch(e){
-                      //  return flow.fire("send_error", 500, e, "html")
+                    //  return flow.fire("send_error", 500, e, "html")
                     }
                 }
                 if(!cache){//如果再不存在则找静态页面
@@ -80,7 +80,8 @@ define( ["../helper","$ejs"], function(helper){
             }
             res.setHeader('Content-Type',  flow.contentType(cache.type));
             //不要使用str.length，会导致页面等内容传送不完整
-            res.setHeader('Content-Length', Buffer.byteLength(data));
+            res.setHeader('Server',  "node.js "+process.version);
+            res.setHeader('Content-Length', Buffer.byteLength(data, "utf-8"));//binary
             $.log("==================","green",7)
             res.end(data);
         //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，
@@ -90,4 +91,5 @@ define( ["../helper","$ejs"], function(helper){
         })
     }
 })
-//https://github.com/felixge/node-paperboy/blob/master/lib/paperboy.js
+//https://github.com/visionmedia/send
+//http://cnodejs.org/topic/4f5b47c42373009b5c04e9cb nodejs大文件下载与断点续传

@@ -9,7 +9,8 @@ define( function(){
         });
     }
 })
-
+//http://hi.baidu.com/cyrist/item/b74d6ebe1206a442ba0e12b7
+ //If file is in a directory outside of the webroot, deny the request 403
 //计算字节因该用这个代码
 
 //// 字节长度
