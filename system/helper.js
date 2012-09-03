@@ -67,7 +67,6 @@ define( function(){
     var reg_full_path = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/
     function create_tag(file, opts, args){
         args = Array.apply([],args);//转换成纯数组
-        var last = args[args.length - 1];
         if (typeof last === "object" ){
             opts = $.mix( opts, args.pop() );
         }
