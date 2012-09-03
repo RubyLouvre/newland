@@ -47,6 +47,12 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
             }
             this.fire("send_error", 403, "不能重复调用render方法")
         },
+        redirect: function(path){//这里的path是路由规则中能找到的
+            var res = this.res;
+            res.statusCode = 301;
+            res.setHeader('Location', path);
+            res.end('Redirecting to ' + path);
+        },
         //为flow添加一系列属性,并劫持res.writeHead,res.setHeader
         patch: function(req, res){
             this.res =  res;

@@ -7,9 +7,11 @@ define( function(){
                 console.log("这里是post请求")
                 console.log(flow.body)
                 console.log(flow.files)
-                flow.render(flow.body)
+                flow.redirect("direct")
             }
-        //   console.log(flow.body)
+        },
+        direct:function(){
+             $.log("已进入home#direct action")
         },
         tabs: function(flow){
             $.log("已进入home#tabs action")

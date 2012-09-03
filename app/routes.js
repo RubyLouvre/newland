@@ -5,6 +5,7 @@ define("routes",function(){
     return function(mapper){
         mapper.get("/","home#index");
         mapper.post("/","home#index")
+        mapper.get("/direct","home#direct")
         mapper.get("/mongo/(:method)","mongo#index")
         mapper.get("/tabs","home#tabs")
         mapper.get("/newland","newland#index")
