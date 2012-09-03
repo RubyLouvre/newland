@@ -52,6 +52,7 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
             this.fire("send_error", 403, "不能重复调用render方法")
         },
         redirect: function(path){//这里的path是路由规则中能找到的
+            this.rendered = true;
             var res = this.res;
             res.statusCode = 301;
             res.setHeader('Location', path);
