@@ -56,7 +56,7 @@ define( ["../controller"], function(){
 })
 
 //2012.8.19 使用httpflow.pacth方法节省代码量
-
+    //http://d.hatena.ne.jp/scalar/20120508/1336488868
 /*
  用cookie在本地传输数据
 

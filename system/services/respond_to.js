@@ -15,9 +15,6 @@ define( ["../helper","$ejs"], function(helper){
             }else {
                 url = $.path.join("app/public/",flow.pathname);
             }
-            flow.pathname = url;
-            delete flow._mime;
-            $.log("flow.mime "+ flow.mime, "white", 7);
             $.ejs.data = {
                 links:   [],
                 scripts: []
@@ -50,22 +47,20 @@ define( ["../helper","$ejs"], function(helper){
                             try{
                                 temp  = $.readFileSync(layout_url,"utf8");
                                 cache = $.pagesCache[ layout_url ] = $.ejs.compile( temp, helper )
-                            }catch(e){ 
+                            }catch(e){
                                 return flow.fire("send_error", 500, e, "html")
                             }
                         }
                         html = cache( context );//这时已是完整页面了
                     }
-                    cache =  html
+                    cache = html;
                 }
             }else{
-                cache = $.pagesCache[ url ];
-                if(!cache){
-
-                    $.log(url+" : "+ flow.mime +"!!!!!!!!!")
-                    cache = getFile( url, flow );
+                cache = $.pagesCache[ url ]
+                if( !$.pagesCache[ url ] ){
+                    var ext = url.match(/\.(\w+)$/)[1];
+                    cache = $.pagesCache[ url ] = getFile( url, $.contentType( ext ) );
                 }
-                $.log("这里是输出其他请求资源 "+flow.mime,"bg_blue",7);
             }
             var data = cache;//要返回给前端的数据
             if(flow.mime  === "application/json" ){
@@ -73,10 +68,10 @@ define( ["../helper","$ejs"], function(helper){
             }
             res.setHeader('Content-Type',  flow.mime );
             //不要使用str.length，会导致页面等内容传送不完整
-            res.setHeader('Server',  "node.js "+process.version);
-            var encoding = /(^text|json$)/.test( flow.mime )  ? "utf8" : "binary"
-            res.setHeader('Content-Length', Buffer.byteLength( data, encoding ));//binary
-            $.log("==================","green",7)
+            res.setHeader('Server',  "node.js "+ process.version);
+            var encoding  = /(^text|json$)/.test( flow.mime )  ? "utf8" : "binary"
+
+            res.setHeader('Content-Length', Buffer.byteLength( data, encoding ));
             res.end(data);
         //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，
         //而要用new Date().toGMTString()，因为前者可能出现中文乱码
@@ -87,3 +82,7 @@ define( ["../helper","$ejs"], function(helper){
 })
 //https://github.com/visionmedia/send
 //http://cnodejs.org/topic/4f5b47c42373009b5c04e9cb nodejs大文件下载与断点续传
+
+//@可乐 找到两个... 等会去试试 https://github.com/aadsm/jschardet
+//[杭州]Neekey<ni184775761@gmail.com> 20:32:43
+//https://github.com/mooz/node-icu-charset-detector
