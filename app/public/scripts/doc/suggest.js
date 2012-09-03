@@ -1,4 +1,4 @@
-$.require("ready,event,fx",function(){
+$.require("ready, $event, $fx",function(){
     var search = $("#search"), hash = window, prefix = "",  fixIE = NaN;
     search.addClass("search_target");
     search.input(function(){//监听输入

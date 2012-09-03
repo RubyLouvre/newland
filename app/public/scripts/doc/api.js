@@ -1,4 +1,4 @@
-$.define("api", function(){
+define("api", function(){
     var _getAPI = function(obj,com,ret,i){
         for(var name in obj){
             if(obj.hasOwnProperty(name) && (name == "fn" || !com.hasOwnProperty(name))){

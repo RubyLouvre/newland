@@ -4,6 +4,7 @@ define( "./helper,./more/tidy, $hfs, $ejs".match($.rword),function( helper, tidy
         var pending = files.length;
         for(var i = 0; i < pending; i++){
             (function(view_url){
+                console.log(view_url+" !!!!!!!")
                 $.readFile(view_url,"utf-8", function(e, source){
                     var data = $.ejs.data = {
                         links: [],
