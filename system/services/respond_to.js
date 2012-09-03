@@ -1,7 +1,8 @@
 define( ["../helper","$ejs"], function(helper){
     function getFile(url, type){
         try{
-            var temp = $.readFileSync( url,"utf8");
+            var encoding  = /^(css|js|txt|ejs|html|xhtml|xml)$/.test ? "utf8" : "binary"
+            var temp = $.readFileSync( url,encoding );
             return $.pagesCache[ url ] = {
                 data: temp,
                 type: type
@@ -23,18 +24,16 @@ define( ["../helper","$ejs"], function(helper){
             }
             if( flow.mime == "*" ){//如果是页面
                 cache = $.pagesCache[ url ];
-                var temp, html //用于保存erb或html
+                var temp, html //用于保存ejs或html
                 if(!cache){//如果不存在,先尝试打模板
                     try{
-                        temp = $.readFileSync(url.replace(/\.html$/,".erb"),"utf8");
+                        temp = $.readFileSync(url.replace(/\.html$/,".ejs"),"utf8");
                         temp = $.ejs.compile( temp, helper );//转换成编译函数
                         cache = $.pagesCache[ url ] = {
                             data: temp,
-                            type: "erb"
+                            type: "ejs"
                         }
-                    }catch(e){
-                    //  return flow.fire("send_error", 500, e, "html")
-                    }
+                    }catch(e){ }
                 }
                 if(!cache){//如果再不存在则找静态页面
                     cache = getFile( url, "html" );
@@ -54,7 +53,7 @@ define( ["../helper","$ejs"], function(helper){
                                 temp  = $.readFileSync(layout_url,"utf8");
                                 cache = $.pagesCache[ layout_url ] = {
                                     data:  $.ejs.compile( temp, helper ),
-                                    type: "erb"
+                                    type: "ejs"
                                 }
                             }catch(e){ 
                                 return flow.fire("send_error", 500, e, "html")

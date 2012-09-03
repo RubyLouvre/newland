@@ -2,6 +2,9 @@ define( function(){
     $.log("视图助手生成模块", 7)
 
     var helpers = {
+        block: function(key, val){
+            $.ejs.data[key] = val
+        },
         set_layout: function( str ){
             $.ejs.data.layout = str
         },

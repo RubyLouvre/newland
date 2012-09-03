@@ -5,7 +5,6 @@ define( "./helper,$hfs, $ejs".match($.rword),function( helper ){
         for(var i = 0; i < pending; i++){
             (function(view_url){
                 $.readFile(view_url,"utf-8", function(e, source){
-                    var array = hepler();
                     var data = $.ejs.data = {
                         links: [],
                         scripts: []
