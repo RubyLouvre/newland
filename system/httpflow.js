@@ -18,12 +18,15 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
         "wma": "audio/x-ms-wma",
         "wmv": "video/x-ms-wmv",
         "xml": "text/xml",
+        "ejs": "text/ejs",
         'manifest': 'text/cache-manifest'
     };
 
-
+    $.contentType = function( name ){
+        return type_mine[ name ]
+    }
     var formats = {
-        txt:  [ 'text/plain'],
+        txt:  ['text/plain'],
         html: ['text/html'],
         json: ['application/json', 'text/json'],
         xml:  ['application/xml', 'text/xml'],
@@ -143,8 +146,8 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
         if(this._mime){
             return this._mime;
         }
-        return  this._mime = /\.(\w+)$/.test( this.pathname ) ?
-        RegExp.$1 : "*"
+        var ext = /\.(\w+)$/.test( this.pathname ) ?  RegExp.$1 : "*"
+        return  this._mime = type_mine[ext] || "";
     })
     HttpFlow.prototype.__defineGetter__("xhr", function(){
         if(!this.req)
