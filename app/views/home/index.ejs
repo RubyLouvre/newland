@@ -1,6 +1,6 @@
 <%  block("title","这是测试用的") %>
 <%  block("layout","sample.ejs") %>
-<%=  add_js('/scripts/mass.js' );  %>
+   <%=  add_js('/scripts/mass_merge.js' );    %>
 <form action="/" method="post" enctype="multipart/form-data" >
   <input type="text" name="name" value="<%= @name || "" %>" />
   <input type="password" name="password" value="<%= @password || "" %>"  /><br/>

@@ -18,7 +18,7 @@ define( ["./httpflow", "http", "fs", "./mapper"], function( Flow, http, fs ){
     http.createServer(function(req, res) {
         var flow = new Flow()//创建一个流程对象，处理所有异步操作，如视图文件的读取、数据库连接
         flow.patch(req, res);
-        $.log("请求req.url "+req.url, "red", 7)
+        $.log("请求req.url "+req.url, "green", 7)
         services.forEach(function(fn, i){
             try{
                 fn(flow);//将拦截器绑到流程对象上

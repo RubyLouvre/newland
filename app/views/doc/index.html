@@ -111,7 +111,7 @@
 			*浏览器有个策略，如果你是用隐藏的iframe来加载页面，而页面又调用父页面的函数，
             *就有一定的几率弹出"For security reasons, framing is not allowed
             */
-                    $.require("ready,node",function(){
+                    $.require("ready,$node",function(){
                         var el = doc.getElementsByTagName("article")[0];
                         var text = el.innerHTML
                         $("#holdplace").html(text);
@@ -129,7 +129,7 @@
                     })
                 }
             }
-            $.require("doc/api, node, more/menu, ready",function( api ){
+            $.require("./doc/api, ./node, ./more/menu, ready",function( api ){
                 var pathMap = {
                     "模块加载模块":  "mass/$",
                     "特征侦探模块":  "support/$",

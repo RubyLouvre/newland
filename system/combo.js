@@ -37,14 +37,15 @@ define( [ "$hfs"], function(){
     // ===============这里是合并脚本===============
     var merge = function(){
         var define = function(a){
-            if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
+          if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
                 arguments[0] = $.core.base + a +".js"
             }
-            return $.define.apply($, arguments)
+            return $.define.apply($, arguments);
         }
+
         for( var c = 0, cn ; cn = all[c++];){
             if(cn !== "mass"){
-                Module.update($.core.base + cn + ".js", 0, 0, 2);
+                Module._update($.core.base + cn + ".js", 0, 0, 2);
             }
         }
     }
