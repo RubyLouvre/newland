@@ -286,6 +286,19 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             if( !events.length ){
                 $.removeData( target, "events") ;
             }
+        },
+        match: function( cur, parent, quark ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
+            if(quark._target)
+                return true
+            var expr  = quark.live
+            var matcher = expr.input ? quickIs : $.match
+            for ( ; cur != parent; cur = cur.parentNode || parent ) {
+                if(matcher(cur, expr)){
+                    quark._target = cur
+                    return true
+                }
+            }
+            return false;
         }
     })
     var rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/;

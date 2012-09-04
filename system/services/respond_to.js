@@ -22,14 +22,14 @@ define( ["../helper","$ejs"], function(helper){
                 links:   [],
                 scripts: []
             }
-            if( flow.mime == "*" ){//如果是页面
+            if( flow.mime == "text/html" ){//如果是页面
                 cache = $.pagesCache[ url ];
                 var temp, html //用于保存ejs或html
                 if(!cache){//如果不存在,先尝试打模板
                     try{
                         temp = $.readFileSync( url.replace(rext,ext), "utf8");
                         temp = $.ejs.compile( temp, helper );//转换成编译函数
-                        cache = $.pagesCache[ url ] =  temp
+                        cache = $.pagesCache[ url ] =  temp;
                     }catch(e){ }
                 }
                 if(!cache){//如果再不存在则找静态页面

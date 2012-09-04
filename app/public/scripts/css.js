@@ -281,8 +281,11 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         visibility: "hidden",
         display: "block"
     }
+    var rdisplayswap = /^(none|table(?!-c[ea]).+)/
     var showHidden = function(node, array){
-        if( node && node.nodeType == 1 && !node.offsetWidth ){
+        if( node && node.nodeType == 1 && !node.offsetWidth
+        //如果是none table-column table-column-group table-footer-group table-header-group table-row table-row-group
+            && rdisplayswap.test(getter(node, "display")) ){
             var obj = {
                 node: node
             }
@@ -298,11 +301,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
     $.support.boxSizing = $.cssName( "boxSizing")
     function getWH( node, name, extra  ) {//注意 name是首字母大写
-        var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
+        var which = cssPair[name], hidden = [];
         showHidden( node, hidden );
         var val = node["offset" + name]
-        //if($.support.boxSizing && $.css(node, "boxSizing" ) === "border-box" && extra == 0 ){ return val;  }
-        //innerWidth = paddingWidth outerWidth = borderWidth, width = contentWidth
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
@@ -533,7 +534,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                     return null;
                 }
                 win = getWindow( node );
-                // Return the scroll offset
                 return win ? ("pageXOffset" in win) ? win[ t ? "pageYOffset" : "pageXOffset" ] :
                 $.support.boxModel && win.document.documentElement[ method ] ||
                 win.document.body[ method ] :

@@ -2,7 +2,7 @@
 // 事件系统 v7
 //==========================================
 define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(){
-    $.log("已加载event模块 v7", 7)
+    $.log("已加载event模块v7")
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{ } //添加或增强二级属性eventAdapter
@@ -100,6 +100,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             hash.uuid = $.getUid( hash.fn );       //确保hash.uuid与fn.uuid一致
             types.replace( $.rword, function( t ){
                 var forged = new $.Event( t, live), type = forged.origType;
+                $.log(t)
                 $.mix(forged, {
                     currentTarget: target,          //this,用于绑定数据的
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
@@ -285,6 +286,19 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             if( !events.length ){
                 $.removeData( target, "events") ;
             }
+        },
+        match: function( cur, parent, quark ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
+            if(quark._target)
+                return true
+            var expr  = quark.live
+            var matcher = expr.input ? quickIs : $.match
+            for ( ; cur != parent; cur = cur.parentNode || parent ) {
+                if(matcher(cur, expr)){
+                    quark._target = cur
+                    return true
+                }
+            }
+            return false;
         }
     })
     var rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/;
@@ -310,19 +324,10 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     //以下是用户使用的API
     $.implement({
         toggle: function(/*fn1,fn2,fn3*/){
-            var fns = Array.apply([],arguments)
-            return this.each(function( el ){
-                var array =  $._data(el, "toggle_click");
-                if(!array){//复制一份，不影响原数组
-                    array =  $._data(el, "toggle_click",fns.concat());
-                    $(el).click(function(e){
-                        var fn = array.shift();
-                        fn.call(el, e);
-                        array.push(fn);
-                    })
-                }else{
-                    $.Array.merge(array,fns);
-                }
+            var fns = Array.apply([],arguments), i = 0;
+            return this.click(function(e){
+                var fn  = fns[i++] || fns[i = 0, i++];
+                fn.call( this, e );
             })
         },
         hover: function( fnIn, fnOut ) {
@@ -464,6 +469,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     }
     //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
+        console.log("ccccccccc")
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, handler = function (event) {
                 var src = event.target;
@@ -494,7 +500,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
             bindType    : "DOMMouseScroll",
             delegateType: "DOMMouseScroll"
         }
-        try{//IE9 与FF17支持一个wheel事件
+        try{
             //可能末来FF会支持标准的mousewheel事件，则需要删除此分支
             document.createEvent("WheelEvent");
             delete adapter.mousewheel;
