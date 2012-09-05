@@ -1,33 +1,30 @@
 //=========================================
 //  数据交互模块
 //==========================================
-define("ajax",["$event"], function(){
-    //$.log("已加载ajax模块");
-    var global = this, DOC = global.document, r20 = /%20/g,
+define("ajax",["$flow"], function(){
+    $.log("已加载ajax模块", 7);
+    var global = this, 
+    DOC = global.document,
+    r20 = /%20/g,
     rCRLF = /\r?\n/g,
-    encode = global.encodeURIComponent,
-    rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE leaves an \r character at EOL
-
+    encode = encodeURIComponent,
+    rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE的换行符不包含 \r
     rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
     rurl =  /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
-    // Document location
-    ajaxLocation;
-    // #8138, IE may throw an exception when accessing
-    // a field from window.location if document.domain has been set
+    curl;
+    //在IE下如果重置了document.domain，访问window.location会抛错
     try {
-        ajaxLocation = global.location.href;
+        curl = global.location.href;
     } catch( e ) {
-        // Use the href attribute of an A element
-        // since IE will modify it given document.location
-        ajaxLocation = DOC.createElement( "a" );
-        ajaxLocation.href = "";
-        ajaxLocation = ajaxLocation.href;
+        curl = DOC.createElement( "a" );
+        curl.href = "";
+        curl = curl.href;
     }
  
     // Segment location into parts
-    var ajaxLocParts = rurl.exec( ajaxLocation.toLowerCase() ) || [],
+    var segments = rurl.exec( curl.toLowerCase() ) || [],
     transports = { },//传送器
     converters ={//转换器
         text: function(dummyXHR,text,xml){
@@ -55,9 +52,9 @@ define("ajax",["$event"], function(){
         "*": "*/*"
     },
     defaults  = {
-        type:"GET",
+        type: "GET",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-        async:true,
+        async: true,
         jsonp: "callback"
     };
     //将data转换为字符串，type转换为大写，添加hasContent，crossDomain属性，如果是GET，将参数绑在URL后面
@@ -66,17 +63,17 @@ define("ajax",["$event"], function(){
         if (opts.crossDomain == null) { //判定是否跨域
             var parts = rurl.exec(opts.url.toLowerCase());
             opts.crossDomain = !!( parts &&
-                ( parts[ 1 ] != ajaxLocParts[ 1 ] || parts[ 2 ] != ajaxLocParts[ 2 ] ||
+                ( parts[ 1 ] != segments[ 1 ] || parts[ 2 ] != segments[ 2 ] ||
                     ( parts[ 3 ] || ( parts[ 1 ] === "http:" ?  80 : 443 ) )
                     !=
-                    ( ajaxLocParts[ 3 ] || ( ajaxLocParts[ 1 ] === "http:" ?  80 : 443 ) ) )
+                    ( segments[ 3 ] || ( segments[ 1 ] === "http:" ?  80 : 443 ) ) )
                 );
         }
         if ( opts.data && opts.data !== "string") {
             opts.data = $.param( opts.data );
         }
         // fix #90 ie7 about "//x.htm"
-        opts.url = opts.url.replace(/^\/\//, ajaxLocParts[1] + "//");
+        opts.url = opts.url.replace(/#.*$/,"").replace(/^\/\//, segments[1] + "//");
         opts.type = opts.type.toUpperCase();
         opts.hasContent = !rnoContent.test(opts.type);//是否为post请求
         if (!opts.hasContent) {
@@ -97,7 +94,6 @@ define("ajax",["$event"], function(){
                 callback = data;
                 data = undefined;
             }
-            console.log("xxxxxxxxxxxxxx")
             return $.ajax({
                 type: method,
                 url: url,
@@ -148,7 +144,8 @@ define("ajax",["$event"], function(){
                 success: callback
             });
         },
-        param: function (json, serializeArray) {//对象变字符串
+        //将一个对象转换为字符串
+        param: function (json, serializeArray) {
             if (!$.isPlainObject(json)) {
                 return "";
             }
@@ -174,7 +171,8 @@ define("ajax",["$event"], function(){
             buf.pop();
             return buf.join("").replace(r20, "+");
         },
-        unparam: function ( url, query ) {//字符串变对象
+        //将一个字符串转换为对象
+        unparam: function ( url, query ) {
             var json = {};
             if (!url || !$.type(url, "String")) {
                 return json
@@ -211,7 +209,6 @@ define("ajax",["$event"], function(){
             }).forEach( function( elem ) {
                 var val = $( elem ).val(), vs;
                 val = $.makeArray[val];
-                // 字符串换行平台归一化
                 val = val.map( function(v) {
                     return v.replace(rCRLF, "\r\n");
                 });
@@ -222,8 +219,8 @@ define("ajax",["$event"], function(){
             return $.param(json, false);// 名值键值对序列化,数组元素名字前不加 []
         }
     });
-//http://sofish.de/file/demo/github/
     //如果没有指定dataType,服务器返回什么就是什么，不做转换
+    var ajaxflow = new $.Flow
     var ajax = $.ajax = function( opts ) {
         if (!opts || !opts.url) {
             throw "参数必须为Object并且拥有url属性";
@@ -231,12 +228,11 @@ define("ajax",["$event"], function(){
         opts = setOptions(opts);//规整化参数对象
         //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
         var dummyXHR = new $.XHR(opts), dataType = opts.dataType;
-
         if( opts.form && opts.form.nodeType === 1 ){
             dataType = "iframe";
         }else if( dataType == "jsonp" ){
             if( opts.crossDomain ){
-                ajax.fire("start", dummyXHR, opts.url,opts.jsonp);//用于jsonp请求
+                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
@@ -254,18 +250,14 @@ define("ajax",["$event"], function(){
         for (var i in opts.headers) {
             dummyXHR.setRequestHeader( i, opts.headers[ i ] );
         }
- 
-        "Complete Success Error".replace( $.rword, function(name){
-            var method = name.toLowerCase();
-            dummyXHR[ method ] = dummyXHR[ "on"+name ];
-            if(typeof opts[ method ] === "function"){
-                dummyXHR[ method ](opts[ method ]);//添加用户事件
-                delete dummyXHR.options[ method ];
-                delete opts[ method ];
+        "complete success error".replace( $.rword, function(name){
+            if(typeof opts[ name ] === "function"){
+                dummyXHR.bind( name, opts[ name ] )
+                delete opts[ name ];
             }
         });
         dummyXHR.readyState = 1;
-        // Timeout
+        // 处理超时
         if (opts.async && opts.timeout > 0) {
             dummyXHR.timeoutID = setTimeout(function() {
                 dummyXHR.abort("timeout");
@@ -284,14 +276,12 @@ define("ajax",["$event"], function(){
         return dummyXHR;
     }
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
-    $.mix(ajax, $.EventTarget);
-
-    ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
+    ajax.isLocal = rlocalProtocol.test(segments[1]);
     /**
          * XHR类,用于模拟原生XMLHttpRequest的所有行为
          */
     $.XHR = $.factory({
-        implement:$.EventTarget,
+        implement: $.Flow,
         init:function(option){
             $.mix(this, {
                 responseData:null,
@@ -303,12 +293,11 @@ define("ajax",["$event"], function(){
                 requestHeaders: {},
                 readyState: 0,
                 //internal state
-                state:0,
+                state: 0,
                 statusText: null,
-                status:0,
+                status: 0,
                 transport: null
             });
-            this.defineEvents("complete success error");
             this.setOptions("options",option);//创建一个options保存原始参数
         },
 
@@ -336,7 +325,7 @@ define("ajax",["$event"], function(){
             return this;
         },
         toString: function(){
-            return "[object Lions]"
+            return "[object XMLHttpRequest]"
         },
         // 中止请求
         abort: function(statusText) {
@@ -394,22 +383,13 @@ define("ajax",["$event"], function(){
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
            
             this.fire( eventType, this.responseData, statusText);
-            //$.log("xxxxxxxxxxxxxxxxxxxxxxxxx")
-            //$.log(this == ajax)
-            ajax.fire( eventType );
+            ajaxflow.fire( eventType );
             this.fire("complete", this.responseData, statusText);
-            ajax.fire("complete");
+            ajaxflow.fire("complete");
             this.transport = undefined;
         }
     });
-    $.XHR.prototype.fire = function( type ){//覆盖$.EventTarget的fire方法，去掉事件对象
-        var events = $._data( this,"events") ,args = $.slice(arguments,1);
-        if(!events || !events.length) return;
-        for ( var i = 0, item; item = events[i++]; ) {
-            if(item.type === type)
-                item.fn.apply( this, args );
-        }
-    }
+
     //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
     var s = ["XMLHttpRequest",
     "ActiveXObject('Msxml2.XMLHTTP.6.0')",
@@ -437,8 +417,7 @@ define("ajax",["$event"], function(){
         transports._default =  $.factory({
             //发送请求
             request: function() {
-                var dummyXHR = this.dummyXHR,
-                options = dummyXHR.options, i;
+                var dummyXHR = this.dummyXHR, options = dummyXHR.options, i;
                 $.log("XhrTransport.sending.....");
                 if (options.crossDomain && !allowCrossDomain) {
                     throw "do not allow crossdomain xhr !"
@@ -588,7 +567,7 @@ define("ajax",["$event"], function(){
     converters["script json"] = function(dummyXHR){
         return $["jsonp"+ dummyXHR.uniqueID ]();
     }
-    ajax.bind("start", function(e, dummyXHR, url, jsonp) {
+    ajaxflow.bind("start", function(e, dummyXHR, url, jsonp) {
         $.log("jsonp start...");
         var jsonpCallback = "jsonp"+dummyXHR.uniqueID;
         dummyXHR.options.url = url  + (rquery.test(url) ? "&" : "?" ) + jsonp + "=" + DOC.URL.replace(/(#.+|\W)/g,'')+"."+jsonpCallback;

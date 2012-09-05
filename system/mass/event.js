@@ -64,7 +64,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 e.preventDefault();
             }// 如果存在returnValue 那么就将它设为false
             e.returnValue = false;
-            $.log("preventDefault")
             return this;
         },
         stopPropagation: function() {
@@ -81,7 +80,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             return this;
         }
     }
-    $.Event = Event
+    $.Event = Event;
     $.mix(facade,{
         //addEventListner API的支持情况:chrome 1+ FF1.6+	IE9+ opera 7+ safari 1+;
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
@@ -100,7 +99,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             hash.uuid = $.getUid( hash.fn );       //确保hash.uuid与fn.uuid一致
             types.replace( $.rword, function( t ){
                 var forged = new $.Event( t, live), type = forged.origType;
-                $.log(t)
                 $.mix(forged, {
                     currentTarget: target,          //this,用于绑定数据的
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
@@ -146,7 +144,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var ctarget = hash.currentTarget//原来绑定事件的对象
                 var more = event.more || {};
                 //防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
-                if( more.origType && more.origType !== type ){
+                if(  more.origType && more.origType !== type ){
                     return
                 }
                 var queue = ( $._data( ctarget, "events") || [] ).concat();
@@ -169,7 +167,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         delete quark._target;
                         quark.times--;
                         if(quark.times === 0){//如果有次数限制并到用光所有次数，则移除它
-                            facade.unbind.call( this, quark)
+                            facade.unbind( this, quark)
                         }
                         if ( result !== void 0 ) {
                             event.result = result;
@@ -190,14 +188,16 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         //将真事件对象的成员赋给伪事件对象，抹平浏览器差异
         fix: function( event, real, type){
             if( !event.originalEvent ){
-                var toString = event.toString;//IE无法遍历出toString;
-                event = $.Object.merge({}, event);
-                var more = real.more || {}
-                $.mix(more, real);
-               
-                for( var p in more ){
-                    if( !/preventDefault|stopPropagation|stopImmediatePropagation|type|origType|live|ns|rns/.test(p) ){
-                        event[p] = more[p]
+                var hash = event, toString = hash.toString;//IE无法遍历出toString;
+                event = $.Object.merge({}, hash);//这里event只是一个伪事件对象
+                for( var p in real ){
+                    if( !(p in hash) ){
+                        event[p] = real[p]
+                    }
+                }
+                for( var p in real.more ){
+                    if( !(p in hash) ){
+                        event[p] = real.more[p]
                     }
                 }
                 event.toString = toString;
@@ -290,8 +290,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         match: function( cur, parent, quark ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
             if(quark._target)
                 return true
-            var expr  = quark.live
-            var matcher = expr.input ? quickIs : $.match
+            var expr  = quark.live;
+            var matcher = expr.input ? quickIs : $.match;
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
                 if(matcher(cur, expr)){
                     quark._target = cur
@@ -450,15 +450,12 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
             adapter[ type ]  = {
                 setup: function( quark ){//使用事件冒充
                     quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){
-                        var parent = event.relatedTarget;
-                        try {
-                            while ( parent && parent !== quark.currentTarget ) {
-                                parent = parent.parentNode;
-                            }
-                            if ( parent !== quark.currentTarget ) {
-                                facade._dispatch( [ quark.currentTarget ], event, type );
-                            }
-                        } catch(e) { };
+                        var target = quark.currentTarget
+                        var related = event.relatedTarget;
+                        if(quark.live || !related || (related !== target && !$.contains( target, related )) ){
+                             facade._dispatch( [ target  ], event, type );
+                        }
+
                     })
                 },
                 teardown: function( quark ){
@@ -469,7 +466,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     }
     //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
-        console.log("ccccccccc")
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, handler = function (event) {
                 var src = event.target;

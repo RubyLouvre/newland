@@ -4,40 +4,18 @@ define( [ "$hfs"], function(){
     var files = [];
 
     //注意：下面这些代码都是与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
-    //    var more = $.config.third_modules
-    //    more.replace($.rword, function( name ){
-    //        var path = $.path.join( __dirname,"mass/more", name + ".js" );
-    //        var text = $.readFileSync( path, "utf-8");
-    //        var rubylouvre = $.path.join( "D:/rubylouvre/scripts/more",name+ ".js")
-    //        $.updateFile( rubylouvre, path, function(){
-    //            //  $.log(rubylouvre+" 更新成功");
-    //            });
-    //        $.writeFile( $.path.join( "app/public/scripts/more", name+ ".js" ), text )
-    //    });
-    //
-    //    $.updateFile( $.path.join( __dirname, "mass", "lang.js" ), $.path.join( __dirname, "lang.js" ) );
-    //用mass Framework的所有核心模块合并成mass_merge.js文件
-    libs.replace($.rword, function( name, url ){
-        try{
-
-            url = $.path.join( __dirname,"mass", name +".js" );
-          
-            var text = $.readFileSync( url, "utf-8");
-            var rubylouvre = url.replace(/\\/g,"/").replace("newland/system/mass","rubylouvre/scripts");
-            //            $.updateFile( rubylouvre, text, function(){
-            //                $.log(rubylouvre+" 更新成功", 5);
-            //            }, 1);
-            files.push( text )
-        //  $.updateFile( $.path.join( "app/public/scripts/", name +".js" ), text, $.noop, 1 );
-
-        }catch(e){
-            $.log( e + "  "+url, "red", 3);
-        }
+    libs.replace($.rword, function( name ){
+        var path = $.path.join( __dirname,"mass", name + ".js" );
+        var text = $.readFileSync( path, "utf-8");
+        files.push( text )
+        var target = $.path.join( $.core.base , "app/public/scripts",name+ ".js");
+        $.updateFileSync( target, text, true);
+         
     });
     // ===============这里是合并脚本===============
     var merge = function(){
         var define = function(a){
-          if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
+            if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
                 arguments[0] = $.core.base + a +".js"
             }
             return $.define.apply($, arguments);

@@ -161,6 +161,7 @@
                     global.console.log( str );
                 }
             }
+            return str
         },
         //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
         getUid: global.getComputedStyle ? function( obj ){
@@ -579,7 +580,7 @@
     });
     $.exports( $.core.name +  postfix );//防止不同版本的命名空间冲突
 var define = function(a){
-          if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
+            if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
                 arguments[0] = $.core.base + a +".js"
             }
             return $.define.apply($, arguments);
@@ -1027,9 +1028,52 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             throw "Invalid JSON: " + data ;
         },
         //将字符串转化为一个XML文档
+        /*
+  "text/html",
+  "text/xml",
+  "application/xml",
+  "application/xhtml+xml",
+  "image/svg+xml"
+<courses>
+ <math>
+   <time>1:00pm</time>
+ </math>
+ <math>
+   <time>3:00pm</time>
+ </math>
+ <phisic>
+   <time>1:00pm</time>
+ </phisic>
+ <phisic>
+   <time>3:00pm</time>
+ </phisic>
+</courses>
+        loadXML: function (text) {
+   if (typeof ActiveXObject !== "undefined") {
+      // var xmldoc = this.createDocument();
+      // xmldoc.loadXML(text);
+      // return xmldoc;
+
+      text = text.replace(/\r\n/g,"");
+      var xmldoc = new ActiveXObject("Microsoft.XMLDOM");
+      xmldoc.async="false";
+      xmldoc.loadXML(text);
+      return xmldoc;
+    }else if(typeof DOMParser != "undefined") {
+      return (new DOMParser()).parseFromString(text,"text/xml");
+    }else {
+      var url = 'data:text/xml;charset=utf-8,' + encodeURIComponent(text), request = new XMLHttpRequest();
+      request.open("GET", url, false);
+      request.send();
+      return request.responseXML;
+    }
+  }
+         */
         parseXML: function ( data, xml, tmp ) {
             try {
-                if ( global.DOMParser ) { // Standard
+                var mode = document.documentMode
+                if ( global.DOMParser && (!mode || mode > 8) ) { // Standard
+                     
                     tmp = new DOMParser();
                     xml = tmp.parseFromString(data , "text/xml" );
                 } else { // IE
@@ -2311,6 +2355,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if ( dataAndEvents ) {
                 $.mergeData( neo, node );
+                            console.log(neo)
                 if ( deepDataAndEvents ) {
                     src =  node[ TAGS ]( "*" );
                     neos = neo[ TAGS ]( "*" );
@@ -3603,7 +3648,7 @@ define("data", ["$lang"], function(){
                 if(events){
                     curData .events = [];
                     for (var i = 0, item ; item =  events[i++]; ) {
-                        $.event.bind.call( cur, item );
+                        $.event.bind( cur, item );
                     }
                 }
             }
@@ -4115,6 +4160,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if ( dataAndEvents ) {
                 $.mergeData( neo, node );
+                            console.log(neo)
                 if ( deepDataAndEvents ) {
                     src =  node[ TAGS ]( "*" );
                     neos = neo[ TAGS ]( "*" );
@@ -4563,7 +4609,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 }
             }
         }
-    
+
     });
 
     //IE9 FF等支持getComputedStyle
@@ -4579,11 +4625,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-            //   var underscored = name == "cssFloat" ? "float" :
-            //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
-            var   rmargin = /^margin/, style = node.style ;
+            var style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
-                ret = computedStyle[name]           //.getPropertyValue( underscored );
+                ret = computedStyle[name] 
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
@@ -4591,11 +4635,17 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             // A tribute to the "awesome hack by Dean Edwards"
             // WebKit uses "computed value (percentage if specified)" instead of "used value" for margins
             // which is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
-            if ( !$.support.cssPercentedMargin && computedStyle && rmargin.test( name ) && rnumnonpx.test( ret ) ) {
+            if (  /^margin/.test( name ) && rnumnonpx.test( ret ) ) {
                 var width = style.width;
-                style.width = ret;
+                var minWidth = style.minWidth;
+                var maxWidth = style.maxWidth;
+
+                style.minWidth = style.maxWidth = style.width = ret;
                 ret = computedStyle.width;
+
                 style.width = width;
+                style.minWidth = minWidth;
+                style.maxWidth = maxWidth;
             }
 
             return ret === "" ? "auto" : ret;
@@ -4765,7 +4815,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#matrix-anim-class
     //=========================　处理　width height　=========================
     
- 
+
     var cssPair = {
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
@@ -4775,8 +4825,11 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         visibility: "hidden",
         display: "block"
     }
+    var rdisplayswap = /^(none|table(?!-c[ea]).+)/
     var showHidden = function(node, array){
-        if( node && node.nodeType == 1 && !node.offsetWidth ){
+        if( node && node.nodeType == 1 && !node.offsetWidth
+            //如果是none table-column table-column-group table-footer-group table-header-group table-row table-row-group
+            && rdisplayswap.test(getter(node, "display")) ){
             var obj = {
                 node: node
             }
@@ -4792,11 +4845,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
     $.support.boxSizing = $.cssName( "boxSizing")
     function getWH( node, name, extra  ) {//注意 name是首字母大写
-        var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
+        var which = cssPair[name], hidden = [];
         showHidden( node, hidden );
         var val = node["offset" + name]
-        //if($.support.boxSizing && $.css(node, "boxSizing" ) === "border-box" && extra == 0 ){ return val;  }
-        //innerWidth = paddingWidth outerWidth = borderWidth, width = contentWidth
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
@@ -4942,7 +4993,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         $.fn[ method ] = function(){
             return this.each(function(){
                 if(this.style){
-                    this.style.display = method == "show" ? "" : "hide"
+                    this.style.display = method == "show" ? "" : "none"
                 }
             })
         }
@@ -5027,7 +5078,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                     return null;
                 }
                 win = getWindow( node );
-                // Return the scroll offset
                 return win ? ("pageXOffset" in win) ? win[ t ? "pageYOffset" : "pageXOffset" ] :
                 $.support.boxModel && win.document.documentElement[ method ] ||
                 win.document.body[ method ] :
@@ -5067,7 +5117,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
 //  事件补丁模块
 //==========================================
 define("event_fix", !!document.dispatchEvent, function(){
-    $.log("已加载event_fix模块")
+    $.log("已加载event_fix模块",7)
     //模拟IE678的reset,submit,change的事件代理
     var rform  = /^(?:textarea|input|select)$/i ,
     changeType = {
@@ -5160,30 +5210,30 @@ define("event_fix", !!document.dispatchEvent, function(){
                 check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
                     return true;
                 },
-                setup: delegate(function( ancestor, item ){
-                    var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
-                    item.change_beforeactive = $.bind( ancestor, "beforeactivate", function() {
+                setup: delegate(function( node, quark ){
+                    var subscriber = quark.subscriber || ( quark.subscriber = {}) //用于保存订阅者的UUID
+                    quark.change_beforeactive = $.bind( node, "beforeactivate", function() {
                         //防止出现跨文档调用的情况,找错event
-                        var doc = ancestor.ownerDocument || ancestor.document || ancestor;
+                        var doc = node.ownerDocument || node.document || node;
                         var target = doc.parentWindow.event.srcElement, tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
-                            publisher[ $.getUid(ancestor) ] = ancestor;//此孩子可能同时要向N个顶层元素报告变化
-                            item.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, item.origType))
+                            publisher[ $.getUid( node ) ] = node;//此孩子可能同时要向N个顶层元素报告变化
+                            quark.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, quark.origType))
                         }
                     });//如果是事件绑定
-                    ancestor.fireEvent("onbeforeactivate")
+                    node.fireEvent("onbeforeactivate")
                 }),
-                teardown: delegate(function( src, item ){
-                    $.unbind( src, "beforeactive", item.change_beforeactive );
-                    var els = item.subscriber || {};
+                teardown: delegate(function( node, quark ){
+                    $.unbind( node, "beforeactive", quark.change_beforeactive );
+                    var els = quark.subscriber || {};
                     for(var i in els){
-                        $.unbind( els[i], "propertychange",  item.change_propertychange)  ;
+                        $.unbind( els[i], "propertychange",  quark.change_propertychange)  ;
                         var publisher = $._data( els[i], "publisher");
-                        if(publisher){
-                            delete publisher[ src.uniqueNumber ];
+                        if( publisher ){
+                            delete publisher[ node.uniqueNumber ];
                         }
                     }
                 })
@@ -5197,18 +5247,18 @@ define("event_fix", !!document.dispatchEvent, function(){
     //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
     "submit,reset".replace( $.rword, function( type ){
         adapter[ type ] = {
-            setup: delegate(function( src ){
-                $.fn.on.call( src, "click._"+type+" keypress._"+type, function( event ) {
+            setup: delegate(function( node ){
+                $(node).bind( "click._"+type+" keypress._"+type, function( event ) {
                     var el = event.target;
                     if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].kind[  el.type ] ) ){
-                        facade._dispatch( [ src ], event, type );
+                        facade._dispatch( [ node ], event, type );
                     }
                 });
             }),
             keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
             kind:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
-            teardown: delegate(function( src ){
-                facade.unbind.call( src, "._"+type );
+            teardown: delegate(function( node ){
+                $( node ).unbind( "._"+type );
             })
         };
     });
@@ -5279,7 +5329,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 e.preventDefault();
             }// 如果存在returnValue 那么就将它设为false
             e.returnValue = false;
-            $.log("preventDefault")
             return this;
         },
         stopPropagation: function() {
@@ -5296,7 +5345,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             return this;
         }
     }
-    $.Event = Event
+    $.Event = Event;
     $.mix(facade,{
         //addEventListner API的支持情况:chrome 1+ FF1.6+	IE9+ opera 7+ safari 1+;
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
@@ -5315,7 +5364,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             hash.uuid = $.getUid( hash.fn );       //确保hash.uuid与fn.uuid一致
             types.replace( $.rword, function( t ){
                 var forged = new $.Event( t, live), type = forged.origType;
-                $.log(t)
                 $.mix(forged, {
                     currentTarget: target,          //this,用于绑定数据的
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
@@ -5361,7 +5409,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var ctarget = hash.currentTarget//原来绑定事件的对象
                 var more = event.more || {};
                 //防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
-                if( more.origType && more.origType !== type ){
+                if(  more.origType && more.origType !== type ){
                     return
                 }
                 var queue = ( $._data( ctarget, "events") || [] ).concat();
@@ -5384,7 +5432,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         delete quark._target;
                         quark.times--;
                         if(quark.times === 0){//如果有次数限制并到用光所有次数，则移除它
-                            facade.unbind.call( this, quark)
+                            facade.unbind( this, quark)
                         }
                         if ( result !== void 0 ) {
                             event.result = result;
@@ -5405,14 +5453,16 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         //将真事件对象的成员赋给伪事件对象，抹平浏览器差异
         fix: function( event, real, type){
             if( !event.originalEvent ){
-                var toString = event.toString;//IE无法遍历出toString;
-                event = $.Object.merge({}, event);
-                var more = real.more || {}
-                $.mix(more, real);
-               
-                for( var p in more ){
-                    if( !/preventDefault|stopPropagation|stopImmediatePropagation|type|origType|live|ns|rns/.test(p) ){
-                        event[p] = more[p]
+                var hash = event, toString = hash.toString;//IE无法遍历出toString;
+                event = $.Object.merge({}, hash);//这里event只是一个伪事件对象
+                for( var p in real ){
+                    if( !(p in hash) ){
+                        event[p] = real[p]
+                    }
+                }
+                for( var p in real.more ){
+                    if( !(p in hash) ){
+                        event[p] = real.more[p]
                     }
                 }
                 event.toString = toString;
@@ -5505,8 +5555,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         match: function( cur, parent, quark ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
             if(quark._target)
                 return true
-            var expr  = quark.live
-            var matcher = expr.input ? quickIs : $.match
+            var expr  = quark.live;
+            var matcher = expr.input ? quickIs : $.match;
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
                 if(matcher(cur, expr)){
                     quark._target = cur
@@ -5662,15 +5712,12 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             adapter[ type ]  = {
                 setup: function( quark ){//使用事件冒充
                     quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){
-                        var parent = event.relatedTarget;
-                        try {
-                            while ( parent && parent !== quark.currentTarget ) {
-                                parent = parent.parentNode;
-                            }
-                            if ( parent !== quark.currentTarget ) {
-                                facade._dispatch( [ quark.currentTarget ], event, type );
-                            }
-                        } catch(e) { };
+                        var target = quark.currentTarget
+                        var related = event.relatedTarget;
+                        if(quark.live || !related || (related !== target && !$.contains( target, related )) ){
+                             facade._dispatch( [ target  ], event, type );
+                        }
+
                     })
                 },
                 teardown: function( quark ){
@@ -5681,7 +5728,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     }
     //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
-        console.log("ccccccccc")
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, handler = function (event) {
                 var src = event.target;
@@ -6147,6 +6193,31 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
         }
         return result;
     }
+    //   first  last  futue
+    // 0  push   push  push
+    // 1  unshift push  splice(0,-2,1)
+    function add(list, callback, flag){
+        if(flag == "first"){
+            if(list._first)//first回调总是第一个执行
+                throw "已存在first回调"
+            if( callback == list._last)
+                throw "first回调不能同时为last回调"
+            list._first = callback;
+            list.unshift(callback)
+        }else if(flag == "last"){
+            if(list._last)//last回调总是最后一个执行
+                throw "已存在last回调"
+            if( callback == list._first)
+                throw "last回调不能同时为first回调"
+            list.push(callback);
+            list._last = callback;
+        }else if(!list.last){
+            list.push(callback);
+        }else{//添加普通的回调
+            var second = [  list.length - 1 , 0, callback];
+            [].splice.apply(list,second)
+        }
+    }
     return $.Flow = $.factory({
         init: function(){
             this.root = {};//数据共享,但策略自定
@@ -6166,7 +6237,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
             return uuid.join('');
         },
         
-        bind: function(names,callback,reload){
+        bind: function(names,callback,reload, flag){
             var root = this.root, deps = {},args = []
             String(names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
@@ -6177,7 +6248,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
                         state : 0
                     }
                 }else{
-                    root[name].unfire.unshift(callback)
+                    add(root[name].unfire, callback, flag)
                 }
                 if(!deps[name]){//去重
                     args.push(name);
@@ -6188,6 +6259,18 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
             callback.args = args;
             callback.reload = !!reload;//默认每次重新加载
             return this;
+        },
+        first: function(names,callback,reload){
+            this.first = function(){
+                return this;
+            }
+            return this.bind(names,callback,reload, "first")
+        },
+        last: function(names,callback,reload){
+            this.last = function(){
+                return this;
+            }
+            return this.bind(names,callback,reload, "last")
         },
         //用于取回符合条件的回调 opts = {match：正则,names:字符串,fired: 布尔}
         find: function(names,opts){
@@ -6258,7 +6341,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
                             state : 0
                         }
                     }else {
-                        root[name].unfire.unshift(fn)
+                        add(root[name].unfire, fn );
                     }
                 }
             });
@@ -6268,7 +6351,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
             var callback = this.find(names)
             var released = "__"+name
             callback.forEach(function(fn){
-                delete fn.deps[released];
+                delete fn.deps[released];//从fn.args字符串数组中删掉released这个操作标识
                 $.Array.remove(fn.args, released)
             });
             return this;
@@ -6348,33 +6431,30 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
 //=========================================
 //  数据交互模块
 //==========================================
-define("ajax",["$event"], function(){
-    //$.log("已加载ajax模块");
-    var global = this, DOC = global.document, r20 = /%20/g,
+define("ajax",["$flow"], function(){
+    $.log("已加载ajax模块", 7);
+    var global = this, 
+    DOC = global.document,
+    r20 = /%20/g,
     rCRLF = /\r?\n/g,
-    encode = global.encodeURIComponent,
-    rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE leaves an \r character at EOL
-
+    encode = encodeURIComponent,
+    rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE的换行符不包含 \r
     rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
     rurl =  /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
-    // Document location
-    ajaxLocation;
-    // #8138, IE may throw an exception when accessing
-    // a field from window.location if document.domain has been set
+    curl;
+    //在IE下如果重置了document.domain，访问window.location会抛错
     try {
-        ajaxLocation = global.location.href;
+        curl = global.location.href;
     } catch( e ) {
-        // Use the href attribute of an A element
-        // since IE will modify it given document.location
-        ajaxLocation = DOC.createElement( "a" );
-        ajaxLocation.href = "";
-        ajaxLocation = ajaxLocation.href;
+        curl = DOC.createElement( "a" );
+        curl.href = "";
+        curl = curl.href;
     }
  
     // Segment location into parts
-    var ajaxLocParts = rurl.exec( ajaxLocation.toLowerCase() ) || [],
+    var segments = rurl.exec( curl.toLowerCase() ) || [],
     transports = { },//传送器
     converters ={//转换器
         text: function(dummyXHR,text,xml){
@@ -6402,9 +6482,9 @@ define("ajax",["$event"], function(){
         "*": "*/*"
     },
     defaults  = {
-        type:"GET",
+        type: "GET",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-        async:true,
+        async: true,
         jsonp: "callback"
     };
     //将data转换为字符串，type转换为大写，添加hasContent，crossDomain属性，如果是GET，将参数绑在URL后面
@@ -6413,17 +6493,17 @@ define("ajax",["$event"], function(){
         if (opts.crossDomain == null) { //判定是否跨域
             var parts = rurl.exec(opts.url.toLowerCase());
             opts.crossDomain = !!( parts &&
-                ( parts[ 1 ] != ajaxLocParts[ 1 ] || parts[ 2 ] != ajaxLocParts[ 2 ] ||
+                ( parts[ 1 ] != segments[ 1 ] || parts[ 2 ] != segments[ 2 ] ||
                     ( parts[ 3 ] || ( parts[ 1 ] === "http:" ?  80 : 443 ) )
                     !=
-                    ( ajaxLocParts[ 3 ] || ( ajaxLocParts[ 1 ] === "http:" ?  80 : 443 ) ) )
+                    ( segments[ 3 ] || ( segments[ 1 ] === "http:" ?  80 : 443 ) ) )
                 );
         }
         if ( opts.data && opts.data !== "string") {
             opts.data = $.param( opts.data );
         }
         // fix #90 ie7 about "//x.htm"
-        opts.url = opts.url.replace(/^\/\//, ajaxLocParts[1] + "//");
+        opts.url = opts.url.replace(/#.*$/,"").replace(/^\/\//, segments[1] + "//");
         opts.type = opts.type.toUpperCase();
         opts.hasContent = !rnoContent.test(opts.type);//是否为post请求
         if (!opts.hasContent) {
@@ -6444,7 +6524,6 @@ define("ajax",["$event"], function(){
                 callback = data;
                 data = undefined;
             }
-            console.log("xxxxxxxxxxxxxx")
             return $.ajax({
                 type: method,
                 url: url,
@@ -6484,7 +6563,8 @@ define("ajax",["$event"], function(){
                 success: callback
             });
         },
-        param: function (json, serializeArray) {//对象变字符串
+        //将一个对象转换为字符串
+        param: function (json, serializeArray) {
             if (!$.isPlainObject(json)) {
                 return "";
             }
@@ -6510,7 +6590,8 @@ define("ajax",["$event"], function(){
             buf.pop();
             return buf.join("").replace(r20, "+");
         },
-        unparam: function ( url, query ) {//字符串变对象
+        //将一个字符串转换为对象
+        unparam: function ( url, query ) {
             var json = {};
             if (!url || !$.type(url, "String")) {
                 return json
@@ -6547,7 +6628,6 @@ define("ajax",["$event"], function(){
             }).forEach( function( elem ) {
                 var val = $( elem ).val(), vs;
                 val = $.makeArray[val];
-                // 字符串换行平台归一化
                 val = val.map( function(v) {
                     return v.replace(rCRLF, "\r\n");
                 });
@@ -6558,8 +6638,8 @@ define("ajax",["$event"], function(){
             return $.param(json, false);// 名值键值对序列化,数组元素名字前不加 []
         }
     });
-//http://sofish.de/file/demo/github/
     //如果没有指定dataType,服务器返回什么就是什么，不做转换
+    var ajaxflow = new $.Flow
     var ajax = $.ajax = function( opts ) {
         if (!opts || !opts.url) {
             throw "参数必须为Object并且拥有url属性";
@@ -6567,12 +6647,11 @@ define("ajax",["$event"], function(){
         opts = setOptions(opts);//规整化参数对象
         //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
         var dummyXHR = new $.XHR(opts), dataType = opts.dataType;
-
         if( opts.form && opts.form.nodeType === 1 ){
             dataType = "iframe";
         }else if( dataType == "jsonp" ){
             if( opts.crossDomain ){
-                ajax.fire("start", dummyXHR, opts.url,opts.jsonp);//用于jsonp请求
+                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
@@ -6590,18 +6669,14 @@ define("ajax",["$event"], function(){
         for (var i in opts.headers) {
             dummyXHR.setRequestHeader( i, opts.headers[ i ] );
         }
- 
-        "Complete Success Error".replace( $.rword, function(name){
-            var method = name.toLowerCase();
-            dummyXHR[ method ] = dummyXHR[ "on"+name ];
-            if(typeof opts[ method ] === "function"){
-                dummyXHR[ method ](opts[ method ]);//添加用户事件
-                delete dummyXHR.options[ method ];
-                delete opts[ method ];
+        "complete success error".replace( $.rword, function(name){
+            if(typeof opts[ name ] === "function"){
+                dummyXHR.bind( name, opts[ name ] )
+                delete opts[ name ];
             }
         });
         dummyXHR.readyState = 1;
-        // Timeout
+        // 处理超时
         if (opts.async && opts.timeout > 0) {
             dummyXHR.timeoutID = setTimeout(function() {
                 dummyXHR.abort("timeout");
@@ -6620,12 +6695,10 @@ define("ajax",["$event"], function(){
         return dummyXHR;
     }
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
-    $.mix(ajax, $.EventTarget);
-
-    ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
+    ajax.isLocal = rlocalProtocol.test(segments[1]);
     
     $.XHR = $.factory({
-        implement:$.EventTarget,
+        implement: $.Flow,
         init:function(option){
             $.mix(this, {
                 responseData:null,
@@ -6637,12 +6710,11 @@ define("ajax",["$event"], function(){
                 requestHeaders: {},
                 readyState: 0,
                 //internal state
-                state:0,
+                state: 0,
                 statusText: null,
-                status:0,
+                status: 0,
                 transport: null
             });
-            this.defineEvents("complete success error");
             this.setOptions("options",option);//创建一个options保存原始参数
         },
 
@@ -6670,7 +6742,7 @@ define("ajax",["$event"], function(){
             return this;
         },
         toString: function(){
-            return "[object Lions]"
+            return "[object XMLHttpRequest]"
         },
         // 中止请求
         abort: function(statusText) {
@@ -6723,22 +6795,13 @@ define("ajax",["$event"], function(){
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
            
             this.fire( eventType, this.responseData, statusText);
-            //$.log("xxxxxxxxxxxxxxxxxxxxxxxxx")
-            //$.log(this == ajax)
-            ajax.fire( eventType );
+            ajaxflow.fire( eventType );
             this.fire("complete", this.responseData, statusText);
-            ajax.fire("complete");
+            ajaxflow.fire("complete");
             this.transport = undefined;
         }
     });
-    $.XHR.prototype.fire = function( type ){//覆盖$.EventTarget的fire方法，去掉事件对象
-        var events = $._data( this,"events") ,args = $.slice(arguments,1);
-        if(!events || !events.length) return;
-        for ( var i = 0, item; item = events[i++]; ) {
-            if(item.type === type)
-                item.fn.apply( this, args );
-        }
-    }
+
     //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
     var s = ["XMLHttpRequest",
     "ActiveXObject('Msxml2.XMLHTTP.6.0')",
@@ -6766,8 +6829,7 @@ define("ajax",["$event"], function(){
         transports._default =  $.factory({
             //发送请求
             request: function() {
-                var dummyXHR = this.dummyXHR,
-                options = dummyXHR.options, i;
+                var dummyXHR = this.dummyXHR, options = dummyXHR.options, i;
                 $.log("XhrTransport.sending.....");
                 if (options.crossDomain && !allowCrossDomain) {
                     throw "do not allow crossdomain xhr !"
@@ -6917,7 +6979,7 @@ define("ajax",["$event"], function(){
     converters["script json"] = function(dummyXHR){
         return $["jsonp"+ dummyXHR.uniqueID ]();
     }
-    ajax.bind("start", function(e, dummyXHR, url, jsonp) {
+    ajaxflow.bind("start", function(e, dummyXHR, url, jsonp) {
         $.log("jsonp start...");
         var jsonpCallback = "jsonp"+dummyXHR.uniqueID;
         dummyXHR.options.url = url  + (rquery.test(url) ? "&" : "?" ) + jsonp + "=" + DOC.URL.replace(/(#.+|\W)/g,'')+"."+jsonpCallback;
