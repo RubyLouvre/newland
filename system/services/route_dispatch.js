@@ -36,7 +36,9 @@ define( ["../controller"], function(){
                             $.log("已经到达指定action","green",7)
                             action( flow );//到达指定action
                             if( !flow.rendered ){
-                                flow.render();
+                                flow.render({
+                                    location: flow._cname + "/"+ flow._aname
+                                });
                             }
                         });
                         flow.fire("create_cookie");
@@ -48,8 +50,9 @@ define( ["../controller"], function(){
                 }
             }else{
                 flow.params = $.parseUrl(this.url, true).query
-                flow.fire("respond_to")
-            //走静态路线
+                var format =  this.pathname.match( /\.(\w+)$/) ;
+                format = format || "**"
+                flow.fire("respond_to", format[1])  //走静态路线
             }
         })
     }

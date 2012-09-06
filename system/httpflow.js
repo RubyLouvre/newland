@@ -39,15 +39,20 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
     }
     HttpFlow = $.factory({
         inherit: $.Flow,
-        render: function(obj){
+        render: function(format, obj){// format
             if(!this.rendered){
                 this.rendered = true;
-                var accept = this.req.headers.accept || 'text/plain';
-                for (var key in formats) {
-                    if ( formats[key].test(accept) ) {
-                        return this.fire("respond_to", key, obj);
+                if(typeof format == "string"){
+                    return this.fire("respond_to", format, obj)
+                }
+                if(format && typeof format == "object"){
+                    var accept = this.req.headers.accept || 'text/plain';
+                    for (var key in formats) {
+                        if ( formats[key].test(accept) ) {
+                            return this.fire("respond_to", key, format);
+                        }
                     }
-                }  //这里会提示错误
+                }
             }
             this.fire("send_error", 403, "不能重复调用render方法")
         },

@@ -9,12 +9,7 @@ define( function(){
             }
             if(flow.method == "GET" && flow.xhr){
                 $.log(flow.xhr, "green")
-                flow.rendered = true
-                var res = flow.res
-                res.setHeader('Content-Type',  "text/plain");
-                var txt = "这是后端返回的"
-                res.setHeader('Content-Length', Buffer.byteLength( txt, "utf8" ));
-                res.end(txt)
+                flow.render("text","这是后端返回的")
             }
         },
         direct:function(){

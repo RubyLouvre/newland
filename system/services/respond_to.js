@@ -9,72 +9,81 @@ define( ["../helper","$ejs"], function(helper){
     }
     return function(flow){
         flow.bind("respond_to", function( format, opts ){
-            opts = opts ||{};
-            var ext = opts.ext || ".ejs"
-            var url, res = flow.res, cache;
-            var rext = /\.(\w+)$/;
-            if(typeof format == "string"){
-                url = $.path.join($.core.base, "app/views", flow._cname, flow._aname + "."+ format);
-            }else {
-                url = $.path.join("app/public/",flow.pathname);
-            }
-            $.ejs.data = {
-                links:   [],
-                scripts: []
-            }
-            if( flow.mime == "text/html" || flow.mime == "*" ){//如果是页面
-                cache = $.pagesCache[ url ];
-                var temp, html //用于保存ejs或html
-                if(!cache){//如果不存在,先尝试打模板
-                    try{
-                        temp = $.readFileSync( url.replace(rext,ext), "utf8");
-                        temp = $.ejs.compile( temp, helper );//转换成编译函数
-                        cache = $.pagesCache[ url ] =  temp;
-                    }catch(e){ }
+            console.log(format+"!!!!!!!!!!!")
+            var url, res = flow.res, rext = /\.(\w+)$/, cache, data;
+            //如果没有指定，或第二个参数指定了location
+            console.log(opts)
+            if( !opts  || typeof opts.location == "string" ){
+                if( !opts ){ //如果是静态资源
+                    url = $.path.join("app/public/",flow.pathname);
+                }else {     //如果是从路由系统那里来的
+                    url = $.path.join($.core.base, "app/views", opts.location + "."+ format);
+                    console.log(url)
                 }
-                if(!cache){//如果再不存在则找静态页面
-                    cache = getFile( url, "text/html" );
+                conosle.log(url)
+                opts = opts ||{};
+                var ext = opts.ext || ".ejs"
+                $.ejs.data = {
+                    links:   [],
+                    scripts: []
                 }
-                if(!cache){//如果还是没有找到404
-                    return flow.fire("send_error", 404, "找不到对应的视图", "html")
-                }
-                flow._mime = "text/html"
-                if(typeof cache == "function"){
-                    html =  cache(opts || {}) ;//转换成页面
-                    var context = $.ejs.data;
-                    if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
-                        context.partial = html;
-                        var layout_url = $.path.join("app","views/layout", context.layout );
-                        layout_url =  layout_url.replace(rext,ext)
-                        
-                        cache = $.pagesCache[ layout_url ];
-                        if( ! cache ){
-                            try{
-                                temp  = $.readFileSync(layout_url,"utf8");
-                                cache = $.pagesCache[ layout_url ] = $.ejs.compile( temp, helper )
-                            }catch(e){
-                                return flow.fire("send_error", 500, e, "html")
-                            }
-                        }
-                        html = cache( context );//这时已是完整页面了
+                if( /^(html|*)$/.test(format) ){  //如果是页面
+                    cache = $.pagesCache[ url ];
+                    var temp, html //用于保存ejs或html
+                    if(!cache){//如果不存在,先尝试打模板
+                        try{
+                            temp = $.readFileSync( url.replace(rext,ext), "utf8");
+                            temp = $.ejs.compile( temp, helper );//转换成编译函数
+                            cache = $.pagesCache[ url ] =  temp;
+                        }catch(e){ }
                     }
-                    cache = html;
+                    if(!cache){//如果再不存在则找静态页面
+                        cache = getFile( url, "text/html" );
+                    }
+                    if(!cache){//如果还是没有找到404
+                        return flow.fire("send_error", 404, "找不到对应的视图", "html")
+                    }
+                    format = "html"
+                    if(typeof cache == "function"){
+                        html =  cache(opts || {}) ;//转换成页面
+                        var context = $.ejs.data;
+                        if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
+                            context.partial = html;
+                            var layout_url = $.path.join("app","views/layout", context.layout );
+                            layout_url =  layout_url.replace(rext,ext)
+
+                            cache = $.pagesCache[ layout_url ];
+                            if( ! cache ){
+                                try{
+                                    temp  = $.readFileSync(layout_url, "utf8");
+                                    cache = $.pagesCache[ layout_url ] = $.ejs.compile( temp, helper )
+                                }catch(e){
+                                    return flow.fire("send_error", 500, e, "html")
+                                }
+                            }
+                            html = cache( context );//这时已是完整页面了
+                        }
+                        cache = html;
+                    }
+                }else{
+                    cache = $.pagesCache[ url ]
+                    if( !$.pagesCache[ url ] ){
+                        var _ext = url.match( rext )[1];
+                        cache = $.pagesCache[ url ] = getFile( url, $.contentType( _ext ) );
+                    }
                 }
+                data = cache;//要返回给前端的数据
             }else{
-                cache = $.pagesCache[ url ]
-                if( !$.pagesCache[ url ] ){
-                    var _ext = url.match( rext )[1];
-                    cache = $.pagesCache[ url ] = getFile( url, $.contentType( _ext ) );
-                }
+                data = opts;//要返回给前端的数据
             }
-            var data = cache;//要返回给前端的数据
-            if(flow.mime  === "application/json" ){
+            var mime = $.contentType( format )
+            if( format == "json" ){
                 data = JSON.stringify(data);
             }
-            res.setHeader('Content-Type',  flow.mime );
+            res.setHeader('Content-Type',  mime );
             //不要使用str.length，会导致页面等内容传送不完整
             res.setHeader('Server',  "node.js "+ process.version);
-            var encoding  = /(^text|json$)/.test( flow.mime )  ? "utf8" : "binary"
+            var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
 
             res.setHeader('Content-Length', Buffer.byteLength( data, encoding ));
             res.end(data);
