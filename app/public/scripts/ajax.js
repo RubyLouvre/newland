@@ -386,7 +386,6 @@ define("ajax",["$flow"], function(){
                         statusText = "parsererror : " + e;
                     }
                 }
-
             }else  if (status < 0) {
                 status = 0;
             }
