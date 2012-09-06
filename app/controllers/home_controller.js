@@ -4,12 +4,10 @@ define( function(){
             $.log("已进入home#index action")
             //链式写法，同名cookie前者会覆盖后者的，前端只生成“aaa=2; bbb=1”
             if(flow.method == "POST"){
-                $.log("这里是post请求")
                 flow.redirect("direct")
             }
             if(flow.method == "GET" && flow.xhr){
-                $.log(flow.xhr, "green")
-                flow.render("text","这是后端返回的")
+                flow.render("txt","这是后端返回的")
             }
         },
         direct:function(){
