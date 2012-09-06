@@ -22,7 +22,7 @@ define( ["../helper","$ejs"], function(helper){
                 links:   [],
                 scripts: []
             }
-            if( flow.mime == "text/html" ){//如果是页面
+            if( flow.mime == "text/html" || flow.mime == "*" ){//如果是页面
                 cache = $.pagesCache[ url ];
                 var temp, html //用于保存ejs或html
                 if(!cache){//如果不存在,先尝试打模板
