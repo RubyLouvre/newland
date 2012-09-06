@@ -151,7 +151,7 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
     HttpFlow.prototype.__defineGetter__("xhr", function(){
         if(!this.req)
             return false;
-        var val = this.req.getHeader('X-Requested-With') || '';
+        var val = this.getHeader("X-Requested-With");
         return 'xmlhttprequest' == val.toLowerCase();
     });   
     return HttpFlow
