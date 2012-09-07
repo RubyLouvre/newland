@@ -25,7 +25,7 @@ message/rfc822（RFC 822形式）
 multipart/alternative（HTML邮件的HTML形式和纯文本形式，相同内容使用不同形式表示）
 application/x-www-form-urlencoded（使用HTTP的POST方法提交的表单）
 multipart/form-data（同上，但主要用于表单提交时伴随文件上传的场合）
-*/
+ */
 
 define("mime", function(){
     var plain = "text/plain";
@@ -53,7 +53,6 @@ define("mime", function(){
         wmv: "video/x-ms-wmv",
         woff: 'font/opentype',
         xml:  "text/xml,application/xml",
-        "*" : "*",
         default_type: "application/octet-stream"
     }
     var formats = {}
@@ -66,7 +65,7 @@ define("mime", function(){
         }
     }
     toRegExp(mapper);
-    return {
+    var ret = {
         //取得pathname中的文件扩展名,进而取得MIME
         path2mime: function(path, fallback){
             var ext = path.replace(/.*[\.\/]/, '').toLowerCase();
@@ -97,4 +96,9 @@ define("mime", function(){
             }
         }
     }
+    ret.accept2mime = function(accept, fallback){
+      return  ret.accept2ext(accept, fallback)
+    }
+    return ret;
+
 })

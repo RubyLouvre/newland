@@ -1,4 +1,5 @@
 $.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
+    console.log(mime)
     $.mix($, mime)
     HttpFlow = $.factory({
         inherit: $.Flow,
