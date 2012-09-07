@@ -1,42 +1,5 @@
-$.define(  [ "$cookie", "$flow" ], function( cookie ){
-    var type_mine = {
-        "css": "text/css",
-        "gif": "image/gif",
-        "html": "text/html",
-        "ico": "image/x-icon",
-        "jpeg": "image/jpeg",
-        "jpg": "image/jpeg",
-        "js": "text/javascript",
-        "json": "application/json",
-        "pdf": "application/pdf",
-        "png": "image/png",
-        "svg": "image/svg+xml",
-        "swf": "application/x-shockwave-flash",
-        "tiff": "image/tiff",
-        "txt": "text/plain",
-        "wav": "audio/x-wav",
-        "wma": "audio/x-ms-wma",
-        "wmv": "video/x-ms-wmv",
-        "xml": "text/xml",
-        "ejs": "text/ejs",
-        'manifest': 'text/cache-manifest',
-        "*" : "*"
-    };
-
-    $.contentType = function( name ){
-        return type_mine[ name ]
-    }
-    var formats = {
-        txt:  ['text/plain'],
-        html: ['text/html'],
-        json: ['application/json', 'text/json'],
-        xml:  ['application/xml', 'text/xml'],
-        js:   ['application/javascript', 'text/javascript']
-    }
-    for(var key in formats){
-        var arr = formats[key];
-        formats[key] = new RegExp(  arr.join('|').replace(/(\/)/g, "\\$1"))
-    }
+$.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
+    $.mix($, mime)
     HttpFlow = $.factory({
         inherit: $.Flow,
         render: function(format, obj){// format
@@ -47,11 +10,8 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
                 }
                 if(format && typeof format == "object"){
                     var accept = this.req.headers.accept || 'text/plain';
-                    for (var key in formats) {
-                        if ( formats[key].test(accept) ) {
-                            return this.fire("respond_to", key, format);
-                        }
-                    }
+                    var type = $.accept2ext(accept)
+                    return this.fire("respond_to", type, format);
                 }
             }
             this.fire("send_error", 403, "不能重复调用render方法")
@@ -150,8 +110,8 @@ $.define(  [ "$cookie", "$flow" ], function( cookie ){
         if(this._mime){
             return this._mime;
         }
-        var ext = /\.(\w+)$/.test( this.pathname ) ?  RegExp.$1 : "*"
-        return  this._mime = type_mine[ext] || "*";
+        var accept = this.req.headers.accept;
+        return  this._mime = $.accept2mime( accept ) || $.path2mime( this.pathname, "*")
     })
     HttpFlow.prototype.__defineGetter__("xhr", function(){
         if(!this.req)

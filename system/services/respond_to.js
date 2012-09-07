@@ -9,25 +9,21 @@ define( ["../helper","$ejs"], function(helper){
     }
     return function(flow){
         flow.bind("respond_to", function( format, opts ){
-            console.log(format+"!!!!!!!!!!!")
             var url, res = flow.res, rext = /\.(\w+)$/, cache, data;
             //如果没有指定，或第二个参数指定了location
-            console.log(opts)
             if( !opts  || typeof opts.location == "string" ){
                 if( !opts ){ //如果是静态资源
                     url = $.path.join("app/public/",flow.pathname);
                 }else {     //如果是从路由系统那里来的
                     url = $.path.join($.core.base, "app/views", opts.location + "."+ format);
-                    console.log(url)
                 }
-                conosle.log(url)
                 opts = opts ||{};
                 var ext = opts.ext || ".ejs"
                 $.ejs.data = {
                     links:   [],
                     scripts: []
                 }
-                if( /^(html|*)$/.test(format) ){  //如果是页面
+                if( /^(html|\*)$/.test(format) ){  //如果是页面
                     cache = $.pagesCache[ url ];
                     var temp, html //用于保存ejs或html
                     if(!cache){//如果不存在,先尝试打模板
@@ -50,8 +46,7 @@ define( ["../helper","$ejs"], function(helper){
                         if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
                             context.partial = html;
                             var layout_url = $.path.join("app","views/layout", context.layout );
-                            layout_url =  layout_url.replace(rext,ext)
-
+                            layout_url =  layout_url.replace(rext,ext);
                             cache = $.pagesCache[ layout_url ];
                             if( ! cache ){
                                 try{
@@ -76,8 +71,11 @@ define( ["../helper","$ejs"], function(helper){
             }else{
                 data = opts;//要返回给前端的数据
             }
-            var mime = $.contentType( format )
-            if( format == "json" ){
+            var mime = $.ext2mime( format );
+            if( data.json && data.callback ){//返回JSONP形式的JS文件
+                data = $.format("#{0}(#{1})", data.callback, JSON.stringify(data.json))
+            }
+            if( format == "json" ){//返回JSON数据
                 data = JSON.stringify(data);
             }
             res.setHeader('Content-Type',  mime );

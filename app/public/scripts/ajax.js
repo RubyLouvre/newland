@@ -112,7 +112,7 @@ define("ajax",["$flow"], function(){
         },
 
         getJSON: function( url, data, callback ) {
-            return $.get( url, data, callback, "json" );
+            return $.get( url, data, callback, "jsonp" );
         },
 
         /**无刷新上传
@@ -217,7 +217,7 @@ define("ajax",["$flow"], function(){
         }
     });
     /*=============================================================================================
-    从这里开始是数据交互模块的核心,包含一个ajax方法,ajaxflow对象,
+    从这里开始是数据交互模块的核心,包含一个ajax方法,ajaxflow对象,传送器集合,转换器集合
     =============================================================================================*/
     var ajaxflow = new $.Flow
     var transports = { }//传送器，我们可以通过XMLHttpRequest, Script, Iframe与后端
@@ -248,8 +248,10 @@ define("ajax",["$flow"], function(){
         if( opts.form && opts.form.nodeType === 1 ){
             dataType = "iframe";
         }else if( dataType == "jsonp" ){
-            if( opts.crossDomain ){
-                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp);//用于jsonp请求
+            $.log(opts)
+            if( opts.crossDomain ){// opts.crossDomain &&
+                $.log("使用script发出JSONP请求")
+                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
@@ -263,6 +265,7 @@ define("ajax",["$flow"], function(){
             dummyXHR.setRequestHeader("Content-Type", opts.contentType);
         }
         //添加dataType所需要的Accept首部
+        console.log(dataType)
         dummyXHR.setRequestHeader( "Accept", accepts[ dataType ] ? accepts[ dataType ] +  ", */*; q=0.01"  : accepts[ "*" ] );
         for (var i in opts.headers) {
             dummyXHR.setRequestHeader( i, opts.headers[ i ] );
@@ -298,7 +301,7 @@ define("ajax",["$flow"], function(){
      * XHR类,用于模拟原生XMLHttpRequest的所有行为
      */
     $.XHR = $.factory({
-        implement: $.Flow,
+        inherit: $.Flow,
         init:function( opts ){
             $.mix(this, {
                 responseData:null,
@@ -561,19 +564,20 @@ define("ajax",["$flow"], function(){
 
     //http://www.decimage.com/web/javascript-cross-domain-solution-with-jsonp.html
     //JSONP请求，借用【script节点】传送器
-    converters["script json"] = function(xhr){
-        return $["jsonp"+ xhr.uniqueID ]();
+    converters["jsonp"] = function(xhr){
+        var json = $[ xhr.jsonp ];
+        delete $[ xhr.jsonp ];
+        return json;
     }
-    ajaxflow.bind("start", function(dummyXHR, url, jsonp) {
+    ajaxflow.bind("start", function(dummyXHR, url, jsonp, jsonpCallback) {
         $.log("jsonp start...");
-        var jsonpCallback = "jsonp"+dummyXHR.uniqueID;
-        dummyXHR.options.url = url  + (rquery.test(url) ? "&" : "?" ) + jsonp + "=" + DOC.URL.replace(/(#.+|\W)/g,'')+"."+jsonpCallback;
-        dummyXHR.options.dataType = "json";
+        var namespace =  DOC.URL.replace(/(#.+|\W)/g,'');
+        jsonpCallback = dummyXHR.jsonp = jsonpCallback || "jsonp"+dummyXHR.uuid().replace(/-/g,"");
+        dummyXHR.options.url = url  + (rquery.test(url) ? "&" : "?" ) + jsonp + "=" + namespace +"."+ jsonpCallback;
+        dummyXHR.options.dataType = "jsonp";
         //将后台返回的json保存在惰性函数中
-        global.$[jsonpCallback]= function(json) {
-            global.$[jsonpCallback] = function(){
-                return json;
-            };
+        global[namespace][jsonpCallback]= function(json) {
+            $[jsonpCallback] = json;
         };
     });
 

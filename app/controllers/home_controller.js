@@ -9,6 +9,23 @@ define( function(){
             if(flow.method == "GET" && flow.xhr){
                 flow.render("txt","这是后端返回的")
             }
+            console.log( flow.req.headers.accept)
+            console.log(flow.mime)
+            if(flow.method == "GET" && flow.params.callback){
+                   flow.render("js",{
+                       json:{
+                           name:"司徒正美",
+                           type:"jsonp",
+                           time: Date.now()
+                       },
+                       callback: flow.params.callback
+                   })
+            }
+         
+           //   if(flow.method == "GET" && flow.xhr){
+            //    flow.render("txt","这是后端返回的")
+        //    }
+         //   callback
         },
         direct:function(){
             $.log("已进入home#direct action")

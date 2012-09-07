@@ -1,16 +1,16 @@
 <%  block("title","这是测试用的") %>
 <%  block("layout","sample.ejs") %>
-<%=  add_js('/scripts/mass.js' );    %>
+<%=  add_js('/scripts/mass_merge.js' );    %>
 <script>
-$.require("$ajax", function(){
-   $.getJSON("/",function(data){
-     $.log(data)
-  })
- $.getJSON("/",function(data){
-     $.log(data)
-  })
-})
-
+    var xmlhttp = new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP");
+    xmlhttp.open("GET", "/",true);
+    xmlhttp.setRequestHeader( "X-Requested-With" ,"XMLHttpRequest")
+    xmlhttp.onreadystatechange=function() {
+        if (xmlhttp.readyState==4) {
+            alert(xmlhttp.responseText)
+        }
+    }
+    xmlhttp.send(null)
 </script>
 <form action="/" method="post" enctype="multipart/form-data" >
     <input type="text" name="name" value="<%= @name || "" %>" />
@@ -21,4 +21,4 @@ $.require("$ajax", function(){
     <p>Image: <input type="file" name="test" /></p>
     <p>Image: <input type="file" name="imgs" /></p>
     <p><input type="submit" value="提交" /></p>
-</form>
+</form>  
