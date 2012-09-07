@@ -297,7 +297,7 @@
   //  });
     $.require("./app/config");
     $.require("./system/more/logger");
- //   $.require("./system/combo");
+    $.require("./system/combo");
     $.require("./system/mvc");
 //var cc = function(str, color){
 //        var str = '\u001b[' +color + 'm' + str + '\u001b[' +39 + 'm';

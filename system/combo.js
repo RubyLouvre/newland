@@ -1,6 +1,5 @@
 define( [ "$hfs"], function(){
-    //,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx
-    var libs = "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx"
+    var libs = "mass,lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
     var files = [];
 
     //注意：下面这些代码都是与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
@@ -38,7 +37,7 @@ define( [ "$hfs"], function(){
     replaced = first.replace("/*combine modules*/", replaced+"\r\n" ).replace(rcomments,"");
     var merge_url = "app/public/scripts/mass_merge.js"
     var trunk = __dirname.indexOf("trunk") !== -1 ? "trunk/" : "";
-    $.writeFile( merge_url, replaced, function(e){//生成新的js文件！
+    $.writeFile( merge_url, replaced,"utf8", function(e){//生成新的js文件！
         if(e) {
             $.log("合并出错 "+e ,"red", 3);
         }else{

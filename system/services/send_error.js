@@ -27,8 +27,8 @@ define( ["http"], function( http ){
             } else if (~format.indexOf('json')) {
                 var object = {
                     code:  code,
-                    message: object.message||"unknown",
-                    stack: object.stack
+                    message: error.message||"unknown",
+                    stack: error.stack
                 };
                 for (var p in error)
                     object[p] = error[p];

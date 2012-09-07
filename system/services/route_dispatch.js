@@ -33,7 +33,7 @@ define( ["../controller"], function(){
                         //如果调用了get_cookie服务,肯定会调用session服务,但如果session服务还没有到位,
                         //就通过bind("open_session",fn)这加锁机制等待服务过错成才进入action
                         flow.bind("open_session",function(){
-                            $.log("已经到达指定action","green",7)
+                          //  $.log("已经到达指定action","green",7)
                             action( flow );//到达指定action
                             if( !flow.rendered ){
                                 flow.render({
@@ -52,6 +52,7 @@ define( ["../controller"], function(){
                 flow.params = $.parseUrl(this.url, true).query
                 var format =  this.pathname.match( /\.(\w+)$/) ;
                 format = format || "**"
+                console.log(this.url +"  "+this.mime)
                 flow.fire("respond_to", format[1])  //走静态路线
             }
         })

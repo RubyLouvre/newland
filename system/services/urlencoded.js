@@ -2,7 +2,7 @@ define( [ "querystring" ], function(qs){
     //这是必经的第一个服务
     return function( flow ){
         var type = flow.getHeader("content-type");
-        if ( (flow._body!== true) &&  type == "application/x-www-form-urlencoded" ){
+        if ( (flow._body!== true) &&  type.indexOf("application/x-www-form-urlencoded" ) == 0 ){
             $.log("这里是普通数据上传服务")
             flow._body = true;
             flow.body = {}  ;

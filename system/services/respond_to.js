@@ -1,7 +1,7 @@
 define( ["../helper","$ejs"], function(helper){
     function getFile(url, mime){//可以是字符串或flow对象
         try{
-            mime = typeof type == "string" ? mime : mime.mime
+            mime = typeof mime == "string" ? mime : mime.mime
             var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
             var temp = $.readFileSync( url,encoding );
             return $.pagesCache[ url ] =  temp
@@ -63,8 +63,7 @@ define( ["../helper","$ejs"], function(helper){
                 }else{
                     cache = $.pagesCache[ url ]
                     if( !$.pagesCache[ url ] ){
-                        var _ext = url.match( rext )[1];
-                        cache = $.pagesCache[ url ] = getFile( url, $.ext2mime( _ext ) );
+                        cache = $.pagesCache[ url ] = getFile( url, flow );
                     }
                 }
                 data = cache;//要返回给前端的数据
@@ -76,14 +75,16 @@ define( ["../helper","$ejs"], function(helper){
                 data = $.format("#{0}(#{1})", data.callback, JSON.stringify(data.json))
             }
             if( format == "json" ){//返回JSON数据
-                console.log("xxxxxxxxxxxxxxxxxxx")
                 data = JSON.stringify(data);
             }
-            res.setHeader('Content-Type',  mime );
+            var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
+            if( encoding == "uft8"){
+                res.setHeader('Content-Type',  mime+"; charset=UTF-8" );
+            }else{
+                res.setHeader('Content-Type',  mime );
+            }
             //不要使用str.length，会导致页面等内容传送不完整
             res.setHeader('Server',  "node.js "+ process.version);
-            var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
-
             res.setHeader('Content-Length', Buffer.byteLength( data, encoding ));
             res.end(data);
         //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，

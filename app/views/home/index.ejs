@@ -1,11 +1,10 @@
 <%  block("title","这是测试用的") %>
 <%  block("layout","sample.ejs") %>
-<%=  add_js('/scripts/mass.js' );    %>
+<%=  add_js('/scripts/mass_merge.js' );    %>
 <script>
-$.log("ssssssssssssss")
 $.require("$ajax", function(){
-   $.getJSON("/",function(data){
-     $.log(data)
+   $.getJSON("/",{"aaa":"bbb"},function(data){
+     alert(data)
   })
 
 })
@@ -15,8 +14,8 @@ $.require("$ajax", function(){
      $.log(data)
   })
 <form action="/" method="post" enctype="multipart/form-data" >
-    <input type="text" name="name" value="<%= @name || "" %>" />
-           <input type="password" name="password" value="<%= @password || "" %>"  /><br/>
+    <input type="text" name="name" value="<%= @name || "name" %>" />
+           <input type="password" name="password" value="<%= @password || "password" %>"  /><br/>
     <input type="checkbox" name="fruit" value ="apple" >苹果<br>
     <input type="checkbox" name="fruit" value ="orange">桔子<br>
     <input type="checkbox" name="fruit" value ="mango">芒果<br>

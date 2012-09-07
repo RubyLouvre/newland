@@ -1,5 +1,4 @@
 $.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
-    console.log(mime)
     $.mix($, mime)
     HttpFlow = $.factory({
         inherit: $.Flow,
@@ -15,7 +14,7 @@ $.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
                     return this.fire("respond_to", type, format);
                 }
             }
-            this.fire("send_error", 403, "不能重复调用render方法")
+           // this.fire("send_error", 403, "不能重复调用render方法")
         },
         redirect: function(path){//这里的path是路由规则中能找到的
             this.rendered = true;
@@ -51,9 +50,11 @@ $.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
                         flow.addCookie(arr[0], arr[1])
                     })
                 } else{
-                    if ('content-type' == key ) {
-                        val += '; charset=' + $.core.charset
-                    }
+//                    if ('content-type' == key ) {
+//
+//                        val += '; charset=' + $.core.charset
+//                            console.log(val)
+//                    }
                     setHeader.call(this, field, val);
                 }
             }

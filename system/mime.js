@@ -65,28 +65,37 @@ define("mime", function(){
         }
     }
     toRegExp(mapper);
-    var ret = {
-        //取得pathname中的文件扩展名,进而取得MIME
-        path2mime: function(path, fallback){
-            var ext = path.replace(/.*[\.\/]/, '').toLowerCase();
-            return mapper[ext] || fallback || mapper.default_type
-        },
-        ext2mime: function(ext, fallback){
-            return mapper[ext] || fallback;
-        },
-        //取得pathname中文的件扩展名
-        path2ext: function( path ){
-            return path.replace(/.*[\.\/]/, '').toLowerCase();
-        },
-        //通过accept找到对应的扩展名
-        accept2ext: function(accept, fallback){
-            for (var key in formats) {
-                if ( formats[key].test(accept) ) {
-                    return key
-                }
+    //=================================================
+    function ext2mime(ext, fallback){
+        var ret =  mapper[ext.toLowerCase()] || fallback || "";
+        return ret.replace(/,.*/,"")
+    }
+    function path2ext ( path ){
+        return path.replace(/.*[\.\/]/, '').toLowerCase();
+    }
+    function accept2ext(accept, fallback){
+        for (var key in formats) {
+            if ( formats[key].test(accept) ) {
+                return key
             }
-            return fallback;
+        }
+        return fallback;
+    }
+    return {
+        //通过路径找到目标资源对应的mime
+        path2mime: function(path, fallback){
+            return ext2mime( path2ext(path), fallback)
         },
+        //通过ext找到对应的mime
+        ext2mime: ext2mime,
+         //通过路径找到目标资源对应的扩展名
+        path2ext: path2ext,
+        //通过accept找到对应的扩展名
+        accept2ext: accept2ext,
+        accept2mime:  function(accept, fallback){
+            return  accept2ext(accept, fallback)
+        },
+        //如果框架没有支持这个MIME,可以自己注册一个
         registerMime: function(ext, mime){
             if( mapper[ext] == void 0){
                 mapper[ext] = mime;
@@ -95,10 +104,6 @@ define("mime", function(){
                 })
             }
         }
-    }
-    ret.accept2mime = function(accept, fallback){
-      return  ret.accept2ext(accept, fallback)
-    }
-    return ret;
+    };
 
 })
