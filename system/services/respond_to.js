@@ -76,6 +76,7 @@ define( ["../helper","$ejs"], function(helper){
                 data = $.format("#{0}(#{1})", data.callback, JSON.stringify(data.json))
             }
             if( format == "json" ){//返回JSON数据
+                console.log("xxxxxxxxxxxxxxxxxxx")
                 data = JSON.stringify(data);
             }
             res.setHeader('Content-Type',  mime );

@@ -265,7 +265,6 @@ define("ajax",["$flow"], function(){
             dummyXHR.setRequestHeader("Content-Type", opts.contentType);
         }
         //添加dataType所需要的Accept首部
-        console.log(dataType)
         dummyXHR.setRequestHeader( "Accept", accepts[ dataType ] ? accepts[ dataType ] +  ", */*; q=0.01"  : accepts[ "*" ] );
         for (var i in opts.headers) {
             dummyXHR.setRequestHeader( i, opts.headers[ i ] );
