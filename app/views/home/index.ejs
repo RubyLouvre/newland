@@ -2,6 +2,7 @@
 <%  block("layout","sample.ejs") %>
 <%=  add_js('/scripts/mass.js' );    %>
 <script>
+$.log("ssssssssssssss")
 $.require("$ajax", function(){
    $.getJSON("/",function(data){
      $.log(data)

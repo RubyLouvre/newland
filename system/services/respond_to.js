@@ -1,7 +1,7 @@
 define( ["../helper","$ejs"], function(helper){
-    function getFile(url, type){//可以是字符串或flow对象
+    function getFile(url, mime){//可以是字符串或flow对象
         try{
-            var mime = typeof type == "string" ? type : type.mime
+            mime = typeof type == "string" ? mime : mime.mime
             var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
             var temp = $.readFileSync( url,encoding );
             return $.pagesCache[ url ] =  temp
@@ -64,7 +64,7 @@ define( ["../helper","$ejs"], function(helper){
                     cache = $.pagesCache[ url ]
                     if( !$.pagesCache[ url ] ){
                         var _ext = url.match( rext )[1];
-                        cache = $.pagesCache[ url ] = getFile( url, $.contentType( _ext ) );
+                        cache = $.pagesCache[ url ] = getFile( url, $.ext2mime( _ext ) );
                     }
                 }
                 data = cache;//要返回给前端的数据

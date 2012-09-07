@@ -46,7 +46,7 @@ define("ajax",["$flow"], function(){
         xml: "application/xml, text/xml",
         html: "text/html",
         text: "text/plain",
-        json: "application/json, text/javascript",
+        json: "text/javascript,application/json",
         script: "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript",
         "*": ["*/"] + ["*"]//避免被压缩掉
     },
