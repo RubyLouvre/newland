@@ -182,7 +182,15 @@ define( ["fs","path"], function(fs, path){
             fs.readFile.apply(fs, arguments)
         },
         readFileSync: function(){
-            return fs.readFileSync.apply(fs, arguments)
+            //这里的注释与处理见https://github.com/joyent/node/blob/master/lib/module.js 459行
+            // Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+            // because the buffer-to-string conversion in `fs.readFileSync()`
+            // translates it to FEFF, the UTF-16 BOM.
+            var content =  fs.readFileSync.apply(fs, arguments)
+            if (content.charCodeAt(0) === 0xFEFF) {
+                content = content.slice(1);
+            }
+            return content
         },
 
         //创建文件,并添加内容,如果指定的路径中里面某些目录不存在,也一并创建它们
@@ -209,7 +217,7 @@ define( ["fs","path"], function(fs, path){
                     sync = true;
                 }
             }
-            encoding = encoding || "utf-8"
+            encoding = encoding || "utf8"
             var method = append ?  "appendFile" : "writeFile"
             var cb = arguments[arguments.length - 1]
             if(sync){
@@ -230,19 +238,19 @@ define( ["fs","path"], function(fs, path){
         //source_path:原文件的路径（或者原文件的内容，当第四个参数为真正的情况下),
         //isText:决定第二个参数是路径还是文本内容，如果是文本内容就不用再读取了
         updateFileSync: function(target_path, source_path, is_text){
-            var source = is_text ? source_path : fs.readFileSync(source_path,"utf-8");
+            var source = is_text ? source_path : $.readFileSync(source_path,"utf8");
             var update = true;
             try{
                 var stat = fs.statSync(target_path);
                 if(stat.isFile()){
-                    var target = fs.readFileSync(target_path,"utf-8");
-                    if(source+"" == target+""){
+                    var target = $.readFileSync(target_path,"utf8");
+                    if(source + "" == target + ""){
                         update = false;
                     }
                 }
             }catch(e){};
             if( update && target ){
-                $.writeFileSync(target_path, source, "utf-8");
+                $.writeFileSync(target_path, source, "utf8");
             }
         },
         //上面的异步化版本，
@@ -262,7 +270,7 @@ define( ["fs","path"], function(fs, path){
                     }
                 }
             }
-            fs.readFile(target_path, "utf-8", function(e, data ){
+            fs.readFile(target_path, "utf8", function(e, data ){
                 pending--;
                 if(e){
                     object.err = true;//如果不存在
@@ -276,7 +284,7 @@ define( ["fs","path"], function(fs, path){
                 object.source = source_path + "";
                 callback();
             }else{
-                fs.readFile(source_path, "utf-8", function(e, data){
+                fs.readFile(source_path, "utf8", function(e, data){
                     pending--;
                     if(e){
                         cb(e)
@@ -303,7 +311,7 @@ define( ["fs","path"], function(fs, path){
                     }else if(stat.isSymbolicLink()){
                         fs.symlinkSync( fs.readlinkSync( source ),target);
                     }else {
-                        fs.writeFileSync( target, fs.readFileSync( source) );
+                        fs.writeFileSync( target, $.readFileSync( source) );
                     }
                 }
             }
