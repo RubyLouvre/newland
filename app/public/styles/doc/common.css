@@ -63,11 +63,15 @@ fieldset{
     -webkit-border-radius:10px;
     border:1px dashed #00FF00;
 }
-
+.primary {
+    color: #ff0080;
+}
 .note {
     color:#ff0000;
 }
-
+.info{
+    color: #FF4500;
+}
 .rundialog {
     overflow: auto;
     border: none;

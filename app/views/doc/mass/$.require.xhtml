@@ -22,27 +22,27 @@
 
 <p><span class="stress">返回值：</span></p>
 <p>target</p>
-<p><span class="stress">模块标识：</span></p>
-<p>一个模块标识就是一个字符串，通过它们来转换成到对应JS文件或CSS文件的路径。</p>
-<p>有关模块标识的CommonJS规范，可以见<a href="http://wiki.commonjs.org/wiki/Modules/1.1.1">这里</a></p>
-<p>具体约定如下：</p>
-<ol>
-    <li>每个模块标识的字符串组成只能是合法URL路径，因此只能是英文字母，数字，点号，斜扛，#号。</li>
-    <li>如果模块标识是"./"开头，则表示相对于它的父模块的目录中找。</li>
-    <li>如果模块标识是"../"开头，则表示相对于它的父模块的父目录中找。</li>
-    <li>如果模块标识不以点号或斜扛开始，则有以下三种情况<br/>
-        <ol>
-            <li>如果此模块标识在$.core.alias存在对应值，换言之某一模块定义了一个别名，则用此模块的具体路径加载文件。</li>
-            <li>如果此模块标识以http://、https://、file:/// 等协议开头的绝对路径，直接用它加载文件。</li>
-            <li>否则我们将在引入框架种子模块（mass.js）的目录下寻找是否有同名JS文件，然后指向它。</li>
-        </ol>
-    </li>
-    <li>对于JS模块，它可以省略后缀名，即“.js”可有可无；但对于CSS文件则不能省略。</li>
-    <li>框架种子模块的目录保存于$.core.base属性中。</li>
-    <li>ready是系统占位符，用于表示DOM树是否加载完毕，不会进行路径转换。</li>
-    <li>在种子模块内部已经默认提供了所有核心模块的别名，以$开头加模块名，如$lang，$event。</li>
-</ol>
-
+<fieldset><legend>模块标识：</legend>
+    <p>一个模块标识就是一个字符串，通过它们来转换成到对应JS文件或CSS文件的路径。</p>
+    <p>有关模块标识的CommonJS规范，可以见<a href="http://wiki.commonjs.org/wiki/Modules/1.1.1">这里</a></p>
+    <p>具体约定如下：</p>
+    <ol>
+        <li>每个模块标识的字符串组成只能是合法URL路径，因此只能是英文字母，数字，点号，斜扛，#号。</li>
+        <li>如果模块标识是<span class="primary">以"./"开头</span>，则表示相对于它的父模块的目录中找。</li>
+        <li>如果模块标识是<span class="primary">以"../"开头</span>，则表示相对于它的父模块的父目录中找。</li>
+        <li>如果模块标识不以点号或斜扛开始，则有以下三种情况<br/>
+            <ol>
+                <li>如果此模块标识在<span class="primary">$.config.alias</span>存在对应值，换言之某一模块定义了一个别名，则用此模块的具体路径加载文件。</li>
+                <li>如果此模块标识<span class="primary">以http://、https://、file:/// 等协议开头</span>的绝对路径，直接用它加载文件。</li>
+                <li>否则我们将在引入框架种子模块（mass.js）的目录下寻找是否有同名JS文件，然后指向它。</li>
+            </ol>
+        </li>
+        <li>对于JS模块，它可以省略后缀名，即“.js”可有可无；但对于CSS文件则不能省略。</li>
+        <li>框架种子模块的目录保存于<span class="primary">$.config.base</span>属性中。</li>
+        <li>ready是系统占位符，用于表示DOM树是否加载完毕，不会进行路径转换。</li>
+        <li>在种子模块内部已经默认提供了<strong>所有核心模块的别名</strong>，以$开头加模块名，如$lang，$event。</li>
+    </ol>
+</fieldset>
 
 
 <fieldset><legend>例子</legend>
@@ -82,7 +82,7 @@
     <p>加载远程模块。</p>
     <pre class="brush:javascript;gutter:false;toolbar:false">
     $.require("http://files.cnblogs.com/rubylouvre/random.js,ready,node,css", function(random){
-         $("#js_require_ex4").css("bgc", random.hex() );//每点一次随机变换颜色
+         $("#js_require_ex4").css("bgc", random.color() );//每点一次随机变换颜色
     });
     </pre>
     <button class="doc_btn" type="button">点我，执行代码</button>

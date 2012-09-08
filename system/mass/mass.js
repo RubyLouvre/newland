@@ -140,7 +140,7 @@
         //$.log(str, showInPage=true, 5 )
         //level Number，通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，
         //7则连普通的调试消息也打印出来。 显示算法为 level <= $.config.level。
-        //这个$.colre.level默认为9。下面是level各代表的含义。
+        //这个$.config.level默认为9。下面是level各代表的含义。
         //0 EMERGENCY 致命错误,框架崩溃
         //1 ALERT 需要立即采取措施进行修复
         //2 CRITICAL 危急错误
@@ -682,5 +682,6 @@ http://warpech.github.com/jquery-handsontable/
 http://baidu.365rili.com/wnl.html?bd_user=1392943581&bd_sig=23820f7a2e2f2625c8945633c15089dd&canvas_pos=search&keyword=%E5%86%9C%E5%8E%86
 http://unscriptable.com/2011/10/02/closures-for-dummies-or-why-iife-closure/
 http://unscriptable.com/2011/09/30/amd-versus-cjs-whats-the-best-format/
+http://news.cnblogs.com/n/157042/
 */
 

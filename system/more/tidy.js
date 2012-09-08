@@ -12,10 +12,10 @@ define( ["./tidy_css","./tidy_html","./tidy_js"], function(tidy_css,tidy_html,ti
                 case "js":
                     context = tidy_js(context);
                     break;
-                case "html":
-                case "xml":
-                    context = tidy_html(context);
-                    break;
+             //   case "html":
+            //    case "xml":
+             //       context = tidy_html(context);
+            //        break;
                 case "css":
                     context = tidy_css(context);
                     break;

@@ -9,7 +9,7 @@
 <p><span class="stress">参数：</span></p>
 <dl>
     <dt>name</dt>
-    <dd>必需。新的短命名空间。我们可以通过$["@name"]访问到当前的短命名空间。</dd>
+    <dd>必需。新的短命名空间。我们可以通过<span class="info">$.config.nick</span>访问到当前的短命名空间。</dd>
 </dl>
 <fieldset><legend>例子</legend>
     <pre class="brush:javascript;gutter:false;toolbar:false">
@@ -26,12 +26,12 @@
     })()
     </pre>
 </fieldset>
-<p><span class="note">小贴士</span>： mass Framework还提供了另一种更有效的机制防止命名空间冲突, 你直接在引用框架的script标签中定义一个叫name属性,
+<p><span class="note">小贴士</span>： mass Framework还提供了另一种更有效的机制防止命名空间冲突, 你直接在引用框架的script标签中定义一个叫nick属性,
     然后把你喜欢的命名空间赋给它就行了,如:
 </p>
 <div>
     <pre class="brush:xml;gutter:false;toolbar:false">
-        <script name="Baidu" src="/scripts/mass.js"></script>
+        <script nick="Baidu" src="/scripts/mass.js"></script>
     </pre>
 </div>
 
