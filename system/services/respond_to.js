@@ -63,6 +63,8 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                     }
                 }else{
                     cache = $.pagesCache[ url ]
+                   
+
                     if( !$.pagesCache[ url ] ){
                         cache = $.pagesCache[ url ] = getFile( url, flow );
                     }
@@ -78,16 +80,40 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
             if( format == "json" ){//返回JSON数据
                 data = JSON.stringify(data);
             }
+            res.setHeader('Server',  "node.js "+ process.version);
             var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
-            if( encoding == "uft8"){
-                res.setHeader('Content-Type',  mime+"; charset=UTF-8" );
+            if(encoding == "binary"){
+                var fs = require("fs");
+                var util = require("util");
+                //http://stackoverflow.com/questions/8445019/problems-with-sending-jpg-over-http-node-js
+                fs.stat(url, function(err, stat) {
+                    res.writeHead(200, {
+                        'Content-Type' : flow.mime,
+                        'Content-Length' : stat.size
+                    });
+                    var rs = fs.createReadStream(url);
+                    // pump the file to the response
+                    util.pump(rs, res, function(err) {
+                        if(err) {
+                            throw err;
+                        }
+                    });
+                })
+            //  console.log(url+"   "+ flow.mime+"  "+encoding)
             }else{
                 res.setHeader('Content-Type',  mime );
+                //不要使用str.length，会导致页面等内容传送不完整
+              
+                res.setHeader('Content-Length', Buffer.byteLength( data, "utf8" ));
+                res.end(data, encoding);
             }
-            //不要使用str.length，会导致页面等内容传送不完整
-            res.setHeader('Server',  "node.js "+ process.version);
-            res.setHeader('Content-Length', Buffer.byteLength( data, encoding ));
-            res.end(data);
+        //console.log(encoding)
+        //            if( encoding == "uft8"){
+        //                res.setHeader('Content-Type',  mime+"; charset=UTF-8" );
+        //            }else{
+        //                res.setHeader('Content-Type',  mime );
+        //            }
+      
         //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，
         //而要用new Date().toGMTString()，因为前者可能出现中文乱码
         //chrome 一定要发送Content-Type 请求头,要不样式表没有效果
@@ -95,33 +121,34 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
         })
     }
 })
-//https://github.com/visionmedia/send
-//http://cnodejs.org/topic/4f5b47c42373009b5c04e9cb nodejs大文件下载与断点续传
+//添加对静态文件的输出读取支持
+    //https://github.com/visionmedia/send
+    //http://cnodejs.org/topic/4f5b47c42373009b5c04e9cb nodejs大文件下载与断点续传
 
-//@可乐 找到两个... 等会去试试 https://github.com/aadsm/jschardet
-//[杭州]Neekey<ni184775761@gmail.com> 20:32:43
-//https://github.com/mooz/node-icu-charset-detector
+    //@可乐 找到两个... 等会去试试 https://github.com/aadsm/jschardet
+    //[杭州]Neekey<ni184775761@gmail.com> 20:32:43
+    //https://github.com/mooz/node-icu-charset-detector
 
-//;(function(lazyIter, globals) {
-//  'use strict';
-//
-//  // Export the lazyIter object for Node.js and CommonJS.
-//  if (typeof exports !== 'undefined' && exports) {
-//    if (typeof module !== 'undefined' && module.exports) {
-//      exports = module.exports = lazyIter;
-//    }
-//    exports.lazyIter = lazyIter;
-//  } else if (typeof define === 'function' && define.amd) {
-//    // for AMD.
-//    define('lazyiter', function() {
-//      return lazyIter;
-//    });
-//  } else {
-//    (globals || Function('return this;')() || {}).lazyIter = lazyIter;
-//  }
-//
-//}(function() {
-//
-//  return lazyIter;
-//
-//}(), this));
+    //;(function(lazyIter, globals) {
+    //  'use strict';
+    //
+    //  // Export the lazyIter object for Node.js and CommonJS.
+    //  if (typeof exports !== 'undefined' && exports) {
+    //    if (typeof module !== 'undefined' && module.exports) {
+    //      exports = module.exports = lazyIter;
+    //    }
+    //    exports.lazyIter = lazyIter;
+    //  } else if (typeof define === 'function' && define.amd) {
+    //    // for AMD.
+    //    define('lazyiter', function() {
+    //      return lazyIter;
+    //    });
+    //  } else {
+    //    (globals || Function('return this;')() || {}).lazyIter = lazyIter;
+    //  }
+    //
+    //}(function() {
+    //
+    //  return lazyIter;
+    //
+    //}(), this));
