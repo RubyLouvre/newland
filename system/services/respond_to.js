@@ -1,21 +1,14 @@
 define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
-    function getFile(url, mime){//可以是字符串或flow对象
-        try{
-            mime = typeof mime == "string" ? mime : mime.mime
-            var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
-            var temp = $.readFileSync( url,encoding );
-            return $.pagesCache[ url ] =  temp
-        }catch(e){ }
-    }
+
     return function(flow){
         flow.bind("respond_to", function( format, opts ){
-            var url, res = flow.res, rext = /\.(\w+)$/, cache, data;
+            var url, res = flow.res, rext = /\.(\w+)$/, data;
             //如果没有指定，或第二个参数指定了location
             if( !opts  || typeof opts.location == "string" ){
                 if( !opts ){ //如果是静态资源
                     url = $.path.join("app/public/",flow.pathname);
                 }else {     //如果是从路由系统那里来的
-                    url = $.path.join($.core.base, "app/views", opts.location + "."+ format);
+                    url = $.path.join($.config.base, "app/views", opts.location + "."+ format);
                 }
                 opts = opts ||{};
                 var ext = opts.ext || ".xhtml"
@@ -24,8 +17,8 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                     scripts: []
                 }
                 if( /^(html|\*)$/.test(format) ){  //如果是页面
-                    cache = $.pagesCache[ url ];
-                    var temp, html //用于保存ejs或html
+                    var cache = $.pagesCache[ url ];
+                    var temp //用于保存ejs或html
                     if(!cache){//如果不存在,先尝试打模板
                         try{
                             temp = $.readFileSync( url.replace(rext,ext), "utf8");
@@ -34,17 +27,17 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                         }catch(e){ }
                     }
                     if(!cache){//如果再不存在则找静态页面
-                        cache = getFile( url, "text/html" );
+                        cache = $.readFileSync( url ,"utf8");
                     }
                     if(!cache){//如果还是没有找到404
-                        return flow.fire("send_error", 404, "找不到对应的视图", "html")
+                        return flow.fire("send_error", 404, "找不到对应的页面", "html")
                     }
-                    format = "html"
+                    format = "html";
                     if(typeof cache == "function"){
-                        html =  cache(opts || {}) ;//转换成页面
+                        cache =  cache(opts || {}) ;//转换成页面
                         var context = $.ejs.data;
                         if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
-                            context.partial = html;
+                            context.partial = cache;
                             var layout_url = $.path.join("app","views/layout", context.layout );
                             layout_url =  layout_url.replace(rext,ext);
                             cache = $.pagesCache[ layout_url ];
@@ -56,39 +49,58 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                                     return flow.fire("send_error", 500, e, "html")
                                 }
                             }
-                            html = cache( context );//这时已是完整页面了
+                            cache = cache( context );//这时已是完整页面了
                         }
-                        cache = html;
-                        cache = tidy(cache)
-                    }
-                }else{
-                    cache = $.pagesCache[ url ]
-                   
-
-                    if( !$.pagesCache[ url ] ){
-                        cache = $.pagesCache[ url ] = getFile( url, flow );
+                        data = tidy(cache)
                     }
                 }
-                data = cache;//要返回给前端的数据
             }else{
                 data = opts;//要返回给前端的数据
             }
             var mime = $.ext2mime( format );
-            if( data.json && data.callback ){//返回JSONP形式的JS文件
+            if( data && data.json && data.callback ){//返回JSONP形式的JS文件
                 data = $.format("#{0}(#{1})", data.callback, JSON.stringify(data.json))
             }
             if( format == "json" ){//返回JSON数据
                 data = JSON.stringify(data);
             }
             res.setHeader('Server',  "node.js "+ process.version);
+            res.setHeader('Accept-Ranges', 'bytes');
+            res.setHeader('X-Powered-By', 'newland');
             var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
-            if(encoding == "binary"){
+            if(encoding == "binary" || !data){
                 var fs = require("fs");
                 var util = require("util");
                 //http://stackoverflow.com/questions/8445019/problems-with-sending-jpg-over-http-node-js
                 fs.stat(url, function(err, stat) {
+
+                    var lastModified = stat.mtime.toUTCString();
+                    var ifModifiedSince = "If-Modified-Since".toLowerCase();
+
+                    if (!res.getHeader('ETag')) {
+                        res.setHeader('ETag','"' + stat.size + '-' + Number(stat.mtime) + '"');
+                    }
+
+                    if (!res.getHeader('Date')){
+                        res.setHeader('Date', new Date().toUTCString());
+                    }
+
+                    if (!res.getHeader('Cache-Control')){
+                        res.setHeader('Cache-Control', 'public, max-age=' + (60 * 60 * 24 * 365));
+                    }
+                  
+                    if (!res.getHeader('Last-Modified')){
+                        res.setHeader("Last-Modified", lastModified);
+                    }
+
+                    var req = flow.req;
+                    if ( req.headers[ifModifiedSince] && lastModified == req.headers[ifModifiedSince]) {
+                        res.writeHead(304, "Not Modified");
+                        return res.end();
+                    }
+
                     res.writeHead(200, {
-                        'Content-Type' : flow.mime,
+                        'Content-Type' :   flow.mime,
                         'Content-Length' : stat.size
                     });
                     var rs = fs.createReadStream(url);
@@ -99,24 +111,17 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                         }
                     });
                 })
-            //  console.log(url+"   "+ flow.mime+"  "+encoding)
             }else{
+                //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，
+                //而要用new Date().toGMTString()，因为前者可能出现中文乱码
+                //chrome 一定要发送Content-Type 请求头,要不样式表没有效果
                 res.setHeader('Content-Type',  mime );
-                //不要使用str.length，会导致页面等内容传送不完整
-              
+                //不要使用str.length，会导致页面等内容传送不完整 
                 res.setHeader('Content-Length', Buffer.byteLength( data, "utf8" ));
                 res.end(data, encoding);
             }
-        //console.log(encoding)
-        //            if( encoding == "uft8"){
-        //                res.setHeader('Content-Type',  mime+"; charset=UTF-8" );
-        //            }else{
-        //                res.setHeader('Content-Type',  mime );
-        //            }
       
-        //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，
-        //而要用new Date().toGMTString()，因为前者可能出现中文乱码
-        //chrome 一定要发送Content-Type 请求头,要不样式表没有效果
+
 
         })
     }

@@ -46,8 +46,8 @@
         }
         for(var i = 0, n = array.length; i < n; i++){
             el = array[ i ];
-            if(/^[-a-z0-9_$]{2,}$/i.test(el) && $.core.alias[ el ] ){
-                array[ i ] = $.core.alias[ el ];
+            if(/^[-a-z0-9_$]{2,}$/i.test(el) && $.config.alias[ el ] ){
+                array[ i ] = $.config.alias[ el ];
             }
         }
         return array;
@@ -107,15 +107,7 @@
             return result;
         },
         path: require("path"),//将原生path模块劫持到命名空间中
-        core: {
-            services:[],
-            alias: {},
-            base: process.cwd()+"/",
-            charset: "utf-8",
-            debug: true,
-            //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
-            level: 9
-        },
+     
         noop: function(){},
         logger: {//这是一个空接口
             write:function(){}
@@ -140,7 +132,7 @@
                         timestamp = true;
                     }
                 }else if( typeof el == "number" ){
-                    show = el <= $.core.level;
+                    show = el <= $.config.level;
                     level = el;
                 }
             }
@@ -217,30 +209,40 @@
             }
             return array;
         },
-        config: function(o) {
-            var core = $.config
-            for (var k in o) {
-                if (!o.hasOwnProperty(k)) continue
-                var previous = core[k]
-                var current = o[k]
-                if (previous && k === 'alias') {
-                    for (var p in current) {
-                        if (current.hasOwnProperty(p)) {
-                            var prevValue = previous[p]
-                            var currValue = current[p]
-                            if(prevValue && previous !== current){
-                                throw p + "不能重命名"
+        config: function( settings ) {
+            var kernel  = $.config;
+            for ( var p in settings ) {
+                if (!settings.hasOwnProperty( p ))
+                    continue
+                var prev = kernel[ p ];
+                var curr = settings[ p ];
+                if (prev && p === 'alias') {
+                    for (var c in curr) {
+                        if (curr.hasOwnProperty( c )) {
+                            var prevValue = prev[ c ];
+                            var currValue = curr[ c ];
+                            if( prevValue && prev !== curr ){
+                                throw c + "不能重命名"
                             }
-                            previous[p] = currValue
+                            prev[ c ] = currValue;
                         }
                     }
                 } else {
-                    core[k] = current
+                    kernel[ p ] = curr;
                 }
             }
+            return this
         }
     });
-
+    $.mix($.config,{
+        services:[],
+        alias: {},
+        base: process.cwd()+"/",
+        charset: "utf-8",
+        debug: true,
+        //level 越小,显示的日志越少,它们就越重要,但都打印在文本上
+        level: 9
+    });
     $.parseQuery = require("querystring").parse;
     var _join = $.path.join;
     //mac下的路径为     app/controllers/doc_controller.js
@@ -250,7 +252,7 @@
         var ret = _join.apply(0,arguments)
         return  ret.replace(/\\/g,"/")
     }
-    //console.log($.core.alias.lang)
+    //console.log($.config.alias.lang)
     $.parseUrl = require("url").parse; //将原生URL模块的parse劫持下来
     $.error = util.error;
     $.debug = util.debug;
@@ -285,16 +287,16 @@
     exports.$ = global.$ = $;
     //重要的别名
     "lang,class,flow,more/ejs,more/cookie".replace($.rword, function(method){
-        $.core.alias["$" + method.replace("more/","") ] = 
-        $.path.join($.core.base , "system/mass/", method +".js")
+        $.config.alias["$" + method.replace("more/","") ] =
+        $.path.join($.config.base , "system/mass/", method +".js")
     });
-    $.core.alias[ "$hfs" ] =   $.path.join($.core.base , "system/more/hfs.js")
+    $.config.alias[ "$hfs" ] =   $.path.join($.config.base , "system/more/hfs.js")
 
     $.log("后端mass框架","magenta");
     //生成mass framework所需要的页面
-  //  $.require( "./system/page_generate", function(){
-  //      $.log("页面生成","lgreen",7)
-  //  });
+    //  $.require( "./system/page_generate", function(){
+    //      $.log("页面生成","lgreen",7)
+    //  });
     $.require("./app/config");
     $.require("./system/more/logger");
     $.require("./system/combo");

@@ -2,12 +2,12 @@ define( ["../controller"], function(){
     //这是必经的第三个服务
     return function( flow ){
         flow.bind("route_dispatch", function(){
-            if(this.url.substr(-1,1) =="/"){
-                 this.url += "index.html"
-                 this.pathname = this.url;
+            if(this.url.substr(-1,1) =="/" && this.url.length > 1){
+                this.url += "index.html"
+                this.pathname = this.url;
             }
             var go = $.router.routeWithQuery( this.method, this.url );
-            var cpath = $.core.base + "app/controllers"
+            var cpath = $.config.base + "app/controllers"
             if( go ){//如果当前URL请求匹配路由规则（app/routes）中的某一项，则交由MVC系统去处理
                 flow.params = go.params || {};//重写params
                 var value = go.value;
@@ -20,7 +20,7 @@ define( ["../controller"], function(){
                         var path =  $.path.join( cpath ,cname +"_controller");
                         $.require( path, function( option ){
                             //进行控制反转，构建我们所需要的控制器子类与它的实例
-                            option.inherit = $.core.controller;
+                            option.inherit = $.config.controller;
                             var klass = $.factory(option);
                             controller = $.controllers[ cname  ] = new klass;
                         });
@@ -37,7 +37,7 @@ define( ["../controller"], function(){
                         //如果调用了get_cookie服务,肯定会调用session服务,但如果session服务还没有到位,
                         //就通过bind("open_session",fn)这加锁机制等待服务过错成才进入action
                         flow.bind("open_session",function(){
-                          //  $.log("已经到达指定action","green",7)
+                            //  $.log("已经到达指定action","green",7)
                             action( flow );//到达指定action
                             if( !flow.rendered ){
                                 flow.render({

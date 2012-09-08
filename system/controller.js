@@ -7,5 +7,5 @@ define( ["$class"],function(){
         }
     })
     var klass = $.factory(opts);
-    $.core.controller = klass;
+    $.config.controller = klass;
 });

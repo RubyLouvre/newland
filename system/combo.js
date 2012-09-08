@@ -7,22 +7,22 @@ define( [ "$hfs"], function(){
         var path = $.path.join( __dirname,"mass", name + ".js" );
         var text = $.readFileSync( path, "utf-8");
         files.push( text )
-        var target = $.path.join( $.core.base , "app/public/scripts",name+ ".js");
+        var target = $.path.join( $.config.base , "app/public/scripts",name+ ".js");
         $.updateFileSync( target, text, true);
          
     });
     // ===============这里是合并脚本===============
     var merge = function(){
         var define = function(a){
-            if(typeof a == "string" && a.indexOf($.core.base) == -1 ){
-                arguments[0] = $.core.base + a +".js"
+            if(typeof a == "string" && a.indexOf($.config.base) == -1 ){
+                arguments[0] = $.config.base + a +".js"
             }
             return $.define.apply($, arguments);
         }
 
         for( var c = 0, cn ; cn = all[c++];){
             if(cn !== "mass"){
-                Module._update($.core.base + cn + ".js", 0, 0, 2);
+                Module._update($.config.base + cn + ".js", 0, 0, 2);
             }
         }
     }
