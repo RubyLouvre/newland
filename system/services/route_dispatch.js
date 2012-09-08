@@ -2,8 +2,11 @@ define( ["../controller"], function(){
     //这是必经的第三个服务
     return function( flow ){
         flow.bind("route_dispatch", function(){
+            if(this.url.substr(-1,1) =="/"){
+                 this.url += "index.html"
+                 this.pathname = this.url;
+            }
             var go = $.router.routeWithQuery( this.method, this.url );
-          
             var cpath = $.core.base + "app/controllers"
             if( go ){//如果当前URL请求匹配路由规则（app/routes）中的某一项，则交由MVC系统去处理
                 flow.params = go.params || {};//重写params
@@ -51,7 +54,6 @@ define( ["../controller"], function(){
                 }
             }else{
                 flow.params = $.parseUrl(this.url, true).query
-             //   console.log(this.url+"        !")
                 flow.fire("respond_to", $.path2ext( this.pathname, "*") )  //走静态路线
             }
         })
@@ -59,6 +61,7 @@ define( ["../controller"], function(){
 })
 
 //2012.8.19 使用httpflow.pacth方法节省代码量
+//2012.9.8 如果路径末端是"/"则自动加上"index.html"
     //http://d.hatena.ne.jp/scalar/20120508/1336488868
 /*
  用cookie在本地传输数据
