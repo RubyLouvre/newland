@@ -30,21 +30,49 @@ multipart/form-data（同上，但主要用于表单提交时伴随文件上传�
 define("mime", function(){
     var plain = "text/plain";
     var mapper = {
-        ejs: plain,
+        "7z": "application/x-7z-compressed",
+        asf: "video/x-ms-asf",
+        au: "audio/basic",
+        chm: "application/mshelp",
         css: "text/css",
+        doc: "application/msword",
+        ejs: plain,
+        exe: "application/octet-stream",
+        flw: "flv-application/octet-stream",
         gif: "image/gif",
         html: "text/html",
+        hlp: "application/mshelp",
+
         ico: "image/x-icon",
         jpeg: "image/jpeg",
         jpg: "image/jpeg",
         json: "text/json,application/json",
         js:   "text/javascript,application/javascript",
+        jar:  "application/java-archive",
+        "class": "application/java-vm",
         log:  plain,
+        m3u8: "application/vnd.apple.mpegurl",
+        mpg: "video/mpeg",
+        mp3: "audio/mpeg",
+        mid: "audio/x-midi",
+        midi: "audio/x-midi",
+        mp2: "audio/x-mpeg",
+        php: "application/x-httpd-php",
+        phtml: "application/x-httpd-php",
+        ppt: "application/mspowerpoint",
         manifest: "text/cache-manifest",
         pdf: "application/pdf",
         png: "image/png",
+     
+        rsd: "application/rsd+xml",
+        rss: "application/rss+xml",
+        ra: "audio/x-pn-realaudio",
+        ram: "audio/x-pn-realaudio",
+        rm: "video/x-pn-realvideo",
+        rmvb: "application/vnd.rn-realmedia",
         svg: "image/svg+xml",
         swf: "application/x-shockwave-flash",
+
         tiff: "image/tiff",
         txt: plain,
         text: plain,
@@ -52,7 +80,10 @@ define("mime", function(){
         wma: "audio/x-ms-wma",
         wmv: "video/x-ms-wmv",
         woff: 'font/opentype',
+        wml: "video/x-ms-asf",
         xml:  "text/xml,application/xml",
+        xls: "application/vnd.ms-excel",
+        xla: "application/msexcel",
         default_type: "application/octet-stream"
     }
     var formats = {}
@@ -88,7 +119,7 @@ define("mime", function(){
         },
         //通过ext找到对应的mime
         ext2mime: ext2mime,
-         //通过路径找到目标资源对应的扩展名
+        //通过路径找到目标资源对应的扩展名
         path2ext: path2ext,
         //通过accept找到对应的扩展名
         accept2ext: accept2ext,

@@ -18,7 +18,7 @@ define( ["../helper","$ejs"], function(helper){
                     url = $.path.join($.core.base, "app/views", opts.location + "."+ format);
                 }
                 opts = opts ||{};
-                var ext = opts.ext || ".ejs"
+                var ext = opts.ext || ".xhtml"
                 $.ejs.data = {
                     links:   [],
                     scripts: []
@@ -30,7 +30,7 @@ define( ["../helper","$ejs"], function(helper){
                         try{
                             temp = $.readFileSync( url.replace(rext,ext), "utf8");
                             temp = $.ejs.compile( temp, helper );//转换成编译函数
-                            cache = $.pagesCache[ url ] =  temp;
+                            cache = $.pagesCache[ url ] =  temp
                         }catch(e){ }
                     }
                     if(!cache){//如果再不存在则找静态页面
@@ -100,3 +100,27 @@ define( ["../helper","$ejs"], function(helper){
 //@可乐 找到两个... 等会去试试 https://github.com/aadsm/jschardet
 //[杭州]Neekey<ni184775761@gmail.com> 20:32:43
 //https://github.com/mooz/node-icu-charset-detector
+
+//;(function(lazyIter, globals) {
+//  'use strict';
+//
+//  // Export the lazyIter object for Node.js and CommonJS.
+//  if (typeof exports !== 'undefined' && exports) {
+//    if (typeof module !== 'undefined' && module.exports) {
+//      exports = module.exports = lazyIter;
+//    }
+//    exports.lazyIter = lazyIter;
+//  } else if (typeof define === 'function' && define.amd) {
+//    // for AMD.
+//    define('lazyiter', function() {
+//      return lazyIter;
+//    });
+//  } else {
+//    (globals || Function('return this;')() || {}).lazyIter = lazyIter;
+//  }
+//
+//}(function() {
+//
+//  return lazyIter;
+//
+//}(), this));

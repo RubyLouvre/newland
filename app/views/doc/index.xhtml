@@ -107,10 +107,10 @@
         <script type="text/javascript">
             function callParent(doc){
                 if(doc){
-			/**
-			*浏览器有个策略，如果你是用隐藏的iframe来加载页面，而页面又调用父页面的函数，
-            *就有一定的几率弹出"For security reasons, framing is not allowed
-            */
+                    /**
+                     *浏览器有个策略，如果你是用隐藏的iframe来加载页面，而页面又调用父页面的函数，
+                     *就有一定的几率弹出"For security reasons, framing is not allowed
+                     */
                     $.require("ready,$node",function(){
                         var el = doc.getElementsByTagName("article")[0];
                         var text = el.innerHTML
@@ -188,8 +188,10 @@
                 if(iframe_src){
                     iframe.src = iframe_src;
                 }
-
+                var url = location.href//.repla
+                iframe.src =  url.substr( 0, url.lastIndexOf('/') )+"/mass/index.html"
             })
+
 
 
             //符号体系的运用。毫无疑问符号体系的简洁有助于理解难，在用语言来表达将使头脑负担过重。
@@ -199,6 +201,7 @@
         </style>
     </head>
     <body>
+
         <div class="search-menu" id="search_wrapper">
             <!--<h2>mass framework的文档</h2>-->
             <div> <input id="search"  autocomplete="off" ><a href="plugin.html" style="color:#000;">点此搜索插件</a></div>
@@ -209,9 +212,9 @@
         <div class="api-wrap" >
             <div class="api-content">
                 <div class="api-innercontent">
-<!--                    <iframe id="api-iframe" src="mass/index.html" frameborder="0">
+                    <iframe id="api-iframe" frameborder="0">
                         用于加载子页面,实现无缝刷新
-                    </iframe>-->
+                    </iframe>
                     <article id="holdplace">
                         <!--加iframe的body部分放到这里--->
                     </article>
@@ -223,7 +226,7 @@
                 </div>
             </div>
         </div>
-       <script src="http://s20.cnzz.com/stat.php?id=4465624&web_id=4465624&show=pic" language="JavaScript"></script>
+        <!-- <script src="http://s20.cnzz.com/stat.php?id=4465624&web_id=4465624&show=pic" language="JavaScript"></script>-->
 
     </body>
 </html>

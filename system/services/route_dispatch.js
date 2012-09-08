@@ -3,6 +3,7 @@ define( ["../controller"], function(){
     return function( flow ){
         flow.bind("route_dispatch", function(){
             var go = $.router.routeWithQuery( this.method, this.url );
+          
             var cpath = $.core.base + "app/controllers"
             if( go ){//如果当前URL请求匹配路由规则（app/routes）中的某一项，则交由MVC系统去处理
                 flow.params = go.params || {};//重写params
@@ -50,10 +51,8 @@ define( ["../controller"], function(){
                 }
             }else{
                 flow.params = $.parseUrl(this.url, true).query
-                var format =  this.pathname.match( /\.(\w+)$/) ;
-                format = format || "**"
-                console.log(this.url +"  "+this.mime)
-                flow.fire("respond_to", format[1])  //走静态路线
+             //   console.log(this.url+"        !")
+                flow.fire("respond_to", $.path2ext( this.pathname, "*") )  //走静态路线
             }
         })
     }

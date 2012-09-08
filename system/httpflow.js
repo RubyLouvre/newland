@@ -112,8 +112,7 @@ $.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
         if(this._mime){
             return this._mime;
         }
-        var accept = this.req.headers.accept;
-        return  this._mime = $.accept2mime( accept ) || $.path2mime( this.pathname, "*")
+        return  this._mime =  $.path2mime( this.pathname, "*")
     })
     HttpFlow.prototype.__defineGetter__("xhr", function(){
         if(!this.req)

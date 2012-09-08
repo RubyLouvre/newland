@@ -1,18 +1,18 @@
 <%  block("title","这是测试用的") %>
-<%  block("layout","sample.ejs") %>
+<%  block("layout","sample.xhtml") %>
 <%=  add_js('/scripts/mass_merge.js' );    %>
 <script>
-$.require("$ajax", function(){
-   $.getJSON("/",{"aaa":"bbb"},function(data){
-     alert(data)
-  })
+    $.require("$ajax", function(){
+        $.post("/",function(data){
+            $.log(data)
+        },"json")
 
-})
+    })
 
 </script>
- $.getJSON("/",function(data){
-     $.log(data)
-  })
+$.getJSON("/",function(data){
+    $.log(data)
+})
 <form action="/" method="post" enctype="multipart/form-data" >
     <input type="text" name="name" value="<%= @name || "name" %>" />
            <input type="password" name="password" value="<%= @password || "password" %>"  /><br/>
