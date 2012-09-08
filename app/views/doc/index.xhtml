@@ -184,12 +184,13 @@
                     var r = url.match(new RegExp("(^|&)" + name + "=([^&]*)(&|$)"));
                     return (r == null ? null : unescape(r[2]));
                 }
+               
+                var url = location.href//.repla
+                iframe.src =  url.substr( 0, url.lastIndexOf('/') )+"/mass/index.html";
                 var iframe_src = getParam("iframe_src");
                 if(iframe_src){
                     iframe.src = iframe_src;
                 }
-                var url = location.href//.repla
-                iframe.src =  url.substr( 0, url.lastIndexOf('/') )+"/mass/index.html"
             })
 
 

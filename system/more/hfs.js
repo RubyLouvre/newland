@@ -21,6 +21,7 @@ define( ["fs","path"], function(fs, path){
         //sync  表示是否同步，
         //one   表示是否找到一个就终于遍历
         //filter表示过滤函数，如果函数返回true则收录
+        //$.walk(url, callback, { sync: true})
         walk: new function  (){
             function collect(opts, el, prop){
                 if((typeof opts.filter == "function") ? opts.filter( el ) : true){
@@ -131,14 +132,14 @@ define( ["fs","path"], function(fs, path){
                 $.walk(p, function( files, dirs ){
                     var c = files.length, n = c;
                     if( n ){
-                        for(var i = 0 ; i < n ; i++){//先删除文件再从最深处起往外删除目录
-                            fs.unlink(files[i], function(e){
+                        files.forEach(function(file){
+                            fs.unlink(file, function(e){//先删除文件再从最深处起往外删除目录
                                 c--
                                 if(c == 0){
                                     inner(dirs, cb)
                                 }
                             })
-                        }
+                        });
                     }else{//如果不存在文件
                         inner(dirs, cb)
                     }

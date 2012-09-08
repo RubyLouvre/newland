@@ -1,0 +1,14 @@
+<%  set_title("$.isEmptyObject") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h3>$.isEmptyObject</h3>
+<p><span class="stress">描述：</span></p>
+<p>判定是否是空对象。</p>
+<fieldset><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    $.log( $.isEmptyObject({}),true);
+                    $.log( $.isEmptyObject({a:1,b:2}),true);
+                });
+    </pre>
+    <button class="doc_btn" type="button">点我，执行代码</button>
+</fieldset>

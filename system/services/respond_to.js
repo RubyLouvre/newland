@@ -1,4 +1,4 @@
-define( ["../helper","$ejs"], function(helper){
+define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
     function getFile(url, mime){//可以是字符串或flow对象
         try{
             mime = typeof mime == "string" ? mime : mime.mime
@@ -59,6 +59,7 @@ define( ["../helper","$ejs"], function(helper){
                             html = cache( context );//这时已是完整页面了
                         }
                         cache = html;
+                        cache = tidy(cache)
                     }
                 }else{
                     cache = $.pagesCache[ url ]

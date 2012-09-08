@@ -1,0 +1,14 @@
+<%  set_title("$.getText") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h3>$.getText(el)</h3>
+<p><span class="stress">描述：</span></p>
+<p>获取某个节点的文本，如果此节点为元素节点，则取其childNodes的所有文本，
+    为了让结果在所有浏览器下一致，忽略所有空白节点，因此它非元素的innerText或textContent。</p>
+<fieldset><legend>例子</legend>
+    <pre class="brush:javascript;gutter:false;toolbar:false">
+         $.require("ready,query", function(){
+           alert($.getText(document.body))
+         });
+    </pre>
+    <button class="doc_btn" type="button">点我，执行代码</button>
+</fieldset>

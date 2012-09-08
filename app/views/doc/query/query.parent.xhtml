@@ -1,0 +1,32 @@
+<%  set_title("query.parent") %>
+<%  set_layout("query_layout.xhtml") %>
+<p>父伪类，:parent，结构伪类的一种。如果此元素是个父子点，不论是文本节还是元素节点，就符合要求被选取。</p>
+<fieldset><legend>例子</legend>
+    <table class="clicktable" cellspacing="0" width="700" rules="cols" >
+        <thead>
+            <tr>
+                <th>
+                    请点击下面表格
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    $("#test:parent").css({"background":"#DAA520","border":"1px solid #6495ED"});
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <pre class="brush:xml;gutter:false;toolbar:false">
+    <div lang="zh">
+        <p id="test">司徒正美</p>
+        <p>司徒正美</p>
+    </div>
+    </pre>
+    <div lang="zh">
+        <p id="test">司徒正美</p>
+        <p>司徒正美</p>
+    </div>
+
+</fieldset>

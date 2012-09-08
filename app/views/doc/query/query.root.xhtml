@@ -1,0 +1,22 @@
+<%  set_title("query.root") %>
+<%  set_layout("query_layout.xhtml") %>
+<p>根伪类，:root，最简单的结构伪类，选取当前文档中的documentElement。</p>
+<fieldset><legend>例子</legend>
+    <table class="clicktable" cellspacing="0" width="700" rules="cols" >
+        <thead>
+            <tr>
+                <th>
+                    请点击下面表格
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    alert($(":root")[0].nodeName)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</fieldset>
