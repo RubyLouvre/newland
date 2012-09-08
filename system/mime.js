@@ -35,14 +35,17 @@ define("mime", function(){
         au: "audio/basic",
         chm: "application/mshelp",
         css: "text/css",
+        crx: "application/x-chrome-extension",
+
         doc: "application/msword",
         ejs: plain,
         exe: "application/octet-stream",
         flw: "flv-application/octet-stream",
         gif: "image/gif",
         html: "text/html",
+      
         hlp: "application/mshelp",
-
+        htc: "text/x-component",
         ico: "image/x-icon",
         jpeg: "image/jpeg",
         jpg: "image/jpeg",
@@ -53,17 +56,22 @@ define("mime", function(){
         log:  plain,
         m3u8: "application/vnd.apple.mpegurl",
         mpg: "video/mpeg",
-        mp3: "audio/mpeg",
+      
         mid: "audio/x-midi",
         midi: "audio/x-midi",
         mp2: "audio/x-mpeg",
+        mp3: "audio/mpeg",
+        m4p: "application/mp4",
+        m4a: "audio/mp4",
         php: "application/x-httpd-php",
         phtml: "application/x-httpd-php",
         ppt: "application/mspowerpoint",
         manifest: "text/cache-manifest",
+
+        otf: "font/opentype",//字体
         pdf: "application/pdf",
         png: "image/png",
-     
+
         rsd: "application/rsd+xml",
         rss: "application/rss+xml",
         ra: "audio/x-pn-realaudio",
@@ -76,6 +84,8 @@ define("mime", function(){
         tiff: "image/tiff",
         txt: plain,
         text: plain,
+
+        ts:  "video/MP2T",
         wav: "audio/x-wav",
         wma: "audio/x-ms-wma",
         wmv: "video/x-ms-wmv",
