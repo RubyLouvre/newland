@@ -14,6 +14,24 @@ define( ["fs","path"], function(fs, path){
         sync: 3
     }
     $.mix( {
+        createWriteStream: fs.createWriteStream,
+        createReadStream: fs.createReadStream,
+        //读取某个文件的内容
+        readFile: function(){
+            fs.readFile.apply(fs, arguments)
+        },
+        readFileSync: function(){
+            //这里的注释与处理见https://github.com/joyent/node/blob/master/lib/module.js 459行
+            // Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+            // because the buffer-to-string conversion in `fs.readFileSync()`
+            // translates it to FEFF, the UTF-16 BOM.
+            var content =  fs.readFileSync.apply(fs, arguments)
+            if (content.charCodeAt(0) === 0xFEFF) {
+                content = content.slice(1);
+            }
+            return content
+        },
+
         //遍历文件树,收集目录与文件,并包含自身
         //p为路径，
         //cb为最终回调，它将接受两个参数files, dirs，所有文件列表与所有目录列表
@@ -177,21 +195,6 @@ define( ["fs","path"], function(fs, path){
             }
             inner("", array, cb)
         },
-        //读取某个文件的内容
-        readFile: function(){
-            fs.readFile.apply(fs, arguments)
-        },
-        readFileSync: function(){
-            //这里的注释与处理见https://github.com/joyent/node/blob/master/lib/module.js 459行
-            // Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
-            // because the buffer-to-string conversion in `fs.readFileSync()`
-            // translates it to FEFF, the UTF-16 BOM.
-            var content =  fs.readFileSync.apply(fs, arguments)
-            if (content.charCodeAt(0) === 0xFEFF) {
-                content = content.slice(1);
-            }
-            return content
-        },
 
         //创建文件,并添加内容,如果指定的路径中里面某些目录不存在,也一并创建它们
         //如果后两个参数中其中一个名为"append",那么它会直接在原文件上添加内容,而不是覆盖
@@ -296,8 +299,6 @@ define( ["fs","path"], function(fs, path){
             }
 
         },
-        createWriteStream: fs.createWriteStream,
-        createReadStream: fs.createReadStream,
         //目录对拷,可以跨分区拷贝
         cpdirSync: new function(old, neo, cb) {
             function inner( old, neo ) {
