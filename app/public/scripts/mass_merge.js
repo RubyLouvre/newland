@@ -9,7 +9,7 @@
     var postfix = "";//用于强制别名
     var loadings = [];//正在加载中的模块列表
     var cbi = 1e5 ; //用于生成回调函数的名字
-    var all = "mass,lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -124,7 +124,7 @@
         //$.log(str, showInPage=true, 5 )
         //level Number，通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，
         //7则连普通的调试消息也打印出来。 显示算法为 level <= $.config.level。
-        //这个$.config.level默认为9。下面是level各代表的含义。
+        //这个$.colre.level默认为9。下面是level各代表的含义。
         //0 EMERGENCY 致命错误,框架崩溃
         //1 ALERT 需要立即采取措施进行修复
         //2 CRITICAL 危急错误
@@ -588,9 +588,7 @@ var define = function(a){
         }
 
         for( var c = 0, cn ; cn = all[c++];){
-            if(cn !== "mass"){
-                Module._update($.config.base + cn + ".js", 0, 0, 2);
-            }
+            Module._update($.config.base + cn + ".js", 0, 0, 2);
         }//=========================================
 //  语言补丁模块
 //==========================================

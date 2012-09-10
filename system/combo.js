@@ -21,9 +21,7 @@ define( [ "$hfs"], function(){
         }
 
         for( var c = 0, cn ; cn = all[c++];){
-            if(cn !== "mass"){
-                Module._update($.config.base + cn + ".js", 0, 0, 2);
-            }
+            Module._update($.config.base + cn + ".js", 0, 0, 2);
         }
     }
     var first = files.shift();
@@ -36,15 +34,15 @@ define( [ "$hfs"], function(){
     replaced = replaced + files.join("\n")
     replaced = first.replace("/*combine modules*/", replaced+"\r\n" ).replace(rcomments,"");
     var merge_url = "app/public/scripts/mass_merge.js"
-//    $.walk(  $.core.base +"app/views/doc",function(files){
-//        files.forEach(function(file){
-//            if(/\.xhtml$/.test(file)){
-//                var text = $.readFileSync(file,"utf8");
-//                text = text.replace('set_layout("query_layout.html")','set_layout("query_layout.xhtml")')
-//                $.updateFileSync(file,text,"utf8")
-//            }
-//        })
-//    })
+    //    $.walk(  $.core.base +"app/views/doc",function(files){
+    //        files.forEach(function(file){
+    //            if(/\.xhtml$/.test(file)){
+    //                var text = $.readFileSync(file,"utf8");
+    //                text = text.replace('set_layout("query_layout.html")','set_layout("query_layout.xhtml")')
+    //                $.updateFileSync(file,text,"utf8")
+    //            }
+    //        })
+    //    })
 
 
     var trunk = __dirname.indexOf("trunk") !== -1 ? "trunk/" : "";
