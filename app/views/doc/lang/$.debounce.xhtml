@@ -1,0 +1,16 @@
+<%  set_title("$.debounce") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h3>$.throttle( action, wait, tail )</h3>
+<p><span class="stress">描述：</span></p>
+<p>重复调用一个防反跳的方法，每隔wait毫秒执行一次。所谓防反跳就是setTimeout前先clearTimeout，
+    防止新定时器开始后还执行上次的定时任务。对于必须在一些输入（多是一些用户操作）停止到达后执行的行为有帮助。例如：渲染一个减价评论的预览，window resized后计算布局。。</p>
+<dl>
+    <dt>wait</dt>
+    <dd>必需。Number。时间间隔。</dd>
+    <dt>action</dt>
+    <dd>必需。Function。函数。</dd>
+</dl>
+<pre class="brush:js;gutter:false;toolbar:false;">
+var lazyLayout = $.debounce(calculateLayout, 300);
+$(window).resize(lazyLayout);
+</pre>
