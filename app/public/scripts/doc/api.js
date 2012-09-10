@@ -39,22 +39,23 @@ define("api", function(){
     //它利用上述方法与属性在mass.js这个文件的三处，求得整个框架的API
     return {
         "模块加载模块": {
-            "require": "function",
-            "define": "function",
-            "mix": "function",
-            "slice": "function",
-            "type": "function",
-            "log": "function",
-            "oneObject": "function",
-            "bind": "function",
-            "unbind": "function",
-            "noop": "function",
-            "html": "object",
-            "head": "object",
-            "rword": "object",
-            "mass": "number",
-            "getUid": "function",
-            "exports": "function"
+            require: "function",
+            define: "function",
+            config: "function",
+            mix: "function",
+            slice: "function",
+            type: "function",
+            log: "function",
+            oneObject: "function",
+            bind: "function",
+            unbind: "function",
+            noop: "function",
+            html: "object",
+            head: "object",
+            rword: "object",
+            mass: "number",
+            getUid: "function",
+            exports: "function"
         },
 
         "语言扩展模块": {

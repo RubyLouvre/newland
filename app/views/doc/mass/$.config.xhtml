@@ -8,3 +8,35 @@
     <dt>opts</dt>
     <dd>必需。Object。它的键值对将添加到$.config上，因此像length, name, constructor是添加不上去的！</dd>
 </dl>
+<p>默认地,它拥有如下默认值,当然你可以通过$.config({ level: 1})这样的方式修改它。</p>
+<ul>
+    <li>$.config.base, String， mass.js这个种子文件所在的目录,以/结束。</li>
+    <li>$.config.debug, Boolean，是否打开调试追踪，这是由引入的种子文件的debug属性决定。</li>
+    <li>$.config.nick, String，框架的别名，默认为$。</li>
+    <li>$.config.alias, Object，用于放置框架的核心模块的别名。</li>
+    <li>$.config.level， Number，调试时消息的显示级别。</li>
+</ul>
+<p>此外你可以另行设置其他项。</p>
+<p>在框架的种子模块mass.js,它是这样设置这些值</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+    (function(scripts, cur){
+        cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
+        var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
+        url = url.replace(/[?#].*/, '');
+        var str = cur.getAttribute("debug");
+        var kernel = $.config;
+        kernel.debug = str == 'true' || str == '1';
+        kernel.base = url.substr( 0, url.lastIndexOf('/') ) +"/";
+        kernel.nick = cur.getAttribute("nick") || "$";
+        kernel.alias = {};
+        kernel.level = 9;
+    })(DOC.getElementsByTagName( "script" ));
+</pre>
+<p>另外,它为框架的核心模块都定义好别名了,都以$开头!</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+ var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
+//...略...
+all.replace($.rword,function(a){
+        $.config.alias[ "$"+a ] = $.config.base + a + ".js"
+});
+</pre>
