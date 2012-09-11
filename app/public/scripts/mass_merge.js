@@ -461,6 +461,7 @@
         var last = args.length - 1;
         if( typeof args[ last ] == "function"){
             //劫持模块工厂,将$, exports, require, module等对象强塞进去
+            localStorage.setItem( nick, args[ last ]+"")
             args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
             (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
         }
