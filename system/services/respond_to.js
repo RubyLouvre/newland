@@ -22,7 +22,9 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                     if(!cache){//如果不存在,先尝试打模板
                         try{
                             temp = $.readFileSync( url.replace(rext,ext), "utf8");
+                            
                             temp = $.ejs.compile( temp, helper );//转换成编译函数
+                            // console.log(temp+"")
                             cache = $.pagesCache[ url ] =  temp
                         }catch(e){ }
                     }
@@ -32,9 +34,12 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                     if(!cache){//如果还是没有找到404
                         return flow.fire("send_error", 404, "找不到对应的页面", "html")
                     }
+                 
                     format = "html";
                     if(typeof cache == "function"){
+
                         cache =  cache(opts || {}) ;//转换成页面
+                         //  console.log(cache)
                         var context = $.ejs.data;
                         if(typeof context.layout == "string"){//如果它还要依赖布局模板才能成为一个完整页面,则找布局模板去
                             context.partial = cache;
