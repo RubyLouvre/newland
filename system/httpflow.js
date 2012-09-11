@@ -5,16 +5,23 @@ $.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
         render: function(format, obj){// format
             if(!this.rendered){
                 this.rendered = true;
+                var type
                 if(typeof format == "string"){
                     return this.fire("respond_to", format, obj)
                 }
-                if(format && typeof format == "object"){
-                    var accept = this.req.headers.accept || 'text/plain';
-                    var type = $.accept2ext(accept)
+                if(format && typeof format === "object"){
+                    var headers = this.req.headers;
+                    var accept = headers.accept;
+                    if( headers["user-agent"].indexOf("MSIE") > 1){
+                        type =  $.path2ext( this.pathname )
+                    }
+                    if(!type){
+                        type = $.accept2ext(accept, "html")
+                    }
                     return this.fire("respond_to", type, format);
                 }
             }
-           // this.fire("send_error", 403, "不能重复调用render方法")
+        // this.fire("send_error", 403, "不能重复调用render方法")
         },
         redirect: function(path){//这里的path是路由规则中能找到的
             this.rendered = true;
@@ -50,11 +57,6 @@ $.define(  [ "$cookie",  "./mime","$flow", ], function( cookie, mime ){
                         flow.addCookie(arr[0], arr[1])
                     })
                 } else{
-//                    if ('content-type' == key ) {
-//
-//                        val += '; charset=' + $.core.charset
-//                            console.log(val)
-//                    }
                     setHeader.call(this, field, val);
                 }
             }

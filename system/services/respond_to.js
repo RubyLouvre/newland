@@ -68,7 +68,8 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
             res.setHeader('Server',  "node.js "+ process.version);
             res.setHeader('Accept-Ranges', 'bytes');
             res.setHeader('X-Powered-By', 'newland');
-            var encoding  = /(^text|json$)/.test( mime )  ? "utf8" : "binary"
+            var encoding  = format == "html" ? "utf8" : /(^text|json$)/.test( mime )  ? "utf8" : "binary"
+        
             if(encoding == "binary" || !data){
                 var fs = require("fs");
                 var util = require("util");
@@ -117,10 +118,10 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                 //node.js向前端发送Last-Modified头部时，不要使用 new Date+""，
                 //而要用new Date().toGMTString()，因为前者可能出现中文乱码
                 //chrome 一定要发送Content-Type 请求头,要不样式表没有效果
-                res.setHeader('Content-Type',  mime );
+                res.setHeader('Content-Type',  mime+"; charset=UTF-8" );
                 //不要使用str.length，会导致页面等内容传送不完整 
                 res.setHeader('Content-Length', Buffer.byteLength( data, "utf8" ));
-                res.end(data, encoding);
+                res.end(data);
             }
       
 

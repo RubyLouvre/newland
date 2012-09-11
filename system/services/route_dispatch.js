@@ -53,7 +53,7 @@ define( ["../controller"], function(){
                     }
                 }
             }else{
-                flow.params = $.parseUrl(this.url, true).query
+                flow.params = $.parseUrl(this.url, true).query;
                 flow.fire("respond_to", $.path2ext( this.pathname, "*") )  //走静态路线
             }
         })

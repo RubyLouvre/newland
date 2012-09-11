@@ -115,6 +115,7 @@ define("mime", function(){
         return path.replace(/.*[\.\/]/, '').toLowerCase();
     }
     function accept2ext(accept, fallback){
+        accept = accept.replace(/;.*/,"").replace(/,.*/,"")
         for (var key in formats) {
             if ( formats[key].test(accept) ) {
                 return key
