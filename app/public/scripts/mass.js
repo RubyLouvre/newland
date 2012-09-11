@@ -321,8 +321,8 @@
         return [ret, ext];
     }
 
-    var modules = Module._cache = {};
-    $.modules = modules
+    var modules = $.modules = Module._cache = {};
+    //   $.modules = modules
     Module._update( "ready" );
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
     var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g;
@@ -345,17 +345,19 @@
         },
         resolveFilename: Module._resolveFilename,
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
-        require: function( list, factory, id ){
+        require: function( list, factory, parent ){
             var deps = {}, // 用于检测它的依赖是否都为2
             args = [],      // 用于依赖列表中的模块的返回值
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, id || $.config.base ), url = array[0];
+                var array = Module._resolveFilename(el, parent || $.config.base ), url = array[0];
                 if(array[1] == "js"){
                     dn++
-                    if( !modules[ url ] ){ //防止重复生成节点与请求
-                        loadJS( url, id );//将要安装的模块通过iframe中的script加载下来
+                    //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
+                    if( (!modules[ url ]) && loadStore( url ) ){
+                        $.log("开始发出请求")
+                        loadJS( url, parent );
                     }else if( modules[ url ].state === 2 ){
                         cn++;
                     }
@@ -367,7 +369,7 @@
                     loadCSS( url );
                 }
             });
-            id = id || "@cb"+ ( cbi++ ).toString(32);
+            var id = parent || "@cb"+ ( cbi++ ).toString(32);
             //创建或更新模块的状态
             Module._update(id, 0, factory, 1, deps, args);
             if( dn === cn ){//如果需要安装的等于已安装好的
@@ -429,7 +431,22 @@
         }
 
     });
-
+    function loadStore(url){
+        var factory = localStorage.getItem(url);
+        if(!!factory){
+            var parent = localStorage.getItem(url+"_parent");
+            Module._update(url,parent);
+            var module = $.modules[url]
+            var fn =  Function( "$,module,exports,require","return "+ factory )
+            ($, module, module.exports, module.require());
+            $.log("这是通过本地储存来获取目标模块")
+            $.define(url,fn)
+            return false;
+        //  console.log($.modules[url])
+        }else{
+            return true;
+        }
+    }
 
     function loadCSS(url){
         var id = url.replace(rmakeid,"");
@@ -482,6 +499,9 @@
         var last = args.length - 1;
         if( typeof args[ last ] == "function"){
             //劫持模块工厂,将$, exports, require, module等对象强塞进去
+
+            localStorage.setItem( nick+"_parent", module.parent)
+            localStorage.setItem( nick, args[ last ] )
             args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
             (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
         }
