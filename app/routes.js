@@ -3,6 +3,8 @@ define("routes",function(){
     //支持五种路由:方法路由,资源路由,嵌套路由,命名空间路由,根路由
     // $.log("已加载路由规则模块")
     return function(mapper){
+        mapper.get("/aaa.html","home#aaa");
+        mapper.get("/bbb.html","home#bbb");
         mapper.get("/(index.html)","home#index");
         mapper.post("/","home#index")
         mapper.get("/direct","home#direct")
@@ -10,7 +12,7 @@ define("routes",function(){
         mapper.get("/tabs","home#tabs")
         mapper.get("/newland","newland#index");
 
-       mapper.add("GET","/doc/(:first)/(:second)","doc#index")
+        mapper.add("GET","/doc/(:first)/(:second)","doc#index")
     //  mapper.add("GET","doc/:modules/:modules(/:method)","doc#index")
     // 方法路由
     //        map.get('/','site#index');

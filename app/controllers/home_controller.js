@@ -41,6 +41,12 @@ define( function(){
         //            }
          
         },
+        aaa:function(){
+            $.log("已进入home#aaa action")
+        },
+        bbb:function(){
+            $.log("已进入home#bbb action")
+        },
         direct:function(){
             $.log("已进入home#direct action")
         },
