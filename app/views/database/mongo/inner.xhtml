@@ -1,5 +1,5 @@
 <%  set_title("MongoDB数据文件内部结构") %>
-<%  set_layout("doc_layout.html") %>
+<%  set_layout("doc_layout.xhtml") %>
 <h3>MongoDB数据文件内部结构</h3>
 <p>有人在Quora上提问：<span class='wp_keywordlink_affiliate'><a href="http://blog.nosqlfan.com/tags/mongodb" title="查看 MongoDB 的全部文章" target="_blank">MongoDB</a></span><span class='wp_keywordlink_affiliate'><a href="http://blog.nosqlfan.com/tags/%e6%95%b0%e6%8d%ae%e6%96%87%e4%bb%b6" title="查看 数据文件 的全部文章" target="_blank">数据文件</a></span>内部的组织<span class='wp_keywordlink_affiliate'><a href="http://blog.nosqlfan.com/tags/%e7%bb%93%e6%9e%84" title="查看 结构 的全部文章" target="_blank">结构</a></span>是什么样的。随后10gen的工程师<a href="http://jaredrosoff.com/" target="_blank">Jared Rosoff</a>出来做了简短的回答。</p>
 <p>每一个数据库都有自己独立的文件。如果你开启了directoryperdb选项，那你每个库的文件会单独放在一个文件夹里。</p>
