@@ -46,7 +46,7 @@ define( ["$lang"],function(){
                 helpers.push( opts[name] );//收集所有helper!
             }
         }
-        helpers.push("__self__")
+      //  helpers.push("__self__")
         var flag = true;//判定是否位于前定界符的左边
         var codes = []; //用于放置源码模板中普通文本片断
         var time = new Date * 1;// 时间截,用于构建codes数组的引用变量
@@ -64,7 +64,12 @@ define( ["$lang"],function(){
             if( cur < pre){
                 if( flag ){//取得最末尾的HTML片断
                     t += prefix + codes.length + postfix
-                    code = source.slice( pre+ close.length );
+                     if(cur == -1){
+                        code = source
+                    }else{
+                        code = source.slice( pre+ close.length );
+                    }
+                  //  code = source.slice( pre+ close.length );
                     if(trim){
                         code = code.trim();
                         trim = false;
@@ -141,7 +146,7 @@ define( ["$lang"],function(){
         var body = ["txt"+time,"js"+time, "filters"]
         var fn = Function.apply(Function, body.concat(helperNames,t) );
         var args = [codes, js, $.ejs.filters];
-        var compiled = fn.apply(this, args.concat(helpers).concat(fn));
+        var compiled = fn.apply(this, args.concat(helpers) );
         if(typeof tid === "string"){
             return  $.ejs.cache[tid] = compiled
         }
