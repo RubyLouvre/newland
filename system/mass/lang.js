@@ -490,7 +490,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             .replace(/&lt;/g,'<')
             .replace(/&gt;/g,'>')
             .replace(/&amp;/g, "&") //处理转义的中文和实体字符
-            .target.replace(/&#([\d]+);/g, function($0, $1){
+            .replace(/&#([\d]+);/g, function($0, $1){
                 return String.fromCharCode(parseInt($1, 10));
             });
         },
