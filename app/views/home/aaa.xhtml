@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>aaa页面</title>
+        <script src="/scripts/mass.js"></script>
+        <script>
+            $.require("aaa", function(){
+                $.log("这是加载了aaa模块后的回调")
+            })
+        </script>
+    </head>
+    <body>
+
+        <p><a href="bbb.html">跳到bbb页面</a></p>
+
+    </body>
+</html>
