@@ -1,6 +1,6 @@
 define("panel",["$node","$event","$css"], function(){
     $.ui = $.ui || {};
-    //$.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
     $.ui.Panel = $.factory({
         init: function(opts){
 
@@ -13,7 +13,7 @@ define("panel",["$node","$event","$css"], function(){
 
             ui.width( opts.width || 400 );
             ui.height( opts.height || 200 );
-            //ui.css( opts.css || {} );
+            ui.css( opts.css || {} );
             //closer为布尔
             if(opts.closer == false){
                 ui.find(".panel_closer").hide();
