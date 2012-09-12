@@ -355,7 +355,8 @@
                 if(array[1] == "js"){
                     dn++
                     //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
-                    if( (!modules[ url ]) && loadStorage( url ) ){
+                    loadStorage( url )
+                    if( (!modules[ url ])  ){//&& loadStorage( url )
                         loadJS( url, parent );
                     }else if( modules[ url ].state === 2 ){
                         cn++;
@@ -488,18 +489,17 @@
         var factory =  Storage.getItem( id);
         if(!!factory){
             var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_deps") ;
-            deps = deps ?  deps.match($.rword) : "";
+            var deps = Storage.getItem(id+"_deps");
+            deps = deps ?  deps.match($.rword) : [];
             Module._update(id, parent);
             var module = $.modules[id];
-            module.state = 1;
-            var fn = Function( "$,module,exports,require","return "+ factory )
+            module.state = module.state || 1;
+          //
+            var fn= Function( "$,module,exports,require","return "+ factory )
             ($, module, module.exports, module.require());
             $.log("这是通过本地储存来获取目标模块", 7);
+              alert([id, deps,fn])
             $.define( id, deps, fn );
-            return false;
-        }else{
-            return true;
         }
     }
 
