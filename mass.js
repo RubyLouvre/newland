@@ -294,12 +294,12 @@
 
     $.log("后端mass框架","magenta");
     //生成mass framework所需要的页面
-      $.require( "./system/page_generate", function(){
-          $.log("页面生成","lgreen",7)
-      });
+   //   $.require( "./system/page_generate", function(){
+   //       $.log("页面生成","lgreen",7)
+   //   });
     $.require("./app/config");
     $.require("./system/more/logger");
-   $.require("./system/combo");
+    $.require("./system/combo");
     $.require("./system/mvc");
 //var cc = function(str, color){
 //        var str = '\u001b[' +color + 'm' + str + '\u001b[' +39 + 'm';
