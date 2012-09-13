@@ -240,7 +240,7 @@
         this.children = [];
     }
     Module._load = function( url, parent) {
-        url = Module._resolveFilename( url, parent.id )[0];
+        url = Module._resolve( url, parent.id )[0];
         var module = Module._cache[ url ];
         if (module) {
             return module.exports;
@@ -266,7 +266,7 @@
             return Module._load(path, self)
         }
     }
-    Module._resolveFilename = function(url, parent, ret){
+    Module._resolve = function(url, parent, ret){
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
         if( url === "ready"){//特别处理ready标识符
@@ -326,7 +326,6 @@
                 el.detachEvent( "on" + type, fn || $.noop );
             }
         },
-        resolveFilename: Module._resolveFilename,
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
         require: function( list, factory, parent ){
             var deps = {}, // 用于检测它的依赖是否都为2
@@ -334,7 +333,7 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, parent || $.config.base ), url = array[0];
+                var array = Module._resolve(el, parent || $.config.base ), url = array[0];
                 if(array[1] == "js"){
                     dn++
                     //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
@@ -434,12 +433,7 @@
             }
         }
     });
-    var Storage =  {
-        setItem: $.noop,
-        getItem: $.noop,
-        removeItem: $.noop,
-        clear: $.noop
-    }
+    var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
         Storage = localStorage;
     }else if( HTML.addBehavior){
@@ -4581,7 +4575,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     //$.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
-    var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
+    var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
@@ -4638,7 +4632,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             }
             var style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
-                ret = computedStyle[name] 
+                ret = computedStyle[name]
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
@@ -4975,7 +4969,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         if( node.tagName === "BODY" ){
             pos.top = node.offsetTop;
-            pos.left = body.offsetLeft;
+            pos.left = node.offsetLeft;
             //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
             if(getBodyOffsetNoMargin()){
                 pos.top  += parseFloat( getter(node, "marginTop") ) || 0;
@@ -5117,7 +5111,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
-
 });
 
 
