@@ -5,7 +5,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     //$.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
-    var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
+    var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
@@ -62,7 +62,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             }
             var style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
-                ret = computedStyle[name] 
+                ret = computedStyle[name]
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
@@ -424,7 +424,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         if( node.tagName === "BODY" ){
             pos.top = node.offsetTop;
-            pos.left = body.offsetLeft;
+            pos.left = node.offsetLeft;
             //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
             if(getBodyOffsetNoMargin()){
                 pos.top  += parseFloat( getter(node, "marginTop") ) || 0;
@@ -566,7 +566,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
-
 });
 /**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
