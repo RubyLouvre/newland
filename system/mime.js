@@ -54,6 +54,7 @@ define("mime", function(){
         jar:  "application/java-archive",
         "class": "application/java-vm",
         log:  plain,
+        less: plain,
         m3u8: "application/vnd.apple.mpegurl",
         mpg: "video/mpeg",
       

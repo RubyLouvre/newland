@@ -3,8 +3,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>aaa页面</title>
+        <link rel="stylesheet/less" type="text/css" href="/styles/reset.less">
         <script src="/scripts/mass.js"></script>
+        <script src="/scripts/more/less.js"></script>
         <script>
+            $.erase();
             $.require("./more/panel", function(){
                 new  $.ui.Panel({
                     title:"xxx",

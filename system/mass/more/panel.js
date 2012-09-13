@@ -13,6 +13,7 @@ define("panel",["$node","$event","$css"], function(/*test*/){
 
             ui.width( opts.width || 400 );
             ui.height( opts.height || 200 );
+            $.log(opts.css)
             ui.css( opts.css || {} );
             //closer为布尔
             if(opts.closer == false){
