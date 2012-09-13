@@ -1,4 +1,4 @@
-define("panel",["$node","$event","$css"], function(){
+define("panel",["$node","$event","$css"], function(/*test*/){
     $.ui = $.ui || {};
   
     $.ui.Panel = $.factory({
