@@ -212,13 +212,17 @@
         cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
-        var str = cur.getAttribute("debug");
+        var a = cur.getAttribute("debug");
+        var b = cur.getAttribute("storage");
         var kernel = $.config;
-        kernel.debug = str == 'true' || str == '1';
+        kernel.debug = a == 'true' || a == '1';
+        kernel.storage = b == 'true' || b == '1';
         kernel.base = url.substr( 0, url.lastIndexOf('/') ) +"/";
         kernel.nick = cur.getAttribute("nick") || "$";
+        kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
         kernel.level = 9;
+
     })(DOC.getElementsByTagName( "script" ));
 
     $.noop = $.error = $.debug = function(){};
@@ -473,7 +477,17 @@
             }
         }
     }
-
+    var rerase = new RegExp('(?:^| )' + $.config.erase + '(?:(?:=([^;]*))|;|$)')
+    var match = String(DOC.cookie).match( rerase );
+    //读取从后端过来的cookie指令，转换成一个对象，键名为模块的URL，值为版本号（这是一个时间戮）
+    if(match && match[1]){
+        try{
+            var obj = eval("0,"+match[1]);
+            for(var i in obj){//$.erase会版本号比现在小的模块从本地储存中删掉
+                $.erase(i, obj[i])
+            }
+        }catch(e){}
+    }
     function loadStorage( id ){
         var factory =  Storage.getItem( id);
         if(factory && !modules[id]){
@@ -546,6 +560,7 @@
         Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
 
+    
     function install( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
