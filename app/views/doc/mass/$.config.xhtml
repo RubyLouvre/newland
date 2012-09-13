@@ -15,6 +15,8 @@
     <li>$.config.nick, String，框架的别名，默认为$。</li>
     <li>$.config.alias, Object，用于放置框架的核心模块的别名。</li>
     <li>$.config.level， Number，调试时消息的显示级别。</li>
+    <li>$.config.storage， Boolean，是否使用本地储存。</li>
+    <li>$.config.erase， String，用于清除本地储存中指定模块的cookie指令名。</li>
 </ul>
 <p>此外你可以另行设置其他项。</p>
 <p>在框架的种子模块mass.js,它是这样设置这些值</p>
@@ -23,11 +25,14 @@
         cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
-        var str = cur.getAttribute("debug");
+        var a = cur.getAttribute("debug");
+        var b = cur.getAttribute("storage");
         var kernel = $.config;
-        kernel.debug = str == 'true' || str == '1';
+        kernel.debug = a == 'true' || a == '1';
+        kernel.storage = b == 'true' || b == '1';
         kernel.base = url.substr( 0, url.lastIndexOf('/') ) +"/";
         kernel.nick = cur.getAttribute("nick") || "$";
+        kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
         kernel.level = 9;
     })(DOC.getElementsByTagName( "script" ));

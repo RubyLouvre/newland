@@ -4,11 +4,12 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>aaa页面</title>
         <link rel="stylesheet/less" type="text/css" href="/styles/reset.less">
+        <link rel="stylesheet/less" type="text/css" href="/styles/test1.less">
         <script src="/scripts/mass.js" debug="1"></script>
         <script src="/scripts/more/less.js"></script>
         <script>
             $.erase();
-            $.require("./more/panel", function(){
+            $.require("ready,./more/panel", function(){
                 new  $.ui.Panel({
                     title:"xxx",
                     body:"body",
@@ -16,7 +17,9 @@
                         bgc:"red"
                     }
                 })
-              
+$("body").offset()
+              //  $("body").offset()
+         
             })
         </script>
     </head>

@@ -50,6 +50,7 @@ define("api", function(){
             bind: "function",
             unbind: "function",
             noop: "function",
+            erase: "function",
             html: "object",
             head: "object",
             rword: "object",
@@ -60,11 +61,11 @@ define("api", function(){
 
         "语言扩展模块": {
             "String": {
-                "contains": "function",
-                "startsWith": "function",
-                "endsWith": "function",
-                "repeat": "function",
-                "byteLen": "function",
+                contains: "function",
+                startsWith: "function",
+                endsWith: "function",
+                repeat: "function",
+                byteLen: "function",
                 "truncate": "function",
                 "camelize": "function",
                 "underscored": "function",
@@ -341,7 +342,6 @@ define("api", function(){
                 "inherit": "function",
                 "implement": "function",
                 "extend": "function",
-                "_init": "object",
                 "toString": "function"
             },
             "xhr": "function"
