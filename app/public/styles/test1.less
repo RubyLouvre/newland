@@ -1,0 +1,10 @@
+#module {
+    @my_color: #04ffff;
+    .function() {
+        color: blue;
+    }
+}
+
+.other {
+    color: #module > my_color;
+}
