@@ -22,7 +22,7 @@ define("panel",["$node","$event","$css"], function(){
     });
 
 })
-/*
+
 define('panel',[
 	'$node',
 	'$event',
@@ -49,7 +49,7 @@ define('panel',[
 	$.ui.Panel = $.factory({
         inherit: $.Flow,
         init: function(opts) {
-        	this.setOptions ( defaults, opts )
+        	this.setOptions ("data", defaults, opts )
         	var self = this;
         	self.template = $.ejs.compile(
 	            '<div class="panel_wrap">\
@@ -71,13 +71,13 @@ define('panel',[
 		                	<%= data.content.foot %>\
 		                </div>\
 	                <% } %>\
-	            </div>', self.onrender);
+	            </div>');
            	self.show();
         },
         show : function() {
             this.fire ( 'beforeshow' )
             this.ui && this.ui.remove();
-        	this.ui = $(this.template( this ))
+        	this.ui = $(this.template( this.data ))
             	.appendTo( this.parent )
             	.css     ( this.css    )
             	.show    ();
@@ -105,4 +105,4 @@ define('panel',[
 		}
     });
 })
-*/
+

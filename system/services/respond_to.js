@@ -9,6 +9,7 @@ define( ["../helper","../more/tidy","$ejs"], function(helper,tidy){
                     url = $.path.join("app/public/",flow.pathname);
                 }else {     //如果是从路由系统那里来的
                     url = $.path.join($.config.base, "app/views", opts.location + "."+ format);
+                    $.log(url,"yellow")
                 }
                 opts = opts ||{};
                 var ext = opts.ext || ".xhtml"

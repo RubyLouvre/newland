@@ -16,7 +16,6 @@ define( function(){
             if(flow.method == "GET" && flow.xhr){
              
                 if(flow.mime == "json"){
-                    console.log(flow.url +" !!!!!!!!!!!!!!!!")
                     flow.render("json",{
                         name:"司徒正美",
                         type:"jsonp",

@@ -64,7 +64,7 @@ define( ["$lang"],function(){
             if( cur < pre){
                 if( flag ){//取得最末尾的HTML片断
                     t += prefix + codes.length + postfix
-                     if(cur == -1){
+                     if(cur == -1 && i == 0){
                         code = source
                     }else{
                         code = source.slice( pre+ close.length );

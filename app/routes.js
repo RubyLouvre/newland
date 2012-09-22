@@ -11,9 +11,10 @@ define("routes",function(){
         mapper.get("/mongo/(:method)","mongo#index")
         mapper.get("/tabs","home#tabs")
         mapper.get("/newland","newland#index");
-
+        mapper.get("/mongo/(:method)","mongo#index")
         mapper.add("GET","/doc/(:first)/(:second)","doc#index")
-    //  mapper.add("GET","doc/:modules/:modules(/:method)","doc#index")
+        mapper.get("/mvvm","mvvm#index");
+        mapper.get("/mvvm/(:first)/(:second)","mvvm#index");
     // 方法路由
     //        map.get('/','site#index');
     //        map.get('/get_comments/:post_id','site#get_comments');

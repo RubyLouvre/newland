@@ -7,7 +7,7 @@ define( ["../controller"], function(){
                 this.pathname = this.url;
             }
             var go = $.router.routeWithQuery( this.method, this.url );
-            var cpath = $.config.base + "app/controllers"
+            var cpath = $.config.base + "app/controllers";
             if( go ){//如果当前URL请求匹配路由规则（app/routes）中的某一项，则交由MVC系统去处理
                 flow.params = go.params || {};//重写params
                 var value = go.value;
