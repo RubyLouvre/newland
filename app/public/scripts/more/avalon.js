@@ -28,7 +28,7 @@ define("avalon",["$attr","$event"], function(){
             var nativeMethod = models[ method ];
             models[ method ] = function(){
                 nativeMethod.apply( models, arguments)
-                var Watchs = models["arr_"+expando];
+                var Watchs = models["$"+expando];
                 for(var i = 0, Watch; Watch = Watchs[i++];){
                     Watch(method, arguments);
                 }
@@ -56,7 +56,38 @@ define("avalon",["$attr","$event"], function(){
         //开始在其自身与孩子中绑定
         return setBindingsToElementAndChildren( node, model, true );
     }
-
+    var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
+    function addWatchs( key, val, model ){
+        switch( $.type( val )){
+            case "String":
+            case "Number":
+            case "Boolean":
+                return atomWatch( key, val, model );
+            case "Function":
+                return depsWatch( key, val, model, "get");
+            case "Array":
+                var models = model[key] || (model[key] = []);
+                return listWatch( val, models );
+            case "Object":
+                if($.isPlainObject( val )){
+                    if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
+                        return  depsWatch( key, val, model, "setget");
+                    }else{
+                        var object = model[key] || (model[key] = {});
+                        $.ViewModel( val,object );
+                        object.$value = function(){
+                            return object
+                        }
+                        return object
+                    }
+                }else{
+                    throw err
+                }
+                break;
+            default:
+                throw err
+        }
+    }
     //一个监控体是一个函数,它总是返回其的value值
     //一个监控体拥有$key属性,表示它在model中的属性名
     //一个监控体拥有$deps属性,里面是其他依赖于它的监控体
@@ -132,15 +163,19 @@ define("avalon",["$attr","$event"], function(){
         function Watch( neo ){
             if( !Watch.$uuid ){ //如果是第一次执行这个域
                 var arr = model[str]
-                if(Array.isArray( arr ) ){
-                    var p = arr["arr_"+expando] || ( arr[ "arr_"+ expando] =  [] );
+                if( key == "foreach" ){
+                    var p = arr["$"+expando] || ( arr[ "$"+ expando] =  [] );
                     $.Array.ensure( p ,Watch);
                     arguments = ["start"]
                 }
                 bridge[ expando ] = Watch;
             }
-            var fn = Function(names, "return "+ str), callback, val;
-            val = fn.apply(null, values );
+            var callback, val;
+            try{
+                val = Function(names, "return "+ str).apply(null, values );
+            }catch(e){
+                return
+            }
             if(typeof val == "function" ){ //&& isFinite( val.$uuid ) 如果返回值也是个域
                 callback = val; //这里的域为它所依赖的域
                 val = callback();//如果是监控体
@@ -154,10 +189,11 @@ define("avalon",["$attr","$event"], function(){
             var method = arguments[0], args = arguments[1]
             if( typeof binding[method] == "function" ){
                 //处理foreach.start, sort, reserve, unshift, shift, pop, push
-                $.log(method)
-                binding[method]( Watch, model[str], Watch.fragments, method, args );
+                var ret = binding[method]( Watch, val, Watch.fragments, method, args );
+                if(ret){
+                    val = ret;
+                }
             }
-            //这里需要另一种指令！用于处理数组增删改查与排序
             binding.update(node, val, Watch, model);
             return Watch.$val = val;
         }
@@ -196,7 +232,7 @@ define("avalon",["$attr","$event"], function(){
             stopBindings: true
         },
         //通过display样式控制显隐
-        visible: {
+        display: {
             update:  function( node, val ){
                 node.style.display = val ? "" : "none";
             }
@@ -237,6 +273,9 @@ define("avalon",["$attr","$event"], function(){
                     $.attr(node, name, val[ name ] );
                 }
             }
+        },
+        hasFocus: {
+
         },
         checked: {
             init:  function( node, val, Watch ){
@@ -337,9 +376,22 @@ define("avalon",["$attr","$event"], function(){
     //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序
     var foreach = $.ViewBindings.foreach;
     foreach.start = function( Watch, models, fragments, method, args ){
+        if(!Array.isArray(models)){
+            var array = []
+            for(var key in models){
+                //通过这里模拟数组行为
+                if(models.hasOwnProperty(key) && (key !== "$value") && (key != "$"+expando)){
+                    var value = models[key];
+                    value.$value = value;
+                    array.push( value );
+                }
+            }
+            models = array
+        }
         for(var i = 1; i < models.length; i++ ){
             Watch.cloneFragment();
         }
+        return models
     };
     //push ok
     foreach.push = function( Watch, models, fragments, method, args ){
@@ -512,38 +564,7 @@ define("avalon",["$attr","$event"], function(){
         Watch();
         return Watch;
     }
-    var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
-    function addWatchs( key, val, model ){
-        switch( $.type( val )){
-            case "String":
-            case "Number":
-            case "Boolean":
-                return atomWatch( key, val, model );
-            case "Function":
-                return depsWatch( key, val, model, "get");
-            case "Array":
-                var models = model[key] || (model[key] = []);
-                return listWatch( val, models );
-            case "Object":
-                if($.isPlainObject( val )){
-                    if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
-                        return  depsWatch( key, val, model, "setget");
-                    }else{
-                        var object = model[key] || (model[key] = {});
-                        $.ViewModel( val,object );
-                        object.$value = function(){
-                            return object
-                        }
-                        return object
-                    }
-                }else{
-                    throw err
-                }
-                break;
-            default:
-                throw err
-        }
-    }
+
 
     //============================================================
     // 将bindings变成一个对象或一个数组 by 司徒正美

@@ -1,6 +1,6 @@
 <%  set_title("快速入门") %>
 <%  set_layout("doc_layout.xhtml") %>
-<h2>快速入门</h2>
+<h1>快速入门</h1>
 <script>
 
     $.require("ready,./more/avalon", function(){
@@ -67,7 +67,7 @@
             }
         });
       //将ViewModel绑定到View中，如果第二个参数不存在，默认是绑到body节点，于是整个body包括其内容
-      //都成为一个View，我们遍历它们所有元素节点，找出拥有bind属性的元素，取得其属性值，生成操作监控者（ationWatch），完成双向绑定。
+      //都成为一个View，我们遍历它们所有元素节点，找出拥有bind属性的元素，取得其属性值，生成绑定监控者（bindWatch），完成双向绑定。
       $.View(model);
         setTimeout(function(){
             model.fullName("司徒 正美")

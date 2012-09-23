@@ -2,6 +2,7 @@
 <%  set_layout("doc_layout.xhtml") %>
 <style>
     h3{
+        line-height:2;
         text-indent:2em;
         background:#589006;
         color:#fff;
@@ -41,7 +42,7 @@
     <li>depsWatch，依赖监控者，是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
         它们是位于双向绑定链的中间层，需要依赖于其他atomWatch或depsWatch的返回值计算自己的返回值。</li>
     <li>
-        bindWatch,绑定监控者,用于DOM树或节点打交道的Watch，
+        bindWatch,绑定监控者或命令监控者,用于DOM树或节点打交道的Watch，
         它们仅在用户调用了$.View(viewmodel, node )，把写在元素节点上的bind属性
         （可以通过$.config.bindname制定此属性名）的分解出来之时生成的。
         它们位于双向绑定链的顶端，为实现最小化刷新而生。
@@ -61,7 +62,25 @@
 <h3>教程</h3>
 <ul>
     <li><a href="/mvvm/quickstart">快速入门</a></li>
-    <li><a href="/mvvm/quickstart">快速入门</a></li>
-    <li><a href="/mvvm/quickstart">快速入门</a></li>
+    <li><a href="/mvvm/text">text绑定</a></li>
+    <li><a href="/mvvm/html">html绑定</a></li>
+    <li><a href="/mvvm/value">value绑定</a></li>
+    <li><a href="/mvvm/class">class绑定</a></li>
+    <li><a href="/mvvm/style">style绑定</a></li>
+    <li><a href="/mvvm/attr">attr绑定</a></li>
+    <li><a href="/mvvm/display">display绑定</a></li>
+    <li><a href="/mvvm/checked">checked绑定</a></li>
+    <li><a href="/mvvm/with">with绑定</a></li>
+    <li><a href="/mvvm/if">if绑定</a></li>
+    <li><a href="/mvvm/unless">unless绑定</a></li>
+    <li><a href="/mvvm/foreach">foreach绑定</a></li>
+
+
 </ul>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
