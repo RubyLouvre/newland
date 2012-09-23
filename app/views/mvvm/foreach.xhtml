@@ -1,0 +1,69 @@
+<%  set_title("foreach绑定") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h1>foreach绑定</h1>
+<p>foreach的参数是一个对象或数组。如果是数组依然可以使用原来的方法，并能同步到对应的DOM中！</p>
+<p>准备来说，ViewModel的数组，它的push、pop、shift、unshift、splice、sort、reverse方法都被重写了，同是它还添加了两个移除元素的方法：
+remove、removeAt方法。
+</p>
+<script>
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            array: [1,2,3,4],
+            user:{
+                display :'编号',
+                name :'id',
+                align :'left',
+                width :600,
+                minWidth :60
+            }
+        });
+        $.View(model);
+        setTimeout(function(){
+            model.array.splice(1,2,"a","b","c")
+        },1000)
+    })
+</script>
+<fieldset><legend>示例</legend>
+    <ul bind="foreach: array" >
+        <li bind="text:$value"></li>
+    </ul>
+    <dl bind="foreach: user">
+        <dt bind="text:$key">dt
+        </dt>
+        <dd bind="text:$value">dd
+        </dd>
+    </dl>
+
+</fieldset>
+<p>HTML：</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+    &lt;ul bind="foreach: array" &gt;
+        &lt;li bind="text:$value"&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;dl bind="foreach: user"&gt;
+        &lt;dt bind="text:$key"&gt;dt
+        &lt;/dt&gt;
+        &lt;dd bind="text:$value"&gt;dd
+        &lt;/dd&gt;
+    &lt;/dl&gt;
+</pre>
+<p>JS:</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            array: [1,2,3,4],
+            user:{
+                display :'编号',
+                name :'id',
+                align :'left',
+                width :600,
+                minWidth :60
+            }
+        });
+        $.View(model);
+        setTimeout(function(){
+            model.array.splice(1,2,"a","b","c")
+        },1000)
+    })
+</pre>
+<p><a href="/mvvm">返回教程首页</a></p>

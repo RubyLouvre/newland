@@ -1,0 +1,39 @@
+<%  set_title("checked绑定") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h1>checked绑定</h1>
+<script>
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            displayMessage: false
+        });
+        $.View(model);
+        setTimeout(function(){
+            model.displayMessage( true )
+        },1000)
+
+    })
+</script>
+<fieldset><legend>示例</legend>
+    <label><input type="checkbox" bind="checked: displayMessage" /> 通过checkbox显示下面的DIV</label>
+    <div bind="if: displayMessage">这由上面的元素checked状态控制显示的</div>
+</fieldset>
+<p>HTML</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+   &lt;label&gt;&lt;input type="checkbox" bind="checked: displayMessage" /&gt; 通过checkbox显示下面的DIV&lt;/label&gt;
+   &lt;div bind="if: displayMessage"&gt;这由上面的元素checked状态控制显示的&lt;/div&gt;
+</pre>
+<p>checked绑定要求它对应的值必须是函数或监控者。</p>
+<p>JS</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            displayMessage: false
+        });
+        $.View(model);
+        setTimeout(function(){
+            model.displayMessage( true )
+        },1000)
+
+    })
+</pre>
+<p><a href="/mvvm">返回教程首页</a></p>

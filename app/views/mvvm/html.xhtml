@@ -1,0 +1,54 @@
+<%  set_title("html绑定") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h1>html绑定</h1>
+<p>第一个传参将强制转换为字符串，假值为""，然后变成目标节点的innerHTML。</p>
+<script>
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            content:"<strong>钓鱼台</strong>是我们的"
+        });
+        $.View(model);
+        var i = 1;
+        setInterval(function(){
+            if(i){
+                model.content("<strong>北方四岛</strong>也是我们的");
+                i = 0;
+            }else{
+                model.content("<strong>钓鱼台</strong>是我们的");
+                i = 1;
+            }
+        },1000);
+    })
+</script>
+<fieldset><legend>示例</legend>
+    <p bind="html: content">
+        XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    </p>
+
+</fieldset>
+<p>HTML：</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+    &lt;p bind="html: content"&gt;
+        XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    &lt;/p&gt;
+</pre>
+<p>JS。</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            content:"&lt;strong&gt;钓鱼台&lt;/strong&gt;是我们的"
+        });
+        $.View(model);
+        var i = 1;
+        setInterval(function(){
+            if(i){
+                model.content("&lt;strong&gt;北方四岛&lt;/strong&gt;也是我们的");
+                i = 0;
+            }else{
+                model.content("&lt;strong&gt;钓鱼台&lt;/strong&gt;是我们的");
+                i = 1;
+            }
+        },1000);
+    });
+</pre>
+<p><a href="/mvvm">返回教程首页</a></p>

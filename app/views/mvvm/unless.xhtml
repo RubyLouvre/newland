@@ -1,0 +1,51 @@
+<%  set_title("unless绑定") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h1>unless绑定</h1>
+<p>unless绑定是if绑定的相反面,只要传参为false时,才渲染下属节点。</p>
+<script>
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            someProperty: false
+        });
+        $.View(model);
+
+        setTimeout(function(){
+            model.someProperty(true); //show
+        },1000);
+
+        setTimeout(function(){
+            model.someProperty(false); // hide
+        },2000);
+    })
+</script>
+<fieldset><legend>示例</legend>
+    <div bind="if: !+someProperty">XXX</div>
+    <div bind="if: someProperty">YYY</div>
+    <div bind="unless: someProperty">ZZZ</div>
+</fieldset>
+<p>HTML：</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+        &lt;div bind="if: !+someProperty"&gt;XXX&lt;/div&gt;
+        &lt;div bind="if: someProperty"&gt;YYY&lt;/div&gt;
+        &lt;div bind="unless: someProperty"&gt;ZZZ&lt;/div&gt;
+</pre>
+<p>JS。</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            someProperty: false
+        });
+        $.View(model);
+
+        setTimeout(function(){
+            model.someProperty(true); //show
+        },1000);
+
+        setTimeout(function(){
+            model.someProperty(false); // hide
+        },2000);
+    })
+</pre>
+<p> 由于!fn这样方式不经过函数的toString或valueOf,因此<strong>&lt;div bind="if: !someProperty"&gt;XXX&lt;/div&gt;</strong>无法实现双向绑定,
+    这正是unless绑定存在的理由</p>
+<p><a href="/mvvm">返回教程首页</a></p>

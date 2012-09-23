@@ -47,6 +47,7 @@ define("avalon",["$attr","$event"], function(){
         models.$value = function(){
             return models
         }
+        models.$value.$uuid = ++uuid;
         return models;
     }
 
@@ -54,11 +55,13 @@ define("avalon",["$attr","$event"], function(){
         //确保是绑定在元素节点上，没有指定默认是绑在body上
         node = node || document.body;
         //开始在其自身与孩子中绑定
-        return setBindingsToElementAndChildren( node, model, true );
+        return setBindingsToElementAndChildren.call( node, model, true );
     }
-    var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
+    var err = new Error("只能是字符串，数值，布尔，Null，Undefined，函数以及纯净的对象")
     function addWatchs( key, val, model ){
         switch( $.type( val )){
+            case "Null":
+            case "Undefined":
             case "String":
             case "Number":
             case "Boolean":
@@ -103,7 +106,7 @@ define("avalon",["$attr","$event"], function(){
             if( arguments.length ){//在传参不等于已有值时,才更新自已,并通知其依赖域
                 if( Watch.$val !== neo ){
                     Watch.$val = neo;
-                    notify$depsUpdate( Watch );
+                    updateDeps( Watch );
                 }
             }
             return Watch.$val;
@@ -151,7 +154,7 @@ define("avalon",["$attr","$event"], function(){
             if( change && (Watch.$val !== neo) ){
                 Watch.$val = neo;
                 //通知此域的所有直接依赖者更新自身
-                notify$depsUpdate( Watch );
+                updateDeps( Watch );
             }
             return Watch.$val;
         }
@@ -159,6 +162,7 @@ define("avalon",["$attr","$event"], function(){
     }
     //actionWatch用于DOM树或节点打交道的Watch，它们仅在用户调用了$.View(viewmodel, node )，
     //把写在元素节点上的@bind属性的分解出来之时生成的。
+    //names values 包含上一级的键名与值
     function bindWatch (node, names, values, key, str, binding, model ){
         function Watch( neo ){
             if( !Watch.$uuid ){ //如果是第一次执行这个域
@@ -166,7 +170,7 @@ define("avalon",["$attr","$event"], function(){
                 if( key == "foreach" ){
                     var p = arr["$"+expando] || ( arr[ "$"+ expando] =  [] );
                     $.Array.ensure( p ,Watch);
-                    arguments = ["start"]
+                    arguments = ["start"];
                 }
                 bridge[ expando ] = Watch;
             }
@@ -174,7 +178,7 @@ define("avalon",["$attr","$event"], function(){
             try{
                 val = Function(names, "return "+ str).apply(null, values );
             }catch(e){
-                return
+                return  $.log(e, 3)
             }
             if(typeof val == "function" ){ //&& isFinite( val.$uuid ) 如果返回值也是个域
                 callback = val; //这里的域为它所依赖的域
@@ -194,7 +198,7 @@ define("avalon",["$attr","$event"], function(){
                     val = ret;
                 }
             }
-            binding.update(node, val, Watch, model);
+            binding.update(node, val, Watch, model, names, values);
             return Watch.$val = val;
         }
         return addWatch( "interacted" ,Watch, node);
@@ -274,9 +278,6 @@ define("avalon",["$attr","$event"], function(){
                 }
             }
         },
-        hasFocus: {
-
-        },
         checked: {
             init:  function( node, val, Watch ){
                 if(typeof Watch !== "function"){
@@ -300,7 +301,7 @@ define("avalon",["$attr","$event"], function(){
         },
         template: {
             //●●●●●●●●●●●●●
-            update: function( node, val, callback, model){
+            update: function( node, val, callback, model, names, values){
                 var transfer = callback(), code = transfer[0], Watch = transfer[1];
                 var fragment = Watch.fragments[0];         //取得原始模板
                 if( code > 0 ){                //处理with if 绑定
@@ -311,7 +312,7 @@ define("avalon",["$attr","$event"], function(){
                         if( code == 2 ){      //处理with 绑定
                             model = transfer[2]
                         }
-                        return setBindingsToChildren( elems, model, true )
+                        return setBindingsToChildren.call( elems, model, true, names, values )
                     }
                 }else if( code === 0 ){        //处理unless 绑定
                     fragment.recover();
@@ -323,7 +324,7 @@ define("avalon",["$attr","$event"], function(){
                         el.recover(); //先回收，以防在unshift时，新添加的节点就插入在后面
                         elems = getChildren( el );
                         node.appendChild( el );//将VM绑定到模板上
-                        setBindingsToChildren( elems, models[i], true );
+                        setBindingsToChildren.call( elems, models[i], true, names, values );
                     }
                 }
             },
@@ -351,10 +352,7 @@ define("avalon",["$attr","$event"], function(){
                 var clone = Watch.cloneFragment(); //先改造一翻,方便在update时调用recover方法
                 node.appendChild( clone );  //将文档碎片中的节点放回DOM树
             },
-            update : function(node, val, Watch, model){
-                if(type == "case" && (typeof model.$switch != "function" )){
-                    throw "Must define switch statement above all";
-                }
+            update : function(node, val, Watch, model, names, values){
                 $.ViewBindings['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2
                         case "case":
@@ -367,7 +365,7 @@ define("avalon",["$attr","$event"], function(){
                         default:
                             return [-1, Watch];       //-1 foreach
                     }
-                }, model);
+                }, model, names, values);
             },
             stopBindings: true
         }
@@ -423,9 +421,6 @@ define("avalon",["$attr","$event"], function(){
         }
     }
     foreach.pop = foreach.shift;
-    //sort reverse ok
-
-    //splice ok
     foreach.splice = function( Watch, models, fragments, method, args ){
         var start = args[0], n = args.length - 2;
         var removes = fragments.splice(start, args[1]);
@@ -433,7 +428,7 @@ define("avalon",["$attr","$event"], function(){
         for(var i = 0; i < removes.length; i++){
             removes[i].recover();
         }
-        for(var i = 0; i < n; i++ ){
+        for(i = 0; i < n; i++ ){
             //将新数据封装成域
             var index = start + i
             var f =  addWatchs(index, models[ index ], models);
@@ -481,21 +476,47 @@ define("avalon",["$attr","$event"], function(){
 
 
     //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToElement( node, model, setData ){
+    //参数分别为model, pnames, pvalues
+    $.fn.model = function(){
+        return $._data(this[0], "$model")
+    }
+    $.fn.$value = function(){
+        var watch = $(this).model()
+        if(watch){
+            var v = watch();
+            $.log(v)
+            return v
+        }
+    }
+    function setBindingsToElement( model, pnames, pvalues ){
         //取得标签内的属性绑定，然后构建成actionWatch，并与ViewModel关联在一块
+        var node = this;
+        pnames = pnames || [];
+        pvalues = pvalues || [];
         var attr = node.getAttribute( BINDING ), names = [], values = [], continueBindings = true,
         key, val, binding;
+        $._data(node,"$model",model);
         for(var name in model){
             if(model.hasOwnProperty(name)){
                 names.push( name );
                 values.push( model[ name ] );
             }
         }
+        if(pnames.length){
+            pnames.forEach(function(name, i){
+                if(names.indexOf(name) === -1){
+                    names.push(name);
+                    values.push(pvalues[i])
+                }
+            })
+        }
         var array = normalizeJSON("{"+ attr+"}",true);
         for(var i = 0; i < array.length; i += 2){
             key = array[i]
             val = array[i+1];
+
             binding = $.ViewBindings[ key ];
+
             if( binding ){
                 if( binding.stopBindings ){
                     continueBindings = false;
@@ -506,26 +527,27 @@ define("avalon",["$attr","$event"], function(){
         return continueBindings;
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
-    function setBindingsToElementAndChildren( node, model, setData ){
-        if ( node.nodeType === 1  ){
+    //参数分别为model, pnames, pvalues
+    function setBindingsToElementAndChildren(){
+        if ( this.nodeType === 1  ){
             var continueBindings = true;
-            if( hasBindings( node ) ){
-                continueBindings = setBindingsToElement(node, model, setData );
+            if( hasBindings( this ) ){
+                continueBindings = setBindingsToElement.apply(this, arguments);
             }
             if( continueBindings ){
-                var elems = getChildren( node );
-                elems.length && setBindingsToChildren( elems, model, setData );
+                var elems = getChildren( this );
+                elems.length && setBindingsToChildren.apply(elems, arguments);
             }
         }
     }
-    function setBindingsToChildren( elems, model, setData ){
-        for(var i = 0, n = elems.length; i < n ; i++){
-            var node = elems[i]
-            setBindingsToElementAndChildren( node, model, setData  );
+    //参数分别为model, pnames, pvalues
+    function setBindingsToChildren( ){
+        for(var i = 0, n = this.length; i < n ; i++){
+            setBindingsToElementAndChildren.apply( this[i], arguments );
         }
     }
     //通知此域的所有直接依赖者更新自身
-    function notify$depsUpdate(Watch){
+    function updateDeps(Watch){
         var list = Watch.$deps || [] ;
         if( list.length ){
             var safelist = list.concat();
@@ -710,19 +732,3 @@ define("avalon",["$attr","$event"], function(){
         }
     }
 })
-/*
-<p>ViewModel的设计难点</p>
-
-        var model = $.ViewModel({
-                firstName: "aaa",
-                lastName:  "bbb",
-                fullName: function(){
-                   return this.firstName() + this.lastName()
-                }
-      });
-
-在VM中，它里面的每一项都叫做域的函数，与原始对象的属性同名。
-如果这个属性是最简单的数据类型，比如字符串，布尔，数值，就最简单不过，它们都没有依赖，自己构建自己的域就行了。
-如果这个属性是函数，那么函数里面的this其实是指向VM，它会依赖于VM的其他域的返回值来计算自己的返回值。
-于是问题来了，根据上文的例子，fullName是怎么知道自己是依赖于firstName与lastName这两个域呢？！
- */

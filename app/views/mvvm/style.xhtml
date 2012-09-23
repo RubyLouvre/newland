@@ -1,0 +1,51 @@
+<%  set_title("style绑定") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h1>style绑定</h1>
+<p>style绑定的参数总是一个对象，里面是它要添加的样式名与样式值。</p>
+<p>相对于knockoutjs，它对键名不要求加引号，即使它是关键字，或是连字符风格，并且对于css3的新增属性，
+    它会自动转换为可用的形式，
+    如column-gap在webkit系浏览器自动转换为-webkit-column-gap，firefox下转换为-moz-column-gap。</p>
+
+<script>
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel( {
+            currentProfit: 1500
+        });
+        $.View(model);
+        setTimeout(function(){
+            model.currentProfit(-70)
+        },1500)
+    })
+</script>
+<fieldset><legend>示例</legend>
+    <div bind="style: {
+         box-shadow: '5px 5px 7px #888',
+         background-color:'orange',
+         text-indent:currentProfit() < 0 ? '2em' : '4em',
+         color: 'purple',
+         line-height: 3,
+         width:'200px' }">添加样式</div>
+</fieldset>
+<p>HTML：</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+    &lt;div bind="style: {
+         box-shadow: '5px 5px 7px #888',
+         background-color:'orange',
+         color: 'purple',
+         text-indent:currentProfit() &lt; 0 ? '2em' : '4em',
+         line-height: 3,
+         width:'200px' }"&gt;添加样式&lt;/div&gt;
+</pre>
+<p>JS:</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel( {
+            currentProfit: 1500
+        });
+        $.View(model);
+        setTimeout(function(){
+            model.currentProfit(-70)
+        },1500)
+    })
+</pre>
+<p><a href="/mvvm">返回教程首页</a></p>

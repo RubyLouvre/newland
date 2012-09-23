@@ -1,0 +1,94 @@
+<%  set_title("text绑定") %>
+<%  set_layout("doc_layout.xhtml") %>
+<h1>text绑定</h1>
+<p>第一个传参将强制转换为字符串，假值为""，然后变成目标节点的innerText!</p>
+<script>
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            content: "这是来自model的"
+        });
+      
+        setTimeout(function(){
+            $.View(model);
+        },1000)
+
+    })
+</script>
+<fieldset><legend>示例</legend>
+    <p bind="text: content" /> xxxxxxxxxxxxx </p>
+</fieldset>
+<p>HTML：</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+   &lt;p bind="text: content" /&gt; xxxxxxxxxxxxx &lt;/p&gt;
+</pre>
+<p>JS：</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+    $.require("ready,./more/avalon", function(){
+        var model = $.ViewModel({
+            content: "这是来自model的"
+        });
+
+        setTimeout(function(){
+            $.View(model);
+        },1000)
+
+    })
+</pre>
+
+
+<fieldset><legend>示例2</legend>
+    这东西 <span bind="text: priceRating"></span>。
+    <script>
+        $.require("ready,./more/avalon", function(){
+            var model = $.ViewModel({
+                price: 24.95,
+                priceRating: function(){
+                    return this.price() > 50 ? "有点贵" : "比较便宜";
+                }
+            });
+            $.View(model);
+        });
+    </script>
+</fieldset>
+<p>HTML</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+   这东西 &lt;span bind="text: priceRating"&gt;&lt;/span&gt;。
+</pre>
+<p>JS</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+     $.require("ready,./more/avalon", function(){
+            var model = $.ViewModel({
+                price: 24.95,
+                priceRating: function(){
+                    return this.price() > 50 ? "有点贵" : "比较便宜";
+                }
+            });
+             $.View(model);
+        });
+</pre>
+<fieldset><legend>示例3</legend>
+    <p> innerInner与textContent会对标签进行转义</p>
+    <p><span bind="text: myMessage"></span>。</p>
+    <script>
+        $.require("ready,./more/avalon", function(){
+            var model = $.ViewModel({
+                myMessage: "<i>Hello, world!</i>"
+            });
+            $.View(model);
+        });
+    </script>
+</fieldset>
+<p>HTML</p>
+<pre class="brush:xml;gutter:false;toolbar:false;">
+  &lt;p&gt;&lt;span bind="text: myMessage"&gt;&lt;/span&gt;。&lt;/p&gt;
+</pre>
+<p>JS</p>
+<pre class="brush:js;gutter:false;toolbar:false;">
+        $.require("ready,./more/avalon", function(){
+            var model = $.ViewModel({
+                myMessage: "&lt;i&gt;Hello, world!&lt;/i&gt;"
+            });
+            $.View(model);
+        });
+</pre>
+<p><a href="/mvvm">返回教程首页</a></p>
