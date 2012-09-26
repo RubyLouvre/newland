@@ -1,5 +1,5 @@
-define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
-       $.ui = $.ui||{}
+define('dropdown',[ '$css',"./avalon" ], function(){
+    $.ui = $.ui||{}
     var defaults = {
         btn_text: "action",
         btn_cls: "",
@@ -14,23 +14,23 @@ define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
             this.setOptions ("data", defaults, opts );
             var data = this.data;
             var list = data.menu;
-            list.forEach(function(el){
-                if(typeof el == "string"){
+            list.forEach(function(el,i){
+                if(/^(b|n|s)/.test(typeof el)){
                     var text = el
-                    el = {
+                    list[i] = el = {
                         text: text
                     };
                 }
-                el.text = el.text || ""
-                el.cls = el.cls || ""
-                el.href = el.href || "#"
-            })
+                el.text = el.text || "";
+                el.cls = el.cls || "";
+                el.href = el.href || "#";
+            });
             this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
             '<div class="btn-group">'+
             '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
             '        <span bind="text:btn_text">Action</span><span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }" ></a></li>'+
             '     </ul>'+
             '</div>'
@@ -43,14 +43,15 @@ define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
             '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
             '        <span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }"></a></li>'+
             '     </ul>'+
             '</div>'
             }
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
-
+            
             this.VM =  $.ViewModel( data );
+
             $.View(this.VM, ui[0]);
             var menu = ui.find(".dropdown-menu")
             //点击按钮时显示下拉框
@@ -136,6 +137,7 @@ define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
         }
         items.eq(index).focus();
     })
+
 })
     /*
      *
