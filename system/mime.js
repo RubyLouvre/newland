@@ -43,7 +43,7 @@ define("mime", function(){
         flw: "flv-application/octet-stream",
         gif: "image/gif",
         html: "text/html",
-      
+        eot: "application/vnd.ms-fontobject",
         hlp: "application/mshelp",
         htc: "text/x-component",
         ico: "image/x-icon",
@@ -57,7 +57,7 @@ define("mime", function(){
         less: plain,
         m3u8: "application/vnd.apple.mpegurl",
         mpg: "video/mpeg",
-      
+
         mid: "audio/x-midi",
         midi: "audio/x-midi",
         mp2: "audio/x-mpeg",

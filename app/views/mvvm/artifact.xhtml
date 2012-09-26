@@ -1,0 +1,84 @@
+<%  set_title("checked绑定") %>
+<%  set_layout("doc_layout.xhtml") %>
+
+<h1>石器时代的舰队</h1>
+<script>
+    $.require("ready,./more/artifact/panel", function(){
+        var model = new $.ui.Panel({
+            parent: "#parent"
+        })
+        setTimeout(function(){
+            model.hide()
+        },1000)
+        setTimeout(function(){
+            model.VM.content.title("新标题")
+            model.show()
+        },2000)
+    })
+    $.require("ready,./more/artifact/dropdown", function(){
+
+        var opts = { btn_text:"下拉框",
+            parent:".btn-toolbar",
+            menu:[
+                {text:"子菜单1"},
+                {text:"子菜单2"},
+                {text:"子菜单3"},
+                {cls: "divider"},
+                {text:"被间隔的链接"}
+            ]
+        }
+        var btn =  new $.ui.DropDown(opts);
+        var blue_btn =  new $.ui.DropDown(opts)
+        blue_btn.VM.btn_cls("btn-primary");
+
+        var red_btn =  new $.ui.DropDown(opts)
+        red_btn.VM.btn_cls("btn-danger")
+        var yellow_btn =  new $.ui.DropDown(opts)
+        yellow_btn.VM.btn_cls("btn-warning")
+        var green_btn =  new $.ui.DropDown(opts)
+        green_btn.VM.btn_cls("btn-success")
+        var cyan_btn = new $.ui.DropDown(opts)
+        cyan_btn.VM.btn_cls("btn-info")
+        var black_btn = new $.ui.DropDown(opts)
+        black_btn.VM.btn_cls("btn-inverse")
+        new $.ui.DropDown({split:1,menu:[1],parent:"#dropdown"})
+        setTimeout(function(){
+            blue_btn.VM.btn_cls({"btn-large":0})
+        },500)
+        setTimeout(function(){
+            blue_btn.VM.btn_cls("btn-large")
+        },2000)
+        setTimeout(function(){
+            blue_btn.size("btn-small");
+        },3000)
+
+
+        //MVVM 有个BUG,不能为空数组
+        // setTimeout(function(){
+        //      document.getElementById("aa").focus()
+        // },2000)
+    })
+</script>
+<fieldset style="height:210px;"><legend>面板示例</legend>
+    <div id="parent"></div>
+</fieldset>
+
+<p>JS</p>
+<pre class="brush:js;gutter:false;toolbar:false">
+            $.require("ready,./more/artifact/panel", function(){
+                var model = new $.ui.Panel()
+                setTimeout(function(){
+                    model.hide()
+                },1000)
+                setTimeout(function(){
+                    model.VM.content.title("新标题")
+                    model.show()
+                },2000)
+            })
+</pre>
+<fieldset style="height:250px;" id="dropdown"><legend>dropdown</legend>
+    <div class="btn-toolbar"></div>
+</fieldset>
+<p>
+    <a href="/mvvm">返回教程首页</a>
+</p>
