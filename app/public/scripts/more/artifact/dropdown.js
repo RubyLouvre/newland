@@ -1,5 +1,5 @@
 define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
-    $.ui = $.ui||{}
+       $.ui = $.ui||{}
     var defaults = {
         btn_text: "action",
         btn_cls: "",
@@ -49,7 +49,7 @@ define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
             '</div>'
             }
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
-            
+
             this.VM =  $.ViewModel( data );
             $.View(this.VM, ui[0]);
             var menu = ui.find(".dropdown-menu")
@@ -109,14 +109,13 @@ define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
         var keyCode = e.which;
         if (!/(38|40|27)/.test(keyCode))
             return
-        // e.preventDefault();
-        //  e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
         //决定要操作哪一个
         var el = $(this)
         if (el.is('.disabled, :disabled'))
             return
         var ui = getDropDown( el );
-
         var isActive = ui.hasClass('open')
         var items = ui.find("li:not(.divider) a");
         if (!isActive || (isActive && keyCode == 27))
