@@ -38,7 +38,7 @@ define('button',[ '$css',"../avalon","./bootstrap.css" ], function(){
                     };
                 }
                 el.text = el.text || "";
-                el.cls = el.cls || defaults.cls
+                el.cls = el.cls || data.cls || defaults.cls;
             });
 
             var tmpl = '<$tag class="btn" data-toggle="button" bind="$text:text,class:cls">单独开关</$tag>';
