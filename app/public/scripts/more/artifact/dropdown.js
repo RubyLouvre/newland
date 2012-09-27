@@ -1,8 +1,13 @@
-define('dropdown',[ '$css',"./avalon" ], function(){
-    $.ui = $.ui||{}
+define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
+    $.log("已加载dropdown模块",7)
+    $.ui = $.ui || {};
     var defaults = {
-        btn_text: "action",
-        btn_cls: "",
+        //按钮内的文字
+        text: "action",
+        //可供换肤用的类名btn-primary btn-danger btn-warning btn-success btn-info btn-inverse
+        //可供调整大小的类名btn-mini btn-small btn-large
+        cls: "",
+        menucls: "", //使用pull-left pull-right让下拉框相对按钮组对齐
         menu: [],
         parent: "body"
     }
@@ -25,34 +30,39 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                 el.cls = el.cls || "";
                 el.href = el.href || "#";
             });
+            this.preRender = data.preRender || $.noop
+            delete data.preRender
             this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
             '<div class="btn-group">'+
-            '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
-            '        <span bind="text:btn_text">Action</span><span class="caret"></span>'+
+            '    <a class="btn dropdown-toggle" bind="class:cls" data-toggle="dropdown" href="#">'+
+            '        <span bind="text:text">Action</span><span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length,class:menucls">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }" ></a></li>'+
             '     </ul>'+
             '</div>'
             if(opts.split){
                 this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
                 '<div class="btn-group">'+
-            '    <a class="btn" bind="class:btn_cls"  href="#">'+
-            '        <span bind="text:btn_text">Action</span>'+
+            '    <a class="btn" bind="class:cls"  href="#">'+
+            '        <span bind="text:text">Action</span>'+
             '    </a>'+
-            '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
+            '    <a class="btn dropdown-toggle" bind="class:cls" data-toggle="dropdown" href="#">'+
             '        <span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length,class:menucls">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }"></a></li>'+
             '     </ul>'+
             '</div>'
             }
+            //在.btn-group 的元素上添加dropup类 ,可以向上展出菜单
+            //在.dropdown-menu的元素上添加pull-right类可以向右对齐
+            this.preRender();
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
-            
+            //插入DOM并绑定数据
             this.VM =  $.ViewModel( data );
-
             $.View(this.VM, ui[0]);
+            //绑定独立的事件
             var menu = ui.find(".dropdown-menu")
             //点击按钮时显示下拉框
             ui.on("click",function(){
@@ -61,7 +71,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                 //要求open加在与btn-group类的同一元素上
                 ui.toggleClass("open");
                 if(ui.hasClass("open")){
-                    menu.focus()
+                    menu.focus();
                 }
                 return false;
             });
@@ -79,12 +89,12 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             })
         },
         size: function(name){
-            this.VM.btn_cls({
+            this.VM.cls({
                 "btn-mini":false,
                 "btn-small":false,
                 "btn-large":false
             })
-            this.VM.btn_cls(name)
+            this.VM.cls(name)
         //只能是这几个:.btn-mini, .btn-small, or .btn-large
         }
     //   如果想下拉框向上方显示,在.btn-group加个类名dropup
@@ -108,6 +118,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
 
     $(document).keyup(function(e){
         var keyCode = e.which;
+        //27 enter 38 up 40 down
         if (!/(38|40|27)/.test(keyCode))
             return
         e.preventDefault();
@@ -139,11 +150,4 @@ define('dropdown',[ '$css',"./avalon" ], function(){
     })
 
 })
-    /*
-     *
-     * 作为一种十天搞出来的语言，能获取如此地位，javascript已经算是非常了不起，但BUG依旧是免不了。而且微软与当时的网景斗气，
-javascript还没有成长起来时，就岔出一个分支JScript，在这个分支在IE6的强势地位后，竟然哗宾夺主肆虐了十多年，这景况真是语言界的奇葩啊，也正因为如此，
-语言自身的发展一直滞后，这任务竟然成为了框架类库的绝活了。
-     *
-     */
-
+ 

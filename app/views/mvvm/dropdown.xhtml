@@ -1,0 +1,112 @@
+<%  set_title("石器时代的舰队") %>
+<%  set_layout("doc_layout.xhtml") %>
+
+<h1>dropdown</h1>
+<p>拥有下拉菜单的按钮。</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>parent</dt>
+    <dd>可选。String|Element。指定UI组件要添加的位置，没有默认为body</dd>
+    <dt>preRender</dt>
+    <dd>可选。Function。当插入DOM树前执行的函数，只执行一次</dd>
+    <dt>text</dt>
+    <dd>可选。String。按钮的文字</dd>
+    <dt>menu</dt>
+    <dd>可选。Array。可以是一个字符串数组，但框架会将它转为一个对象数组，将原字符串作为相应位置上的对象的text属性。如果本来就是对象数组，
+        对象要求有cls，text，href这三属性，没有框架会帮你补上。</dd>
+    <dt>split</dt>
+    <dd>可选。Boolean或0,1。即将三角形用一个独立的按钮放置</dd>
+    <dt>menucls</dt>
+    <dd>可选。String。决定下拉面板是相对按钮的左边对齐还是右边对齐，默认是左边。</dd>
+</dl>
+<p><span class="stress">除了通用成员外，此实例还拥有以下成员：</span></p>
+<dl>
+    <dt>size</dt>
+    <dd>方法，我们可以传入"btn-mini"，"btn-small"， "btn-large"之中的任何一个作为参数，改变它的尺寸。</dd>
+</dl>
+<p>另外我们可以在instance.ui.addClass("dropup")，让菜单向上显示。</p>
+<script>
+    $.require("ready,./more/artifact/dropdown", function(){
+        var opts = { btn_text:"下拉框",
+            parent:".btn-toolbar",
+            menu:[
+                {text:"子菜单1"},
+                {text:"子菜单2"},
+                {text:"子菜单3"},
+                {cls: "divider"},
+                {text:"被间隔的链接"}
+            ]
+        }
+        var btn =  new $.ui.DropDown(opts);
+        var blue_btn =  new $.ui.DropDown(opts)
+        blue_btn.VM.cls("btn-primary");
+        var red_btn =  new $.ui.DropDown(opts)
+        red_btn.VM.cls("btn-danger")
+        var yellow_btn =  new $.ui.DropDown(opts)
+        yellow_btn.VM.cls("btn-warning")
+        var green_btn =  new $.ui.DropDown(opts)
+        green_btn.VM.cls("btn-success")
+        var cyan_btn = new $.ui.DropDown(opts)
+        cyan_btn.VM.cls("btn-info")
+        var black_btn = new $.ui.DropDown(opts)
+        black_btn.VM.cls("btn-inverse")
+        new $.ui.DropDown({split:1,menu:[1],parent:"#dropdown"})
+        setTimeout(function(){
+            blue_btn.VM.cls({"btn-large":0})
+        },500)
+        setTimeout(function(){
+            blue_btn.VM.cls("btn-large")
+        },2000)
+        setTimeout(function(){
+            blue_btn.size("btn-small");
+        },3000)
+
+    })
+</script>
+<hr/>
+<pre class="brush:js;gutter:false;toolbar:false">
+  $.require("ready,./more/artifact/dropdown", function(){
+        var opts = { btn_text:"下拉框",
+            parent:".btn-toolbar",
+            menu:[
+                {text:"子菜单1"},
+                {text:"子菜单2"},
+                {text:"子菜单3"},
+                {cls: "divider"},
+                {text:"被间隔的链接"}
+            ]
+        }
+        var btn =  new $.ui.DropDown(opts);
+        var blue_btn =  new $.ui.DropDown(opts)
+        blue_btn.VM.cls("btn-primary");
+        var red_btn =  new $.ui.DropDown(opts)
+        red_btn.VM.cls("btn-danger")
+        var yellow_btn =  new $.ui.DropDown(opts)
+        yellow_btn.VM.cls("btn-warning")
+        var green_btn =  new $.ui.DropDown(opts)
+        green_btn.VM.cls("btn-success")
+        var cyan_btn = new $.ui.DropDown(opts)
+        cyan_btn.VM.cls("btn-info")
+        var black_btn = new $.ui.DropDown(opts)
+        black_btn.VM.cls("btn-inverse")
+        new $.ui.DropDown({split:1,menu:[1],parent:"#dropdown"})
+        setTimeout(function(){
+            blue_btn.VM.cls({"btn-large":0})
+        },500)
+        setTimeout(function(){
+            blue_btn.VM.cls("btn-large")
+        },2000)
+        setTimeout(function(){
+            blue_btn.size("btn-small");
+        },3000)
+  })
+</pre>
+<fieldset style="height:150px;" id="dropdown"><legend>dropdown</legend>
+    <div class="btn-toolbar"></div>
+</fieldset>
+<p>
+    <a href="/mvvm">返回教程首页</a>
+</p>
+<p>
+    <a href="/mvvm/artifact">返回组件库首页</a>
+</p>

@@ -1,0 +1,70 @@
+<%  set_title("石器时代的舰队") %>
+<%  set_layout("doc_layout.xhtml") %>
+
+<h1>button</h1>
+<p>按钮组件，根据传参可以实现checkbox, radio的效果。</p>
+<p><span class="stress">参数：</span></p>
+<dl>
+    <dt>parent</dt>
+    <dd>可选。String|Element。指定UI组件要添加的位置，没有默认为body</dd>
+    <dt>preRender</dt>
+    <dd>可选。Function。当插入DOM树前执行的函数，只执行一次</dd>
+    <dt>text</dt>
+    <dd>可选。String。按钮的文字</dd>
+    <dt>btns</dt>
+    <dd>可选。Array。可以是一个字符串数组，但框架会将它转为一个对象数组，将原字符串作为相应位置上的对象的text属性。如果本来就是对象数组，
+        对象要求有cls，text，href这三属性，没有框架会帮你补上。</dd>
+    <dt>type</dt>
+    <dd>可选。String。是生成普通的按钮，还是点击带有checkbox， radio效果的按钮组。传参只能是button,buttons-checkbox,buttons-radio中的任何一个。</dd>
+    <dt>tag</dt>
+    <dd>可选。String。按钮的类型，是A标签还是用button, input实现。传参最好是a, button, input中的任何一个，也可以是div, span等其他标签名。</dd>
+</dl>
+
+<script>
+    $.require("ready,./more/artifact/button", function(){
+        new $.ui.Button({
+            parent:".btn-toolbar",
+            cls:"btn-danger"
+        });
+        new $.ui.Button({
+            parent:".btn-toolbar",
+            cls: "btn-info",
+            type:"buttons-checkbox",
+            btns:["左","中","右"]
+        })
+        new $.ui.Button({
+            parent:".btn-toolbar",
+            type:"buttons-radio",
+            btns:["左","中","右"]
+        })
+    })
+</script>
+
+<pre class="brush:js;gutter:false;toolbar:false">
+            $.require("ready,./more/artifact/button", function(){
+                new $.ui.Button({
+                    parent:".btn-toolbar",
+                    cls:"btn-danger"
+                });
+                new $.ui.Button({
+                    parent:".btn-toolbar",
+                    cls: "btn-info",
+                    type:"buttons-checkbox",
+                    btns:["左","中","右"]
+                })
+                new $.ui.Button({
+                    parent:".btn-toolbar",
+                    type:"buttons-radio",
+                    btns:["左","中","右"]
+                })
+            })
+</pre>
+<fieldset style="height:150px;" ><legend>botton</legend>
+    <div class="btn-toolbar"></div>
+</fieldset>
+<p>
+    <a href="/mvvm">返回教程首页</a>
+</p>
+<p>
+    <a href="/mvvm/artifact">返回组件库首页</a>
+</p>
