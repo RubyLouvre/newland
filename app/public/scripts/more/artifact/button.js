@@ -10,7 +10,6 @@ define('button',[ '$css',"../avalon","./bootstrap.css" ], function(){
         btns: []
     }
     $.ui.Button  = $.factory({
-        inherit: $.Flow,
         init: function(opts){
             var _type
             if(typeof  opts == "string"){

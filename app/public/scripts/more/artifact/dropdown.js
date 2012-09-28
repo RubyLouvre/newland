@@ -13,7 +13,6 @@ define('dropdown',[ '$css',"../avalon","./bootstrap.css" ], function(){
     }
 
     $.ui.DropDown  = $.factory({
-        inherit: $.Flow,
         init: function(opts) {
             opts =  opts || [];
             this.setOptions ("data", defaults, opts );
