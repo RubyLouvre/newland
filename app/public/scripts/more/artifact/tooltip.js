@@ -18,6 +18,7 @@ define('tooltip',[ '$css',"../avalon","./bootstrap.css" ], function(){
             var position = data.position;
             this.tmpl = data.tmpl || '<div class="tooltip" bind="class:cls"><div class="tooltip-arrow"></div><div class="tooltip-inner" bind="html:text"></div></div>'
             this.preRender = data.preRender || $.noop;
+            $.log(data)
             var parent = this.parent = $(data.parent);
             data.delay = data.delay || 0;
             if (data.delay && typeof data.delay == 'number') {
@@ -34,7 +35,6 @@ define('tooltip',[ '$css',"../avalon","./bootstrap.css" ], function(){
             if (data.animation) {
                 position += "fade";
             }
-            $.log(position)
             this.VM = $.ViewModel( {
                 cls: position,  //top | bottom | left | right | in top
                 text: data.text
@@ -42,7 +42,7 @@ define('tooltip',[ '$css',"../avalon","./bootstrap.css" ], function(){
             $.View(this.VM, ui[0]);
             var trigger = data.trigger;
             var self = this;
-            $.log("init tooltip")
+          
             if (trigger == 'click') {
                 parent.click( function(){
                     self.toggle();
@@ -51,7 +51,6 @@ define('tooltip',[ '$css',"../avalon","./bootstrap.css" ], function(){
                 var eventIn = trigger == 'hover' ? 'mouseenter' : 'focus';
                 var eventOut = trigger == 'hover' ? 'mouseleave' : 'blur';
                 parent.on(eventIn, function(){
-                    $.log("mouseenter tooltip")
                     self.enter()
                 });
                 parent.on(eventOut, function(){
