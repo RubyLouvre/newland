@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>石器时代的舰队</title>
+        <script type="text/javascript" src="/scripts/mass_merge.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shCore.js"></script>
+        <script type="text/javascript" src="/scripts/doc/common.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushJScript.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushCss.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushXml.js"></script>
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/common.css"
+        />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shCore.css"
+        />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shThemeRDark.css"
+        />
+    </head>
+    
+    <body>
+        <article>
+            <h1>tooltip</h1>
+            <p>工具提示组件。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>parent</dt>
+                <dd>可选。String|Element。指定UI组件要添加的位置，没有默认为body。
+                    <br/>不过通常来说，我们只要目标元素定义必要的类名与属性名，我们在载入此脚本就能自动初始化组件。
+                    <br/>这个必要的类名叫tooltip-parent，必要的属性名为title。</dd>
+                <dt>preRender</dt>
+                <dd>可选。Function。当插入DOM树前执行的函数，只执行一次</dd>
+                <dt>text</dt>
+                <dd>可选。String。工具提示的文字。目标元素的对应属性名为title。</dd>
+                <dt>animation</dt>
+                <dd>可选。String。为工具提示添加一个淡入的过渡。
+                    <br/>目标元素的对应属性名为data-animation。</dd>
+                <dt>position</dt>
+                <dd>可选。String。工具提示出现在元素的什么位置：top | bottom | left | right。默认为top。目标元素的对应属性名为data-position。</dd>
+                <dt>trigger</dt>
+                <dd>可选。String。工具提示的触发方式：鼠标经过(hover) | 获得焦点(focus) | 手动触发(manual)。目标元素的对应属性名为data-trigger。</dd>
+                <dt>delay</dt>
+                <dd>可选。Number|Object。显示和隐藏时的延迟时间(以毫秒计)
+                    <br/>如果提供的是一个数字，延迟就会同时被应用到显示和隐藏。
+                    <br/>如果是一个对象，其结构就是: delay: { show: 500, hide: 100 }。
+                    <br/>目标元素的对应属性名为data-delay。</dd>
+            </dl>
+            <p>
+                <span class="stress">除了通用成员外，此实例还拥有以下成员：</span>
+            </p>
+            <dl>
+                <dt>show</dt>
+                <dd>方法，显示某个元素的工具提示。</dd>
+            </dl>
+            <dl>
+                <dt>hide</dt>
+                <dd>方法，隐藏某个元素的工具提示。</dd>
+            </dl>
+            <dl>
+                <dt>toggle</dt>
+                <dd>切换某个元素的工具提示的隐藏和显示状态。</dd>
+            </dl>
+            <script>
+                $.require("ready,./more/artifact/tooltip", function(){
+                   //只要在元素上定义好必要的属性，它就拥有工具消息了。
+                })
+            </script>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,./more/artifact/tooltip", function() {
+    //只要在元素上定义好必要的属性，它就拥有工具消息了。
+})
+</pre>
+            <fieldset style="height:150px;">
+                <legend>botton</legend>
+                <p class="muted" style="margin-bottom: 0;">“这是我的第一次英文访问,很抱歉它不够严谨,但是我不得不这么做,不只因为采访时间限制， 更因为我面对的是
+                    <a href="#" data-position="top"
+                    class="tooltip-parent" title="詹姆斯·卡梅隆，1954年8月16日生于加拿大的著名电影导演，擅长拍摄动作片以及科幻电影。他导演的这些电影经常超出预定计划以及预算，不过都很卖座，比如目前电影票房史上最卖座的两部电影《泰坦尼克号》（1997）和《阿凡达》（2009）">卡梅隆</a>， 这个人喜爱挑战、从无畏惧，他也希望别人如此，他可以原谅不完美， 但他无法接受一个人不去努力接近自己的极限。” ——
+                    <a href="#"
+                    data-position="top" class="tooltip-parent" title="柴静始终站在离新闻最近的地方，她以她的犀利和敏锐、坚定与坚持，最终历练成为一名优秀的新闻工作者。 ">柴静</a>《看见》专访
+                    <a href="#" data-position="bottom" class="tooltip-parent" title="1954年8月16日生于加拿大的著名电影导演，擅长拍摄动作片以及科幻电影。">卡梅隆</a>
+                </p>
+            </fieldset>
+            <p>
+                <a href="/mvvm/artifact">返回组件库首页</a>
+            </p>
+            <p>
+                <a href="/mvvm">返回教程首页</a>
+            </p>
+        </article>
+    </body>
+
+</html>
