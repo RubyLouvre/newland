@@ -554,7 +554,7 @@
         Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
 
-
+    
     function install( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
@@ -3126,7 +3126,7 @@ define("query", function(){
 //==================================================
 define("data", ["$lang"], function(){
     $.log("已加载data模块",7);
-    var remitter = /object|function/, rtype = /[^38]/
+    var remitter = /object|function/, rtype = /[^38]/;
     function validate(target){
         return target && remitter.test(typeof target) && rtype.test(target.nodeType)
     }
@@ -3183,16 +3183,19 @@ define("data", ["$lang"], function(){
             return $.data(target, name, data, true)
         },
         parseData: function(target, name, table, value){
-            var data, key = $.String.camelize(name);
+            var data, key = $.String.camelize(name),_eval
             if(table && (key in table))
                 return table[key];
             if(arguments.length != 4){
                 var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
                 value = target.getAttribute( attr );
             }
-            if ( typeof value === "string") {//转换
+            if ( typeof value === "string") {//转换 /^(?:\{.*\}|null|false|true|NaN)$/
+                if(/^(?:\{.*\}|null|false|true|NaN)$/.test(value) || +value + "" === value){
+                    _eval = true
+                }
                 try {
-                    data = eval("0,"+ value );
+                    data = _eval ?  eval("0,"+ value ) : value
                 } catch( e ) {
                     data = value
                 }
@@ -3266,7 +3269,7 @@ define("data", ["$lang"], function(){
 //==================================================
 // 节点操作模块
 //==================================================
-define( "node", ["$lang","$support","$class","$query","$data","ready"],function( lang,support ){
+define( "node", ["$lang","$support","$class","$query","$data","ready"],function( lang, support ){
     $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){

@@ -1,5 +1,5 @@
 define('tooltip',[ '$css',"../avalon","./bootstrap.css" ], function(){
-       $.log("已加载dropdown模块",7)
+       $.log("已加载tooltip模块",7)
     $.ui = $.ui || {};
     //有两个方式创建tooltip，一种直接定义在标签里，当点击或滑过该元素时，发现有tooltip就创建它
     //另一种手动创建，parent
