@@ -1,5 +1,5 @@
 define( "./helper,./more/tidy, $hfs, $ejs".match($.rword),function( helper, tidy ){
-    var url = $.path.join( process.cwd(),"app/views/mvvm"),layouts = {};
+    var url = $.path.join( process.cwd(),"app/views/doc"),layouts = {};
     var fs = require("fs")
     $.walk(url, function(files){
         var pending = files.length;

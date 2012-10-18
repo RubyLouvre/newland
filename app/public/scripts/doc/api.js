@@ -287,7 +287,6 @@ define("api", function(){
                 "resize": "function",
                 "scroll": "function",
                 "change": "function",
-                "input": "function",
                 "select": "function",
                 "reset": "function",
                 "submit": "function",
@@ -299,21 +298,20 @@ define("api", function(){
                 "keydown": "function",
                 "keyup": "function"
             },
+            "eventAdapter": {
+                "focus": "object",
+                "blur": "object",
+                "beforeunload": "object",
+                "focusin": "object",
+                "focusout": "object",
+                "mousewheel": "object"
+            },
             "event": {
-                "eventAdapter": {
-                    "focus": "object",
-                    "blur": "object",
-                    "beforeunload": "object",
-                    "focusin": "object",
-                    "focusout": "object",
-                    "mousewheel": "object"
-                },
                 "bind": "function",
                 "unbind": "function",
                 "fire": "function",
                 "filter": "function",
                 "dispatch": "function",
-                "_dispatch": "function",
                 "fix": "function"
             },
             "Event": "function",
