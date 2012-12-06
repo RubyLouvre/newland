@@ -1,7 +1,7 @@
 define( [ "$hfs"], function(){
     var libs = "mass,lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
     var files = [];
-
+    console.log("开始合并")
     //注意：下面这些代码都是与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
     libs.replace($.rword, function( name ){
         var path = $.path.join( __dirname,"mass", name + ".js" );
@@ -14,15 +14,16 @@ define( [ "$hfs"], function(){
     // ===============这里是合并脚本===============
     var merge = function(){
         var define = function(a){
-            if(typeof a == "string" && a.indexOf($.config.base) == -1 ){
-                arguments[0] = $.config.base + a +".js"
+            if(typeof a == "string" && a.indexOf(basepath) == -1 ){
+                arguments[0] = basepath + a +".js"
             }
             return $.define.apply($, arguments);
         }
-
-        for( var c = 0, cn ; cn = all[c++];){
-            Module._update($.config.base + cn + ".js", 0, 0, 2);
-        }
+        all.replace($.rword,function(a){
+            modules[basepath + a + ".js"] = {
+                state: 2
+            }
+        })
     }
     var first = files.shift();
     var rbody = /[^{]*\{([\d\D]*)\}$/;
@@ -60,4 +61,5 @@ define( [ "$hfs"], function(){
 //http://www.elmerzhang.com/2011/09/nodejs-module-develop-publish/
 //==================================================================
 })
+
 
