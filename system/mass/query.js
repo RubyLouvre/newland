@@ -1,8 +1,7 @@
 //=========================================
 // 选择器模块 v5 开发代号Icarus
 //==========================================
-define("query", function(){
-    $.log("已加载选择器模块",7)
+define("query",["mass"], function( $ ){
     var global = this, DOC = global.document;
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
@@ -489,7 +488,7 @@ define("query", function(){
         }
         return elems;
     }
-     var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
+    var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
 
     $.mix(Icarus, {
         //getAttribute总会返回字符串
@@ -583,7 +582,7 @@ define("query", function(){
                         filter = ["class", "~=", key];
                         break;
                     case ":"://伪类选择器
-                        tmp = Icarus.pseudoAdapter[key];
+                        tmp = Icarus.pseudoHooks[key];
                         if (match = expr.match(rpseudo)) {
                             expr = RegExp.rightContext;
                             if(!!~key.indexOf("nth")){
@@ -780,7 +779,7 @@ define("query", function(){
             }
         };
     };
-    Icarus.pseudoAdapter = {
+    Icarus.pseudoHooks = {
         root: function (el) {//标准
             return el === (el.ownerDocument || el.document).documentElement;
         },
@@ -916,16 +915,16 @@ define("query", function(){
             return el.type === "hidden" || (!el.offsetWidth && !el.offsetHeight) || (el.currentStyle && el.currentStyle.display === "none") ;
         }
     }
-    Icarus.pseudoAdapter.visible = function(el){
-        return  !Icarus.pseudoAdapter.hidden(el);
+    Icarus.pseudoHooks.visible = function(el){
+        return  !Icarus.pseudoHooks.hidden(el);
     }
 
     "text,radio,checkbox,file,password,submit,image,reset".replace($.rword, function(name){
-        Icarus.pseudoAdapter[name] = function(el){
+        Icarus.pseudoHooks[name] = function(el){
             return (el.getAttribute("type") || el.type) === name;//避开HTML5新增类型导致的BUG，不直接使用el.type === name;
         }
     });
-       
+    return Icarus
 });
 /**
 2011.10.25重构$.unique

@@ -197,12 +197,19 @@
         },
         require: function(deps, callback){
             deps = alias(deps);
+            console.log(deps)
             if( deps.length === 1 && !callback){
                 return require( deps[0] );
             }
             var array = [];
             for(var i = 0, el; el = deps[i++];){
-                array.push( require(el) );
+                console.log(el)
+                if(el == "mass"){
+                    array.push( $ );
+                }else{
+                    array.push( require(el) );
+                }
+               
             }
             if(typeof callback == "function"){
                 callback.apply(0, array);
@@ -236,7 +243,9 @@
     });
     $.mix($.config,{
         services:[],
-        alias: {},
+        alias: {
+            mass:"mass"
+        },
         base: process.cwd()+"/",
         charset: "utf-8",
         debug: true,
@@ -294,13 +303,13 @@
 
     $.log("后端mass框架","magenta");
     //生成mass framework所需要的页面
-      $.require( "./system/page_generate", function(){
-          $.log("页面生成","lgreen",7)
-      });
-    $.require("./app/config");
-    $.require("./system/more/logger");
+//    $.require( "./system/page_generate", function(){
+//        $.log("页面生成","lgreen",7)
+//    });
+//    $.require("./app/config");
+//    $.require("./system/more/logger");
     $.require("./system/combo");
-    $.require("./system/mvc");
+//  $.require("./system/mvc");
 //var cc = function(str, color){
 //        var str = '\u001b[' +color + 'm' + str + '\u001b[' +39 + 'm';
 //        console.log(str)

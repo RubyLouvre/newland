@@ -1,48 +1,33 @@
 //==================================================
 // 数据缓存模块
 //==================================================
-define("data", ["$lang"], function(){
-    $.log("已加载data模块",7);
+define("data", ["$lang"], function( $ ){
     var remitter = /object|function/, rtype = /[^38]/;
     function innerData( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
         if( $.acceptData(target) ){
-            var id = $.getUid(target), isEl = target.nodeType === 1;
-            if(name === "@uuid"){
-                return id;
-            }
-            var one = typeof name === "string",//取得指定值
-            database = isEl ? $["@data"]: target,
-            table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
+            var id = $.getUid(target), isEl = target.nodeType === 1,
+            getOne = typeof name === "string",//取得单个属性
+            database =  $["@data"],
+            table = database[ id] || (database[ id ] = {
                 data:{}
             });
-            var _table = table;
-            //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
-            //我们可能通过$("#test").data("full-name")或$("#test").data("fullName")访问到
-            if(isEl && !table.parsedAttrs){
-                var attrs = target.attributes;
-                //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
-                for ( var i = 0, attr; attr = attrs[i++];) {
-                    var key = attr.name;
-                    if (  key.length > 5 && !key.indexOf( "data-" ) ) {
-                        $.parseData(target, key.slice(5), _table, attr.value);
-                    }//camelize
-                }
-                table.parsedAttrs = true;
-            }
+            var cache = table;
             //私有数据都是直接放到table中，普通数据放到table.data中
             if ( !pvt ) {
                 table = table.data;
             }
             if ( name && typeof name == "object" ) {
-                $.mix( table, name );//写入一组方法
-            }else if(one && data !== void 0){
-                table[ name ] = data;//写入单个方法
+                $.mix( table, name );//写入一组属性
+            }else if(getOne && data !== void 0){
+                table[ name ] = data;//写入单个属性
             }
-            if(one){
+            if(getOne){
                 if(name in table){
                     return table[name]
                 }else if(isEl && !pvt){
-                    return $.parseData( target, name, _table );
+                    //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
+                    //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
+                    return $.parseData( target, name, cache );
                 }
             }else{
                 return table
@@ -51,13 +36,13 @@ define("data", ["$lang"], function(){
     }
     function innerRemoveData (target, name, pvt){
         if( $.acceptData(target) ){
-            var id =  $.getUid(target);
-            if (  !id ) {
+            var id = $.getUid(target);
+            if ( !id ) {
                 return;
             }
-            var  clear = 1, ret = typeof name == "string",
-            database = target.nodeType === 1  ? $["@data"] : target,
-            table = database["@data_"+id],
+            var clear = 1, ret = typeof name == "string",
+            database =  $["@data"],
+            table = database[ id ],
             cache = table;
             if ( table && ret ) {
                 if(!pvt){
@@ -82,9 +67,9 @@ define("data", ["$lang"], function(){
             }
             if(clear){
                 try{
-                    delete database["@data_"+id];
+                    delete database[id];
                 }catch(e){
-                    database["@data_"+id] = void 0;
+                    database[id] = void 0;
                 }
             }
             return ret;
@@ -94,7 +79,7 @@ define("data", ["$lang"], function(){
     $.mix( {
         "@data": {},
         acceptData: function( target ) {
-            return target && remitter.test(typeof target) && rtype.test(target.nodeType)
+            return target && remitter.test(typeof target) && rtype.test(target.nodeType);
         },
         data: function( target, name, data ) {  // 读写数据
             return innerData(target, name, data)
@@ -146,6 +131,7 @@ define("data", ["$lang"], function(){
             }
         }
     });
+    return $
 });
 
 /**

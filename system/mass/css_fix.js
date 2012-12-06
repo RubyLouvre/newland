@@ -1,75 +1,36 @@
 //=========================================
 //  样式补丁模块
 //==========================================
-define("css_fix", !!top.getComputedStyle, function(){
-    $.log("已加载css_fix模块");
-    var adapter = $.cssAdapter = {},
-    ropacity = /opacity=([^)]*)/i,
-    ralpha = /alpha\([^)]*\)/i,
-    rnumpx = /^-?\d+(?:px)?$/i, 
-    rtransform = /(\w+)\(([^)]+)\)/g,
-    rnum = /^-?\d/;
-    //=========================　处理　opacity　=========================
-    adapter[ "opacity:get" ] = function( node, op ){
-        //这是最快的获取IE透明值的方式，不需要动用正则了！
-        if(node.filters.alpha){
-            op = node.filters.alpha.opacity;
-        }else if(node.filters["DXImageTransform.Microsoft.Alpha"]){
-            op = node.filters["DXImageTransform.Microsoft.Alpha"].opacity
-        }else{
-            op = (node.currentStyle.filter ||"opacity=100").match(ropacity)[1];
-        }
-        return (op  ? op /100 :op)+"";//如果是零就不用除100了
-    }
-    //http://www.freemathhelp.com/matrix-multiplication.html
-    //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
-    adapter[ "opacity:set" ] = function( node, _, value ){
-        var currentStyle = node.currentStyle, style = node.style;
-        if(!currentStyle.hasLayout)
-            style.zoom = 1;//让元素获得hasLayout
-        value = (value > 0.999) ? 1: (value < 0.001) ? 0 : value;
-        if(node.filters.alpha){
-            //必须已经定义过透明滤镜才能使用以下便捷方式
-            node.filters.alpha.opacity = value * 100;
-        }else{
-            style.filter = "alpha(opacity="+((value * 100) | 0)+")";
-        }
-        //IE7的透明滤镜当其值为100时会让文本模糊不清
-        if(value === 1){
-            style.filter = currentStyle.filter.replace(ralpha,'');
-        }
-    }
-    var runselectable = /^(br|input|link|meta|hr|col|area|base|hr|embed|param|iframe|textarea|input|select|script|noscript)/i
-    adapter[ "userSelect:set" ] = function( node, name, value ) {
-        if(!runselectable.test(node.nodeName)){//跳过不显示的标签与表单控件
-            var allow = /none/.test(value||"all");
-            node.unselectable  = allow ? "" : "on";
-            node.onselectstart = allow ? "" : function(){
-                return false;
-            };
-        }
-    };
-    var ie8 = !!top.XDomainRequest,
+define("css_fix", !!top.getComputedStyle,["mass"], function( $ ){
+    var adapter = $.cssHooks = {},
+    ie8 = !!top.XDomainRequest,
+    rfilters = /[\w\:\.]+\([^)]+\)/g,
+    salpha = "DXImageTransform.Microsoft.Alpha",
+    rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
+    rposition = /^(top|right|bottom|left)$/,
     border = {
         thin:   ie8 ? '1px' : '2px',
         medium: ie8 ? '3px' : '4px',
         thick:  ie8 ? '5px' : '6px'
     };
     adapter[ "_default:get" ] = function(node, name){
-        var ret = node.currentStyle && node.currentStyle[name];
-        if ((!rnumpx.test(ret) && rnum.test(ret))) {
-            var style = node.style,
-            left = style.left,
-            rsLeft = node.runtimeStyle && node.runtimeStyle.left ;
-            if (rsLeft) {
-                node.runtimeStyle.left = node.currentStyle.left;
-            }
+        //取得精确值，不过它有可能是带em,pc,mm,pt,%等单位
+        var ret = node.currentStyle[name];
+        if (( rnumnonpx.test(ret) && !rposition.test(ret))) {
+            //①，保存原有的style.left, runtimeStyle.left,
+            var style = node.style, left = style.left,
+            rsLeft =  node.runtimeStyle.left ;
+            //②由于③处的style.left = xxx会影响到currentStyle.left，
+            //因此把它currentStyle.left放到runtimeStyle.left，
+            //runtimeStyle.left拥有最高优先级，不会style.left影响
+            node.runtimeStyle.left = node.currentStyle.left;
+            //③将精确值赋给到style.left，然后通过IE的另一个私有属性 style.pixelLeft
+            //得到单位为px的结果；fontSize的分支见http://bugs.jquery.com/ticket/760
             style.left = name === 'fontSize' ? '1em' : (ret || 0);
             ret = style.pixelLeft + "px";
+            //④还原 style.left，runtimeStyle.left
             style.left = left;
-            if (rsLeft) {
-                node.runtimeStyle.left = rsLeft;
-            }
+            node.runtimeStyle.left = rsLeft;
         }
         if( ret == "medium" ){
             name = name.replace("Width","Style");
@@ -78,85 +39,104 @@ define("css_fix", !!top.getComputedStyle, function(){
                 ret = "0px";
             }
         }
-        if(/margin|padding|border/.test(name) && ret === "auto"){
+        //处理auto值
+        if(rposition.test(name) && ret === "auto"){
             ret = "0px";
         }
         return ret === "" ? "auto" : border[ret] ||  ret;
     }
-    var ident  = "DXImageTransform.Microsoft.Matrix"
-    //deg:degrees 角度,grad grads,百分度 rad	radians, 弧度
-    function toRadian(value) {
-        return ~value.indexOf("deg") ?
-        parseInt(value,10) *  Math.PI/180:
-        ~value.indexOf("grad") ?
-        parseInt(value,10) * Math.PI/200:
-        parseFloat(value);
+    //=========================　处理　opacity　=========================
+    adapter[ "opacity:get" ] = function( node ){
+        //这是最快的获取IE透明值的方式，不需要动用正则了！
+        var alpha = node.filters.alpha || node.filters[salpha],
+        op = alpha ? alpha.opacity: 100;
+        return ( op /100 )+"";//确保返回的是字符串
     }
-
-    adapter[ "transform:get" ] = function(node, name){
-        var m = $._data(node,"matrix")
-        if(!m){
-            if(!node.currentStyle.hasLayout){
-                node.style.zoom = 1;
-            }
-            //IE9下请千万别设置  <meta content="IE=8" http-equiv="X-UA-Compatible"/>
-            //http://www.cnblogs.com/Libra/archive/2009/03/24/1420731.html
-            if(!node.filters[ident]){
-                var old = node.currentStyle.filter;//防止覆盖已有的滤镜
-                node.style.filter =  (old ? old +"," : "") + " progid:" + ident + "(sizingMethod='auto expand')";
-            }
-            var f = node.filters[ident];
-            m = new $.Matrix2D( f.M11, f.M12, f.M21, f.M22, f.Dx, f.Dy);
-            $._data(node,"matrix",m ) //保存到缓存系统，省得每次都计算
+    //http://www.freemathhelp.com/matrix-multiplication.html
+    //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
+    adapter[ "opacity:set" ] = function( node, name, value ){
+        var currentStyle = node.currentStyle, style = node.style;
+        if(!isFinite(value)){//"xxx" * 100 = NaN
+            return
         }
-        return name === true ? m : m.toString();
+        value = (value > 0.999) ? 100: (value < 0.001) ? 0 : value * 100;
+        if(!currentStyle.hasLayout)
+            style.zoom = 1;//让元素获得hasLayout
+        var filter = currentStyle.filter || style.filter || "";
+        //http://snook.ca/archives/html_and_css/ie-position-fixed-opacity-filter
+        //IE78的透明滤镜当其值为100时会让文本模糊不清
+        if(value == 100  ){  //IE78的透明滤镜当其值为100时会让文本模糊不清
+            // var str =  "filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color='#FFFFFF')"+
+            //   "progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',"+
+            //   "M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558)";
+            value = style.filter = filter.replace(rfilters, function(a){
+                return /alpha/i.test(a) ? "" : a;//可能存在多个滤镜，只清掉透明部分
+            });
+            //如果只有一个透明滤镜 就直接去掉
+            if(value.trim() == "" && style.removeAttribute){
+                style.removeAttribute( "filter" );
+            }
+            return;
+        }
+        //如果已经设置过透明滤镜可以使用以下便捷方式
+        var alpha = node.filters.alpha || node.filters[salpha];
+
+        if( alpha ){
+            alpha.opacity = value ;
+        }else{
+            style.filter  += (filter ? "," : "")+ "alpha(opacity="+ value +")";
+        }
     }
-
-    adapter[ "transform:set" ] = function(node, name, value){
-        var m = adapter[ "transform:get" ](node, true).set( 1,0,0,1,0,0 );
-        var filter = node.filters[ident];
-        filter.M11 =  filter.M22 = 1;//重置矩形
-        filter.M12 =  filter.M21 = 0;
-        var width = node.offsetWidth
-        var height = node.offsetHeight
-        var el = $(node);//处理元素的定位问题，保存原来元素与offsetParent的距离
-        if(node._mass_top == null && el.css("position") != "static"){
-            var p = el.position()
-            node._mass_top = p.top;
-            node._mass_left = p.left;
+    //=========================　处理　user-select　=========================
+    //auto——默认值，用户可以选中元素中的内容
+    //none——用户不能选择元素中的任何内容
+    //text——用户可以选择元素中的文本
+    //element——文本可选，但仅限元素的边界内(只有IE和FF支持)
+    //all——在编辑器内，如果双击/上下文点击发生在子元素上，改值的最高级祖先元素将被选中。
+    //-moz-none——firefox私有，元素和子元素的文本将不可选，但是，子元素可以通过text重设回可选。
+    adapter[ "userSelect:set" ] = function( node, name, value ) {
+        var allow = /none/.test(value) ? "on" : "",
+        e, i = 0, els = node.getElementsByTagName('*');
+        node.setAttribute('unselectable', allow);
+        while (( e = els[ i++ ] )) {
+            switch (e.tagName.toLowerCase()) {
+                case 'iframe' :
+                case 'textarea' :
+                case 'input' :
+                case 'select' :
+                    break;
+                default :
+                    e.setAttribute('unselectable', allow);
+            }
         }
-        value.toLowerCase().replace(rtransform,function(_,method,array){
-            array = array.replace(/px/g,"").match($.rword) || [];
-            if(/skew|rotate/.test(method)){//角度必须带单位
-                array[0] = toRadian(array[0] );//IE矩阵滤镜的方向是相反的
-                array[1] = toRadian(array[1] || "0");
-            }
-            if(method == "scale" && array[1] == void 0){
-                array[1] = array[0] //sy如果没有定义等于sx
-            }
-            if(method !== "matrix"){
-                method = method.replace(/(x|y)$/i,function(_,b){
-                    return  b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
-                })
-            }
-            m[method].apply(m, array);
-            filter.M11 = m.a;//0
-            filter.M12 = m.c;//2★★★注意这里的顺序, IE滤镜和其他浏览器定义的角度方向相反
-            filter.M21 = m.b;//1
-            filter.M22 = m.d;//3
-            filter.Dx  = m.tx;
-            filter.Dy  = m.ty;
-        //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
-        //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
-        });
-        node.style.position = "relative";
-        node.style.left = (node._mass_left | 0) + ( width - node.offsetWidth )/2  + m.tx  + "px";
-        node.style.top = (node._mass_top | 0) + ( height - node.offsetHeight) /2  + m.ty  + "px";  
-        $._data(node,"matrix",m )
+    };
+    //=========================　处理　background-position　=========================
+    adapter[ "backgroundPosition:get" ] = function( node, name, value ) {
+        var style = node.currentStyle;
+        return style.backgroundPositionX +" "+style.backgroundPositionX
+    };
+    //=========================　处理　rotate　=========================
+    var stransform = "DXImageTransform.Microsoft.Matrix";
+    adapter.centerOrigin = "margin"
+    adapter[ "rotate:set" ] = function(node, name, value){
+        $._data( node, 'rotate',  value);
+        var matrix = node.filters[stransform]
+        if(!matrix){
+            node.style.filter += "progid:"+stransform+"(M11=1,M12=1,M21=1,M22=1,sizingMethod='auto expand')";
+            matrix = node.filters[stransform];
+        }
+        var _rad = value * Math.PI / 180, costheta = Math.cos(_rad), sintheta = Math.sin(_rad);
+        matrix.M11 = costheta;
+        matrix.M12 = -sintheta;
+        matrix.M21 = sintheta;
+        matrix.M22 = costheta;
+        name = adapter.centerOrigin;
+        node.style[name == 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth/2) + (node.clientWidth/2) + "px";
+        node.style[name == 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight/2) + (node.clientHeight/2) + "px";
     }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
 //2012.5.9 完美支持CSS3 transform 2D
-
-   
+//2012.10.25 重构透明度的读写
+//2012.11.25 添加旋转

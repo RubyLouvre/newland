@@ -1,12 +1,11 @@
 //==========================================
 // 特征嗅探模块 by 司徒正美
 //==========================================
-define("support", function(){
-    $.log("已加载特征嗅探模块",7);
+define("support",["mass"], function( $ ){
     var DOC = document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
     div.setAttribute("className", "t");
     div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+
-    '<object><param/></object><table></table><input type="checkbox"/>';
+    '<object><param/></object><table></table><input type="checkbox" checked/>';
     var a = div[TAGS]("a")[0], style = a.style,
     select = DOC.createElement("select"),
     input = div[TAGS]( "input" )[ 0 ],
@@ -16,15 +15,17 @@ define("support", function(){
         //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
         insertTbody: !div[TAGS]("tbody").length,
         // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
-        checkOn :  input.value === "on",
+        checkOn : input.value === "on",
         //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
         optSelected: !!opt.selected,
-        //IE67无法区分href属性与特性（bug）
-        attrHref: a.getAttribute("href") === "/nasami",
-        //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
-        attrStyle: a.getAttribute("style") !== style,
-        //对于一些特殊的特性，如class, for, char，IE67需要通过映射方式才能使用getAttribute才能取到值(bug)
-        attrProp:div.className !== "t",
+        //IE67，无法取得用户设定的原始href值
+        attrInnateHref: a.getAttribute("href") === "/nasami",
+        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
+        attrInnateStyle: a.getAttribute("style") !== style,
+        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
+        attrInnateName:div.className !== "t",
+        //IE6-8,对于某些固有属性不会返回用户最初设置的值
+        attrInnateValue: input.getAttribute("checked") == "",
         //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
         //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
         cssOpacity: style.opacity == "0.25",
@@ -132,8 +133,7 @@ define("support", function(){
         body.removeChild( div );
         div =  null;
     });
-    
-    return support;
+    return $;
 });
 /**
 2011.9.7 优化attrProp判定

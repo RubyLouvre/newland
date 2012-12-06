@@ -1,19 +1,18 @@
 //=========================================
 // 类型扩展模块v7 by 司徒正美
 //=========================================
-define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
-    $.log("已加载语言扩展模块");
+define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),function($){
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
     // JSON RegExp
     rvalidchars = /^[\],:{}\s]*$/,
     rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-    rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+    rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
-    str_body = (global.open + '').replace(/open/g, '');
+    str_body = (global.open + '').replace(/open/g, "");
 
     $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
@@ -33,8 +32,8 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         },
         //判定method是否为obj的原生方法，如$.isNative(global,"JSON")
         isNative: function(obj, method) {
-            var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
-            return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
+            var m = obj ? obj[method] : false, r = new RegExp(method, "g");
+            return !!(m && typeof m != "string" && str_body === (m + "").replace(r, ""));
         },
         /**
          * 是否为空对象
@@ -74,7 +73,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         format: function(str, object){
             var array = $.slice(arguments,1);
             return str.replace(rformat, function(match, name){
-                if (match.charAt(0) == '\\')
+                if (match.charAt(0) == "\\")
                     return match.slice(1);
                 var index = Number(name)
                 if(index >=0 )
@@ -98,9 +97,9 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             var chain = function(start, content, xml){
                 var html = arguments.callee.html;
                 start && html.push("<",start,">");
-                content = ''+(content||'');
+                content = ""+(content||"");
                 content && html.push(content);
-                var end = start.split(' ')[0];//取得结束标签
+                var end = start.split(" ")[0];//取得结束标签
                 if(end && (xml || !rnoclose.test(end))){
                     html.push("</",end,">");
                 }
@@ -135,17 +134,24 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         quote:  String.quote || function(s) {
             return '"' + s.replace( runicode, function(a) {
                 switch (a) {
-                    case '"': return '\\"';
-                    case '\\': return '\\\\';
-                    case '\b': return '\\b';
-                    case '\f': return '\\f';
-                    case '\n': return '\\n';
-                    case '\r': return '\\r';
-                    case '\t': return '\\t';
+                    case '"':
+                        return '\\"';
+                    case '\\':
+                        return '\\\\';
+                    case '\b':
+                        return '\\b';
+                    case '\f':
+                        return '\\f';
+                    case '\n':
+                        return '\\n';
+                    case '\r':
+                        return '\\r';
+                    case '\t':
+                        return '\\t';
                 }
                 a = a.charCodeAt(0).toString(16);
-                while (a.length < 4) a = '0' + a;
-                return '\\u' + a;
+                while (a.length < 4) a = "0" + a;
+                return "\\u" + a;
             }) + '"';
         },
         //查看对象或数组的内部构造
@@ -447,13 +453,13 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
         truncate: function(target, length, truncation) {
             length = length || 30;
-            truncation = truncation === void(0) ? '...' : truncation;
+            truncation = truncation === void(0) ? "..." : truncation;
             return target.length > length ?
             target.slice(0, length - truncation.length) + truncation : String(target);
         },
         //转换为驼峰风格
         camelize: function(target){
-            if (target.indexOf('-') < 0 && target.indexOf('_') < 0) {
+            if (target.indexOf("-") < 0 && target.indexOf("_") < 0) {
                 return target;//提前判断，提高getStyle等的效率
             }
             return target.replace(/[-_][^-_]/g, function (match) {
@@ -462,7 +468,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         },
         //转换为下划线风格
         underscored: function(target) {
-            return target.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/\-/g, '_').toLowerCase();
+            return target.replace(/([a-z\d])([A-Z]+)/g, "$1_$2").replace(/\-/g, "_").toLowerCase();
         },
         //首字母大写
         capitalize: function(target){
@@ -470,7 +476,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         },
         //移除字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
         stripTags: function (target) {
-            return String(target ||"").replace(/<[^>]+>/g, '');
+            return String(target || "").replace(/<[^>]+>/g, "");
         },
         //移除字符串中所有的 script 标签。弥补stripTags方法的缺陷。此方法应在stripTags之前调用。
         stripScripts: function(target){
@@ -478,17 +484,17 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         },
         //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
         escapeHTML:  function (target) {
-            return target.replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
+            return target.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
         },
         //还原为可被文档解析的HTML标签
         unescapeHTML: function (target) {
             return  target.replace(/&quot;/g,'"')
-            .replace(/&lt;/g,'<')
-            .replace(/&gt;/g,'>')
+            .replace(/&lt;/g,"<")
+            .replace(/&gt;/g,">")
             .replace(/&amp;/g, "&") //处理转义的中文和实体字符
             .replace(/&#([\d]+);/g, function($0, $1){
                 return String.fromCharCode(parseInt($1, 10));
@@ -498,7 +504,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         //http://stevenlevithan.com/regex/xregexp/
         //将字符串安全格式化为正则表达式的源码
         escapeRegExp: function( target ){
-            return (target+"").replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+            return (target+"").replace(/([-.*+?^${}()|[\]\/\\])/g, "\\$1");
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
@@ -521,8 +527,8 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
 3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题*/
         wbr: function (target) {
             return String(target)
-            .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
-            .replace(/><wbr>/g, '>');
+            .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, "$&<wbr>")
+            .replace(/><wbr>/g, ">");
         }
     });
 
@@ -564,12 +570,15 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             return first;
         },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
-        // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
-        shuffle: function ( target ) {
-            var j, x, i = target.length;
-            for (; i > 0; j = parseInt(Math.random() * i),
-                x = target[--i], target[i] = target[j], target[j] = x) {};
-            return target;
+        shuffle: function ( arr ) {
+            var ret = [], i = arr.length, n; 
+            arr = arr.slice(0);
+            while (--i >= 0) {
+                n = Math.floor( Math.random() * i);
+                ret[ret.length] = arr[n];
+                arr[n] = arr[i];
+            }
+            return ret;
         },
         //从数组中随机抽选一个元素出来。
         random: function ( target ) {
@@ -589,15 +598,23 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         },
         // 对数组进行去重操作，返回一个没有重复元素的新数组。
         unique: function ( target ) {
-            var result = [];
-                o:for(var i = 0, n = target.length; i < n; i++) {
-                    for(var x = i + 1 ; x < n; x++) {
-                        if(target[x] === target[i])
-                            continue o;
-                    }
-                    result.push(target[i]);
-                }
-            return result;
+            //            var result = [];
+            //                o:for(var i = 0, n = target.length; i < n; i++) {
+            //                    for(var x = i + 1 ; x < n; x++) {
+            //                        if(target[x] === target[i])
+            //                            continue o;
+            //                    }
+            //                    result.push(target[i]);
+            //                }
+            //            return result;
+            var ret = [], n = target.length, i, j;//by abcd
+            for (i = 0; i < n; i++) {
+                for (j = i + 1; j < n; j++)
+                    if (target[i] === target[j])
+                        j = ++i;
+                ret.push(target[i]);
+            }
+            return ret;
         },
         // 过滤数组中的null与undefined，但不影响原数组。
         compact: function ( target ) {
@@ -829,7 +846,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         }
     });
     $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
-    return $.lang;
+    return $
 });
 /**
 changlog:

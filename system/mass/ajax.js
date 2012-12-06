@@ -2,8 +2,7 @@
 //  数据交互模块
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
-define("ajax",["$flow"], function(){
-    $.log("已加载ajax模块", 7);
+define("ajax",["mass","$flow"], function($){
     var global = this,
     DOC = global.document,
     r20 = /%20/g,
@@ -14,7 +13,7 @@ define("ajax",["$flow"], function(){
     rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
-    rurl =  /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
+    rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
     //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
     //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
     curl = DOC.URL;
@@ -163,6 +162,8 @@ define("ajax",["$flow"], function(){
             return buf.join("").replace(r20, "+");
         },
         //将一个字符串转换为对象
+        //$.deparam = jq_deparam = function( params, coerce ) {
+        //https://github.com/cowboy/jquery-bbq/blob/master/jquery.ba-bbq.js
         unparam: function ( url, query ) {
             var json = {};
             if (!url || !$.type(url, "String")) {
@@ -685,7 +686,7 @@ define("ajax",["$flow"], function(){
             }, 16);
         }
     });
-
+    return $;
 });
 /**
 2011.8.31
