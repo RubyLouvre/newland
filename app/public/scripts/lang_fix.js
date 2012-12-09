@@ -157,98 +157,57 @@ define( "lang_fix", !!Array.isArray, function(){
             return this.setFullYear(year );//+ 1900
         };
     }
-
-    /**
-     * Cross-Browser Split 1.1.1
-     * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
-     * Available under the MIT License
-     * ECMAScript compliant, uniform cross-browser split method
-     * // Basic use
-     * split('a b c d', ' ');
-     * // -> ['a', 'b', 'c', 'd']
-     *
-     * // With limit
-     * split('a b c d', ' ', 2);
-     * // -> ['a', 'b']
-     *
-     * // Backreferences in result array
-     * split('..word1 word2..', /([a-z]+)(\d+)/i);
-     * // -> ['..', 'word', '1', ' ', 'word', '2', '..']
-     */
-    var nativeSplit = String.prototype.split,
-    compliantExecNpcg = /()??/.exec("")[1] === void 0, // NPCG: nonparticipating capturing group
-    fix = function (str, separator, limit) {
-        // If `separator` is not a regex, use `nativeSplit`
-        if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
-            return nativeSplit.call(str, separator, limit);
-        }
-        var output = [],
-        flags = (separator.ignoreCase ? "i" : "") +
-        (separator.multiline  ? "m" : "") +
-        (separator.extended   ? "x" : "") + // Proposed for ES6
-        (separator.sticky     ? "y" : ""), // Firefox 3+
-        lastLastIndex = 0,
-        // Make `global` and avoid `lastIndex` issues by working with a copy
-        separator = new RegExp(separator.source, flags + "g"),
-        separator2, match, lastIndex, lastLength;
-        str += ""; // Type-convert
-        if (!compliantExecNpcg) {
-            // Doesn't need flags gy, but they don't hurt
-            separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
-        }
-        /**
-         * Values for `limit`, per the spec:
-         * If undefined: 4294967295 // Math.pow(2, 32) - 1
-         * If 0, Infinity, or NaN: 0
-         * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
-         * If negative number: 4294967296 - Math.floor(Math.abs(limit))
-         * If other: Type-convert, then use the above rules
-         */
-        limit = limit === void 0 ?
-        -1 >>> 0 : // Math.pow(2, 32) - 1
-        limit >>> 0; // ToUint32(limit)
-        while (match = separator.exec(str)) {
-            // `separator.lastIndex` is not reliable cross-browser
-            lastIndex = match.index + match[0].length;
-            if (lastIndex > lastLastIndex) {
-                output.push(str.slice(lastLastIndex, match.index));
-                // Fix browsers whose `exec` methods don't consistently return `undefined` for
-                // nonparticipating capturing groups
-                if (!compliantExecNpcg && match.length > 1) {
-                    match[0].replace(separator2, function () {
-                        for (var i = 1; i < arguments.length - 2; i++) {
-                            if (arguments[i] === void 0) {
-                                match[i] = void 0;
-                            }
-                        }
-                    });
-                }
-                if (match.length > 1 && match.index < str.length) {
-                    Array.prototype.push.apply(output, match.slice(1));
-                }
-                lastLength = match[0].length;
-                lastLastIndex = lastIndex;
-                if (output.length >= limit) {
-                    break;
+    //http://www.cnblogs.com/tilfon/archive/2012/11/11/2765189.html
+    if ('a~b'.split(/(~)/).length !== 3){
+        String.prototype.split = function(reg){
+            if (!reg.global) {
+                reg = new RegExp(reg.source, 'g' + (reg.ignoreCase ? 'i' : ''));
+            }
+            var m, str = '', arr = [];
+            var i, len = this.length;
+            for (i = 0; i < len; i++)  {
+                str += this.charAt(i);
+                m = str.match(reg);
+                if (m)  {
+                    arr.push(str.replace(m[0], ''));
+                    arr.push(m[0]);
+                    str = '';
                 }
             }
-            if (separator.lastIndex === match.index) {
-                separator.lastIndex++; // Avoid an infinite loop
-            }
+            if (str != '') arr.push(str);
+            return arr;
         }
-        if (lastLastIndex === str.length) {
-            if (lastLength || !separator.test("")) {
-                output.push("");
-            }
-        } else {
-            output.push(str.slice(lastLastIndex));
+    }
+    //http://stackoverflow.com/questions/10470810/javascript-tofixed-bug-in-ie6
+    if (0.9.toFixed(0) !== '1') {
+        Number.prototype.toFixed = function(n) {
+            var power = Math.pow(10, n);
+            var fixed = (Math.round(this * power) / power).toString();
+            if(n == 0) return fixed;
+            if(fixed.indexOf('.') < 0) fixed += '.';
+            var padding = n + 1 - (fixed.length - fixed.indexOf('.'));
+            for(var i = 0; i < padding; i++) fixed += '0';
+            return fixed;
+        };    
+    }
+    //  string.substr(start, length)参考 start
+    //  要抽取的子串的起始下标。如果是一个负数，那么该参数声明从字符串的尾部开始算起的位置。也就是说，-1指定字符串中的最后一个字符，-2指倒数第二个字符，以此类推。
+    var substr = String.prototype.substr;
+    if('ab'.substr(-1) != 'b'){
+        String.prototype.substr = function(start, length){
+            start =  start < 0 ? Math.max(this.length + start, 0) : start;
+            return substr.call( this, start,length);
         }
-        return output.length > limit ? output.slice(0, limit) : output;
-    };
-    // For convenience
-    String.prototype.split = function (separator, limit) {
-        return fix(this, separator, limit);
-    };
+    }
+//    var testString = "0123456789";
+//    alert(testString.substr(2));
+//    // Output: 23456789
+//    alert(testString.substr(2, 5));
+//    // Output: 23456
+//    alert(testString.substr(-3));
+//    // Output: 789 IE:0123456789
+//    alert(testString.substr(-5, 2));
+//// Output: 56  IE:01
 });
 /**
 2011.7.26 添加Object.getPrototypeOf方法
