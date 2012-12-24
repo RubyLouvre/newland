@@ -1,10 +1,8 @@
 //==================================================
 // 属性操作模块 v3
 //==================================================
-define("attr",["$node"], function( $ ){
+define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
     var rreturn = /\r/g,
-    rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
-    rquote = /^['"]/,
     rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
     rnospaces = /\S+/g,
     support = $.support
@@ -12,6 +10,7 @@ define("attr",["$node"], function( $ ){
         var ret = el.tagName.toLowerCase();
         return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
     }
+
     $.implement({
         /**
          *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
@@ -22,49 +21,38 @@ define("attr",["$node"], function( $ ){
             if ( typeof item == "string") {
                 for ( var i = 0, el; el = this[i++]; ) {
                     if ( el.nodeType === 1 ) {
-                        if ( !el.className ) {
-                            el.className = item;
-                        } else {
-                            var a = (el.className+" "+item).match( rnospaces );
-                            a.sort();
-                            for (var j = a.length - 1; j > 0; --j)
-                                if (a[j] == a[j - 1])
-                                    a.splice(j, 1);
-                            el.className = a.join(" ");
-                        }
+                        item.replace(rnospaces, function(clazz){
+                            el.classList.add(clazz);
+                        })
                     }
                 }
             }
             return this;
         },
+        //如果不传入类名,则清空所有类名,允许同时删除多个类名
+        removeClass: function( item ) {
+            var removeSome  = item && typeof item === "string",removeAll = item === void 0
+            for ( var i = 0, node; node = this[ i++ ]; ) {
+                if ( node.nodeType === 1 ) {
+                    if(removeSome && node.className){
+                        item.replace(rnospaces, function(clazz){
+                            node.classList.remove(clazz);
+                        })
+                    }else if(removeAll){
+                        node.className = "";
+                    }
+                }
+            }
+            return this;
+        },
+       
         //如果第二个参数为true，要求所有匹配元素都拥有此类名才返回true
         hasClass: function( item, every ) {
             var method = every === true ? "every" : "some",
             rclass = new RegExp('(\\s|^)'+item+'(\\s|$)');//判定多个元素，正则比indexOf快点
             return $.slice(this)[ method ](function( el ){//先转换为数组
-                return "classList" in el ? el.classList.contains( item ):
-                (el.className || "").match(rclass);
+                return  (el.className || "").match(rclass);
             });
-        },
-        //如果不传入类名,则清空所有类名,允许同时删除多个类名
-        removeClass: function( item ) {
-            if ( (item && typeof item === "string") || item === void 0 ) {
-                var classNames = ( item || "" ).match( rnospaces ), cl = classNames.length;
-                for ( var i = 0, node; node = this[ i++ ]; ) {
-                    if ( node.nodeType === 1 && node.className ) {
-                        if ( item ) {//rnospaces = /\S+/
-                            var set = " " + node.className.match( rnospaces ).join(" ") + " ";
-                            for ( var c = 0; c < cl; c++ ) {
-                                set = set.replace(" " + classNames[c] + " ", " ");
-                            }
-                            node.className = set.slice( 1, set.length - 1 );
-                        } else {
-                            node.className = "";
-                        }
-                    }
-                }
-            }
-            return this;
         },
         //如果存在（不存在）就删除（添加）指定的类名。对所有匹配元素进行操作。
         toggleClass: function( value, stateVal ){
@@ -140,6 +128,7 @@ define("attr",["$node"], function( $ ){
         return cacheProp[name] = document.createElement(node.tagName)[prop]
     }
     $.mix({
+        fixDefault: $.noop,
         propMap:{//属性名映射
             "accept-charset": "acceptCharset",
             "char": "ch",
@@ -217,6 +206,7 @@ define("attr",["$node"], function( $ ){
                 // 确保bool属性的值为bool
                 if ( node[ name ] === true ) {
                     node[ name ] = false;
+                    $.fixDefault(node, name, false)
                 }
             }
         },
@@ -252,23 +242,9 @@ define("attr",["$node"], function( $ ){
                 //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
                 node.setAttribute( name, name.toLowerCase() )
                 node[ name ]  = true;
-            },
-            "@ie:get": function( node, name ){
-                var str = node.outerHTML.replace(node.innerHTML, ""), obj = {}, k, v;
-                while (k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
-                    v = k[2]
-                    obj[ k[1].toLowerCase() ] = v ? rquote.test( v ) ? v.slice(1, -1) : v : ""
-                }
-                return obj[ name ];
-            },
-            "@ie:set": function( node, name, value ){  
-                var attr = node.getAttributeNode( name );
-                if ( !attr ) {//不存在就创建一个同名的特性节点
-                    attr = node.ownerDocument.createAttribute( name );
-                    node.setAttributeNode( attr );
-                }
-                attr.value = value + "" ;
+                $.fixDefault(node, name, true)
             }
+
         }
     });
     "Attr,Prop".replace($.rword, function( method ){
@@ -282,71 +258,18 @@ define("attr",["$node"], function( $ ){
         }
     });
     //========================propHooks 的相关修正==========================
-    var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
     "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
     "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
     prop.replace($.rword, function(name){
-        propMap[name.toLowerCase()] = name;
+        $.propMap[name.toLowerCase()] = name;
     });
-    if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
-        propMap.enctype = "encoding";
-    }
+
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if ( !support.optSelected ) {
         $.propHooks[ "selected:get" ] = function( node ) {
             for( var p = node;typeof p.selectedIndex != "number";p = p.parentNode){}
             return node.selected;
-        }
-    }
-    if ( !support.attrInnateValue ) {
-        // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
-        //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
-        $.propHooks[ "href:set" ] =  $.attrHooks[ "href:set" ] = function( node, name, value ) {
-            var b
-            if(node.tagName == "A" && node.innerText.indexOf("@") > 0
-                && !node.children.length){
-                b = node.ownerDocument.createElement('b');
-                b.style.display = 'none';
-                node.appendChild(b);
-            }
-            node.setAttribute(name, value+"");
-            if (b) {
-                node.removeChild(b);
-            }
-        }
-    }
-
-    //========================attrHooks 的相关修正==========================
-    var attrHooks = $.attrHooks
-    if ( !support.attrInnateHref ) {
-        //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
-        //IE的getAttribute支持第二个参数，可以为 0,1,2,4
-        //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
-        //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
-        "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
-            attrHooks[ method.toLowerCase() + ":get" ] =  function( node,name ) {
-                var ret = node.getAttribute( name, 2 );
-                return ret == null ? void 0 : ret;
-            }
-        });
-        "width,height".replace( $.rword, function( attr ){
-            attrHooks[attr+":set"] = function(node, name, value){
-                node.setAttribute( attr, value === "" ? "auto" : value+"");
-            }
-        });
-        $.propHooks["href:get"] = function( node, name ) {
-            return node.getAttribute( name, 4 );
-        };
-    }
-
-    if ( !support.attrInnateStyle ) {
-        //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
-        attrHooks[ "style:get" ] = function( node ) {
-            return node.style.cssText.toLowerCase() || undefined ;
-        }
-        attrHooks[ "style:set" ] = function( node, name, value ) {
-            node.style.cssText = value + "";
         }
     }
     //========================valHooks 的相关修正==========================
@@ -406,9 +329,8 @@ define("attr",["$node"], function( $ ){
             }
         }
     });
-    if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
-        valHooks["button:get"] =  $.attrHooks["@ie:get"]
-        valHooks["button:set"] =  $.attrHooks["@ie:set"]
+    if(typeof $.fixIEAttr == "function"){
+        $.fixIEAttr(valHooks, $.attrHooks);
     }
     return $;
 });
@@ -425,5 +347,9 @@ define("attr",["$node"], function( $ ){
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
 2012.11.6 升级v2
- */
+2012.12.24 升级到v3 添加对defaultSelected defaultChecked的处理
+http://nanto.asablo.jp/blog/2005/10/29/123294
+
+http://perl.no-tubo.net/2010/07/01/ie-%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B-setattribute-%E3%82%84-getattribute-%E3%82%84-removeattribute-%E3%81%8C%E3%81%A0%E3%82%81%E3%81%A0%E3%82%81%E3%81%AA%E4%BB%B6/
+*/
 
