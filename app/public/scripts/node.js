@@ -15,7 +15,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         }
         return document;
     }
-    $.mix( $.mutators ).implement({
+    $.mix( $.factory ).implement({
         init: function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
@@ -185,13 +185,16 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             return this;
         }
     });
-    "remove,empty".replace( $.rword, function( method ){
+    "remove,empty,detach".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
-            var isRemove = method === "remove";
+            var isRemove = method !== "empty";
             for ( var i = 0, node; node = this[i++]; ){
                 if(node.nodeType === 1){
                     //移除匹配元素
-                    $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] ).forEach( cleanNode );
+                    var array = $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] )
+                    if(method != "detach"){
+                        array .forEach( cleanNode );
+                    }
                 }
                 if( isRemove ){
                     if ( node.parentNode ) {
@@ -466,14 +469,29 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         return nodes;
     }
     $.implement({
-        data: function( key, item, pv ){
+        data: function( key, item ){
+            if ( key === void 0 ) {
+                if ( this.length ) {
+                    var target = this[0], data = $.data( target );
+                    if ( target.nodeType === 1 && !$._data( target, "parsedAttrs" ) ) {
+                        for (var i = 0, attrs = target.attributes, attr ; attr = attrs[i++]; ) {
+                            var name = attr.name;
+                            if ( !name.indexOf( "data-" ) ) {
+                                $.parseData(target, name.slice(5), data, attr.value)
+                            }
+                        }
+                        $._data( target, "parsedAttrs", true );
+                    }
+                }
+                return data;
+            }
             return $.access( this, key, item, function(el){
-                return  $.data( el, key, item,  pv === true  );
+                return  $.data( el, key, item  );
             })
         },
-        removeData: function( key, pv ) {
+        removeData: function( key ) {
             return this.each(function() {
-                $.removeData( this, key, pv );
+                $.removeData( this, key );
             });
         }
     });
@@ -694,7 +712,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         return result;
     };
 
-    $.lang({
+    $.each({
         parent: function( el ){
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent: [];
@@ -737,7 +755,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             el.contentDocument || el.contentWindow.document :
             $.slice( el.childNodes );
         }
-    }).each(function( method, name ){
+    }, function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
             for(var i = 0, el ; el = this[i++];){//expr只用于Until

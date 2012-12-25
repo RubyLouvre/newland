@@ -1,5 +1,5 @@
 define( [ "$hfs"], function(){
-    var libs = "mass,lang_fix,lang,support,class,flow,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
+    var libs = "mass,lang_fix,lang,support,class,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var files = [];
     console.log("开始合并")
     //注意：下面这些代码都是与newland项目无关，它们是用于同步rubylouvre.github.com项目的JS文件
