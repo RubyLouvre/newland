@@ -18,7 +18,7 @@ define("class", ["$lang"], function( $ ){
     }
 
     var hash = {
-        inherit : function( parent,init ) {
+        inherit: function( parent,init ) {
             var bridge = function() { }
             if( typeof parent == "function"){
                 for(var i in parent){//继承类成员
@@ -52,7 +52,7 @@ define("class", ["$lang"], function( $ ){
             }
             return proto.constructor = this;
         },
-        implement:function(){
+        implement: function(){
             var target = this.prototype, reg = rconst;
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
