@@ -200,7 +200,7 @@ define("ajax",["mass","$lang"], function($){
                 return  elem.name && !elem.disabled && ( elem.checked === true || /radio|checkbox/.test(elem.type) )
             }).forEach( function( elem ) {
                 var val = $( elem ).val(), vs;
-                val = $.makeArray[val];
+                val = Array.isArray(val) ? val : [val];
                 val = val.map( function(v) {
                     return v.replace(rCRLF, "\r\n");
                 });
@@ -288,10 +288,18 @@ define("ajax",["mass","$lang"], function($){
         }
         return dummyXHR;
     }
-    //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
+ 
     ajax.isLocal = rlocalProtocol.test(segments[1]);
     /**
      * XHR类,用于模拟原生XMLHttpRequest的所有行为
+     * var ajax = new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
+     * ajax.onreadystatechange = function(){
+     *   if (ajax.readyState==4 && ajax.status==200){
+     *        alert(ajax.responseText)
+     *   }
+     * }
+     * ajax.open("POST", url, true);
+     * ajax.send("key=val&key1=val2");
      */
     $.XHR = $.factory({
         inherit: $.EventTarget,
@@ -633,7 +641,7 @@ define("ajax",["mass","$lang"], function($){
             setTimeout(function () {
                 $(iframe).bind("load error",this.respond);
                 form.submit();
-            }, 16);
+            });
         },
 
         respond: function( event  ) {
@@ -682,7 +690,7 @@ define("ajax",["mass","$lang"], function($){
                 // Fix busy state in FF3
                 iframe.parentNode.removeChild(iframe);
                 $.log("iframe.parentNode.removeChild(iframe)")
-            }, 16);
+            });
         }
     });
     return $;
