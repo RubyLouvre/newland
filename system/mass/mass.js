@@ -1,4 +1,5 @@
-!function(global, DOC) {
+!
+function(global, DOC) {
     var $$ = global.$ //保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace(rmakeid, "")
@@ -11,7 +12,7 @@
     var mass = 1; //当前框架的版本号
     var postfix = ""; //用于强制别名
     var cbi = 1e5; //用于生成回调函数的名字
-    var all = "lang_fix,lang,support,class,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,support,class,interact,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]": "Document",
@@ -25,8 +26,8 @@
         "undefined": "Undefined"
     }
     var toString = class2type.toString,
-        basepath
-        /**
+    basepath
+    /**
          * 命名空间
          * @namespace 可变的短命名空间
          * @param  {String|Function} expr  CSS表达式或函数
@@ -66,9 +67,9 @@
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
-            i = 1,
-            key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+        i = 1,
+        key, //如果最后参数是布尔，判定是否覆写同名属性
+        ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -115,7 +116,7 @@
          */
         slice: function(nodes, start, end) {
             var ret = [],
-                n = nodes.length;
+            n = nodes.length;
             if(end === void 0 || typeof end == "number" && isFinite(end)) {
                 start = parseInt(start, 10) || 0;
                 end = end == void 0 ? n : parseInt(end, 10);
@@ -168,7 +169,7 @@
          *  @param {Any} str 用于打印的信息，不是字符串将转换为字符串
          *  @param {Boolean} page ? 是否打印到页面
          *  @param {Number} level ? 通过它来过滤显示到控制台的日志数量。
-         *          0为最少，只显示最致命的错误；7，则连普通的调试消息也打印出来。 
+         *          0为最少，只显示最致命的错误；7，则连普通的调试消息也打印出来。
          *          显示算法为 level <= $.config.level。
          *          这个$.config.level默认为9。下面是level各代表的含义。
          *          0 EMERGENCY 致命错误,框架崩溃
@@ -235,7 +236,7 @@
                 array = array.match($.rword) || [];
             }
             var result = {},
-                value = val !== void 0 ? val : 1;
+            value = val !== void 0 ? val : 1;
             for(var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
@@ -272,10 +273,9 @@
     });
 
     (function(scripts) {
-        var cur = scripts[scripts.length - 1];
-		var kernel = $.config;
-        var url = cur.hasAttribute ? cur.src : cur.getAttribute("src", 4);
-        url = url.replace(/[?#].*/, "");
+        var cur = scripts[scripts.length - 1],
+        url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+        kernel = $.config;
         basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
@@ -374,7 +374,9 @@
 
     //============================加载系统===========================
     var modules = $.modules = {
-        ready: {},
+        ready: {
+            exports: $
+        },
         mass: {
             state: 2,
             exports: $
@@ -407,7 +409,7 @@
     function checkDeps() {
         loop: for(var i = loadings.length, id; id = loadings[--i];) {
             var obj = modules[id],
-                deps = obj.deps;
+            deps = obj.deps;
             for(var key in deps) {
                 if(deps.hasOwnProperty(key) && modules[key].state != 2) {
                     continue loop;
@@ -479,37 +481,37 @@
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-            // 用于依赖列表中的模块的返回值
-            args = [],
-            // 需要安装的模块数
-            dn = 0,
-            // 已安装完的模块数
-            cn = 0,
-            id = parent || "cb" + (cbi++).toString(32),
-            parent = parent || basepath
-            String(list).replace($.rword, function(el) {
-                var array = parseURL(el, parent),
-                    url = array[0];
-                if(array[1] == "js") {
-                    dn++;
-                    if(!modules[url]) {
-                        modules[url] = {
-                            id: url,
-                            parent: parent,
-                            exports: {}
-                        };
-                        loadJS(url);
-                    } else if(modules[url].state === 2) {
-                        cn++;
-                    }
-                    if(!deps[url]) {
-                        args.push(url);
-                        deps[url] = "司徒正美"; //去重
-                    }
-                } else if(array[1] === "css") {
-                    loadCSS(url);
+        // 用于依赖列表中的模块的返回值
+        args = [],
+        // 需要安装的模块数
+        dn = 0,
+        // 已安装完的模块数
+        cn = 0,
+        id = parent || "cb" + (cbi++).toString(32),
+        parent = parent || basepath
+        String(list).replace($.rword, function(el) {
+            var array = parseURL(el, parent),
+            url = array[0];
+            if(array[1] == "js") {
+                dn++;
+                if(!modules[url]) {
+                    modules[url] = {
+                        id: url,
+                        parent: parent,
+                        exports: {}
+                    };
+                    loadJS(url);
+                } else if(modules[url].state === 2) {
+                    cn++;
                 }
-            });
+                if(!deps[url]) {
+                    args.push(url);
+                    deps[url] = "司徒正美"; //去重
+                }
+            } else if(array[1] === "css") {
+                loadCSS(url);
+            }
+        });
         //创建或更新模块的状态
         modules[id] = {
             id: id,
@@ -533,7 +535,7 @@
      * @api public
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
-        var args = $.slice( arguments );
+        var args = $.slice(arguments);
         if(typeof id == "string") {
             var _id = args.shift();
         }
@@ -578,7 +580,7 @@
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret = factory.apply(global, array);
+        ret = factory.apply(global, array);
         module.state = 2;
         if(ret !== void 0) {
             modules[id].exports = ret
@@ -638,8 +640,8 @@
         $.exports();
     });
     $.exports($.config.nick + postfix); //防止不同版本的命名空间冲突
-    //============================合并核心模块支持===========================
-    /*combine modules*/
+//============================合并核心模块支持===========================
+/*combine modules*/
 
 }(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
 /**
