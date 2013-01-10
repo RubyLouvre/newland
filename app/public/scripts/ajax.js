@@ -2,7 +2,7 @@
 //  数据交互模块
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
-define("ajax",["mass","$lang"], function($){
+define("ajax",["mass","$interact"], function($){
     var global = this,
     DOC = global.document,
     r20 = /%20/g,
@@ -10,16 +10,16 @@ define("ajax",["mass","$lang"], function($){
     encode = encodeURIComponent,
     decode = decodeURIComponent,
     rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE的换行符不包含 \r
-    rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
+    rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
     rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
     //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
     //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
-    curl = DOC.URL;
-
+    curl = DOC.URL,
+    segments = rurl.exec( curl.toLowerCase() ) || [],
     //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
-    var s = ["XMLHttpRequest",
+    s = ["XMLHttpRequest",
     "ActiveXObject('Msxml2.XMLHTTP.6.0')",
     "ActiveXObject('Msxml2.XMLHTTP.3.0')",
     "ActiveXObject('Msxml2.XMLHTTP')",
@@ -36,8 +36,8 @@ define("ajax",["mass","$lang"], function($){
             }
         }catch(e){}
     }
-    var segments = rurl.exec( curl.toLowerCase() ) || [],
-    accepts  = {
+   
+    var accepts  = {
         xml: "application/xml, text/xml",
         html: "text/html",
         text: "text/plain",
@@ -214,7 +214,7 @@ define("ajax",["mass","$lang"], function($){
     /*=============================================================================================
     从这里开始是数据交互模块的核心,包含一个ajax方法,ajaxflow对象,传送器集合,转换器集合
     =============================================================================================*/
-    var ajaxflow = new $.EventTarget
+    var ajaxflow = new $.Flow
     var transports = { }//传送器，我们可以通过XMLHttpRequest, Script, Iframe与后端
     var converters = {   //转换器，返回用户想要做的数据（从原始返回值中提取加工）
         text: function(xhr, text, xml){
@@ -245,7 +245,7 @@ define("ajax",["mass","$lang"], function($){
         }else if( dataType == "jsonp" ){
             if( opts.crossDomain ){// opts.crossDomain &&
                 $.log("使用script发出JSONP请求")
-                ajaxflow.dispatchEvent("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
+                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
@@ -302,7 +302,7 @@ define("ajax",["mass","$lang"], function($){
      * ajax.send("key=val&key1=val2");
      */
     $.XHR = $.factory({
-        inherit: $.EventTarget,
+        inherit: $.Flow,
         init:function( opts ){
             $.mix(this, {
                 responseData:null,
@@ -401,10 +401,10 @@ define("ajax",["mass","$lang"], function($){
             }
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
 
-            this.dispatchEvent( eventType, this.responseData, statusText);
-            ajaxflow.dispatchEvent( eventType );
-            this.dispatchEvent("complete", this.responseData, statusText);
-            ajaxflow.dispatchEvent( "complete" );
+            this.fire( eventType, this.responseData, statusText);
+            ajaxflow.fire( eventType );
+            this.fire("complete", this.responseData, statusText);
+            ajaxflow.fire( "complete" );
             delete this.transport;
         }
     });
@@ -570,7 +570,7 @@ define("ajax",["mass","$lang"], function($){
         delete $[ xhr.jsonp ];
         return json;
     }
-    ajaxflow.addEventListener("start", function(e, dummyXHR, url, jsonp, jsonpCallback) {
+    ajaxflow.bind("start", function(e, dummyXHR, url, jsonp, jsonpCallback) {
         $.log("jsonp start...");
         var namespace =  DOC.URL.replace(/(#.+|\W)/g,'');
         jsonpCallback = dummyXHR.jsonp = jsonpCallback || "jsonp"+dummyXHR.uuid().replace(/-/g,"");
@@ -596,8 +596,8 @@ define("ajax",["mass","$lang"], function($){
         data = $.unparam(data);
         var ret = [], d, isArray, vs, i, e;
         for (d in data) {
-            isArray = $.isArray(data[d]);
-            vs = $.makeArray( data[d])
+            isArray = Array.isArray(data[d]);
+            vs = isArray?  data[d]: [data[d]]
             // 数组和原生一样对待，创建多个同名输入域
             for (i = 0; i < vs.length; i++) {
                 e = DOC.createElement("input");
