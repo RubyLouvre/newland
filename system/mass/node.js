@@ -9,7 +9,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
     types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
     //需要处理套嵌关系的标签
-    rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
+    rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
     adjacent = "insertAdjacentHTML",
     TAGS = "getElementsByTagName"
     function getDoc() {
@@ -220,7 +220,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         $.fn[method] = function(item) {
             return manipulate(this, method, item, this.ownerDocument);
         }
-        $.fn[method + "To"] = function() {
+        $.fn[method + "To"] = function(item) {
             $(item, this.ownerDocument)[method](this);
             return this;
         }
@@ -265,7 +265,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     }
     var matchesAPI = cssName("matchesSelector", $.html);
     $.mix({
-        //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
+        //判定元素是否支持此样式   http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
         //判定元素节点是否匹配CSS表达式
         match: function(node, expr) {
@@ -348,9 +348,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             }
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
-            
             $.fixParseHTML(wrapper, html);
-
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
                 fragment.appendChild(firstChild);
             }
@@ -741,4 +739,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.5.21 Remove $("body") case; $(document.body) is 2x faster.
 2012.5.28 cssName支持检测mozMatchesSelector, Fix $.match BUG
 2012.7.31 使用$.Array.merge代替不可靠的[].push,对cloneNode进行重构,只对元素节点进行修复
+2013.1.17 修正rnest正则,防止遗漏tbody
  */

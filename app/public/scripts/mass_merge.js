@@ -861,7 +861,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         
         filter: function(obj, fn, scope) {
             for(var i = 0, n = obj.length, ret = []; i < n; i++) {
-                var val = fn.call(scope, obj[i], i);
+                var val = fn.call(scope||obj[i], obj[i], i);
                 if(val === true) {
                     ret[ret.length] = obj[i]
                 }
@@ -3170,7 +3170,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
     types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
     //需要处理套嵌关系的标签
-    rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
+    rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
     adjacent = "insertAdjacentHTML",
     TAGS = "getElementsByTagName"
     function getDoc() {
@@ -3381,7 +3381,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         $.fn[method] = function(item) {
             return manipulate(this, method, item, this.ownerDocument);
         }
-        $.fn[method + "To"] = function() {
+        $.fn[method + "To"] = function(item) {
             $(item, this.ownerDocument)[method](this);
             return this;
         }
@@ -3426,7 +3426,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     }
     var matchesAPI = cssName("matchesSelector", $.html);
     $.mix({
-        //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
+        //判定元素是否支持此样式   http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
         //判定元素节点是否匹配CSS表达式
         match: function(node, expr) {
@@ -3501,9 +3501,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             }
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
-            
             $.fixParseHTML(wrapper, html);
-
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
                 fragment.appendChild(firstChild);
             }
@@ -5407,7 +5405,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                         matches = [];
                         for(var i = 0; i < delegateCount; i++) {
                             handleObj = handlers[i];
-                            sel = handleObj.selector;
+                            sel = handleObj.selector + " ";//避免与Ovject.prototype的属性冲突,比如toString, valueOf等
                             //判定目标元素(this)的孩子(cur)是否匹配（sel）
                             if(selMatch[sel] === void 0) {
                                 selMatch[sel] = $(sel, this).index(cur) >= 0
@@ -5546,6 +5544,8 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                     hash.times = el;
                 } else if(typeof el == "function") {
                     hash.handler = el
+                } else if(typeof el == "object") {
+                    $.mix(hash, el, false);
                 }
                 if(typeof el === "string") {
                     if(hash.type != null) {
