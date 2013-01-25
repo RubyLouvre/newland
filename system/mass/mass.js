@@ -26,8 +26,8 @@ function(global, DOC) {
         "undefined": "Undefined"
     }
     var toString = class2type.toString,
-        basepath
-        /**
+    basepath
+    /**
          * 命名空间
          * @namespace 可变的短命名空间
          * @param  {String|Function} expr  CSS表达式或函数
@@ -67,9 +67,9 @@ function(global, DOC) {
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
-            i = 1,
-            key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+        i = 1,
+        key, //如果最后参数是布尔，判定是否覆写同名属性
+        ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -106,7 +106,7 @@ function(global, DOC) {
             return parsings.slice.call(nodes, start, end);
         } : function(nodes, start, end) {
             var ret = [],
-                n = nodes.length;
+            n = nodes.length;
             if(end === void 0 || typeof end == "number" && isFinite(end)) {
                 start = parseInt(start, 10) || 0;
                 end = end == void 0 ? n : parseInt(end, 10);
@@ -227,7 +227,7 @@ function(global, DOC) {
             for(var i = 1, show = true; i < arguments.length; i++) {
                 level = arguments[i]
                 if(typeof level == "number") {
-                    show = level <= $.config.level
+                    show = level <= $.config.level;
                 } else if(level === true) {
                     page = true;
                 }
@@ -241,7 +241,9 @@ function(global, DOC) {
                         DOC.body.appendChild(div);
                     });
                 } else if(global.console) {
-                    global.console.log(str);
+                    console.log(str);
+                }else if(global.opera){
+                    opera.postError(str);
                 }
             }
             return str;
@@ -258,7 +260,7 @@ function(global, DOC) {
                 array = array.match($.rword) || [];
             }
             var result = {},
-                value = val !== void 0 ? val : 1;
+            value = val !== void 0 ? val : 1;
             for(var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
@@ -325,9 +327,9 @@ function(global, DOC) {
 
     (function(scripts) {
         var cur = scripts[scripts.length - 1],
-            url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
-            kernel = $.config;
-        basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
+        url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+        kernel = $.config;
+        basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1) ;
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
         kernel.level = 9;
@@ -375,7 +377,7 @@ function(global, DOC) {
                 if(tmp !== "." && tmp != "/") { //相对于根路径
                     ret = basepath + url;
                 } else if(url.slice(0, 2) == "./") { //相对于兄弟路径
-                    ret = parent + url.substr(1);
+                    ret = parent + url.slice(1);
                 } else if(url.slice(0, 2) == "..") { //相对于父路径
                     var arr = parent.replace(/\/$/, "").split("/");
                     tmp = url.replace(/\.\.\//g, function() {
@@ -407,22 +409,34 @@ function(global, DOC) {
         if(DOC.currentScript) { //firefox 4+
             return DOC.currentScript.src;
         }
-        //  参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
-        var stack, e, i, node;
+        // 参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
+        var stack;
         try {
             a.b.c(); //强制报错,以便捕获e.stack
-        } catch(e) {
+        } catch(e) {//safari的错误对象只有line,sourceId,sourceURL
             stack = e.stack;
+            if(!stack && window.opera){
+                //opera 9没有e.stack,但有e.Backtrace,但不能直接取得,需要对e对象转字符串进行抽取
+                stack = (String(e).match(/of linked script \S+/g) || []).join(" ");
+            }
         }
         if(stack) {
-            // chrome IE10使用 at, firefox opera 使用 @
-            e = stack.indexOf(' at ') !== -1 ? ' at ' : '@';
-            i = stack.lastIndexOf(e);
-            var a = stack.slice(i + e.length).replace(/\s\s*$/, "").replace(/(:\d+)?:\d+$/i, "");
-            return a
+            /**e.stack最后一行在所有支持的浏览器大致如下:
+            *chrome23:
+            * at http://113.93.50.63/data.js:4:1
+            *firefox17:
+            *@http://113.93.50.63/query.js:4
+            *opera12:http://www.oldapps.com/opera.php?system=Windows_XP
+            *@http://113.93.50.63/data.js:4
+            *IE10:
+            *  at Global code (http://113.93.50.63/data.js:4:1)
+            */
+            stack = stack.split( /[@ ]/g).pop();//取得最后一行,最后一个空格或@之后的部分
+            stack = stack[0] == "(" ? stack.slice(1,-1) : stack;
+            return stack.replace(/(:\d+)?:\d+$/i, "");//去掉行号与或许存在的出错字符起始位置
         }
         var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
-        for(i = 0; node = nodes[i++];) {
+        for(var i = 0, node; node = nodes[i++];) {
             if(node.className == moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
@@ -443,7 +457,7 @@ function(global, DOC) {
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         loop: for(var i = loadings.length, id; id = loadings[--i];) {
             var obj = modules[id],
-                deps = obj.deps;
+            deps = obj.deps;
             for(var key in deps) {
                 if(deps.hasOwnProperty(key) && modules[key].state != 2) {
                     continue loop;
@@ -491,12 +505,11 @@ function(global, DOC) {
         }
 
         node.src = url; //插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
-        if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
-            html.insertBefore(node, head); //在最新的firefox下,如果父节点还没有完成不能插入新节点
-        } else {
-            head.insertBefore(node, head.firstChild); //chrome下第二个参数不能为null
-        }
-
+        //  if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
+        //       html.insertBefore(node, head); //在最新的firefox Nightly下,如果父节点还没有完成不能插入新节点
+        //   } else {
+        head.insertBefore(node, head.firstChild); //chrome下第二个参数不能为null
+        //   }
         $.log("正准备加载 " + node.src, 7) //更重要的是IE6下可以收窄getCurrentScript的寻找范围
     }
 
@@ -522,17 +535,17 @@ function(global, DOC) {
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-            // 用于依赖列表中的模块的返回值
-            args = [],
-            // 需要安装的模块数
-            dn = 0,
-            // 已安装完的模块数
-            cn = 0,
-            id = parent || "cb" + (cbi++).toString(32);
+        // 用于依赖列表中的模块的返回值
+        args = [],
+        // 需要安装的模块数
+        dn = 0,
+        // 已安装完的模块数
+        cn = 0,
+        id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath
         String(list).replace($.rword, function(el) {
             var array = parseURL(el, parent),
-                url = array[0];
+            url = array[0];
             if(array[1] == "js") {
                 dn++;
                 if(!modules[url]) {
@@ -621,7 +634,7 @@ function(global, DOC) {
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret = factory.apply(global, array);
+        ret = factory.apply(global, array);
         module.state = 2;
         if(ret !== void 0) {
             modules[id].exports = ret;
@@ -681,8 +694,8 @@ function(global, DOC) {
         $.exports();
     });
     $.exports($.config.nick + postfix); //防止不同版本的命名空间冲突
-    //============================合并核心模块支持===========================
-    /*combine modules*/
+//============================合并核心模块支持===========================
+/*combine modules*/
 
 }(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
 /**
