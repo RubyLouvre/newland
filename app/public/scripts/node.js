@@ -1,7 +1,7 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? [] : ["$node_fix"]), function($) {
+define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEvent ? [] : ["$node_fix"]), function($) {
     var rtag = /^[a-zA-Z]+$/,
     rtagName = /<([\w:]+)/,
     //取得其tagName
@@ -12,7 +12,8 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
     adjacent = "insertAdjacentHTML",
     TAGS = "getElementsByTagName"
-    function getDoc() {
+
+    function getDoc() { //获取文档对象
         for(var i = 0, el; i < arguments.length; i++) {
             if(el = arguments[i]) {
                 if(el.nodeType) {
@@ -24,8 +25,9 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         }
         return document;
     }
-    $.fixCloneNode = $.fixCloneNode || function(node){
-        return  node.cloneNode(true)
+    $.fixCloneNode = $.fixCloneNode ||
+    function(node) {
+        return node.cloneNode(true)
     }
     $.fixParseHTML = $.fixParseHTML || $.noop;
     $.mix($.factory).implement({
@@ -66,10 +68,13 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         },
         mass: $.mass,
         length: 0,
-        valueOf: function() {
+        valueOf: function() { //转换为纯数组对象
             return Array.prototype.slice.call(this);
         },
-        toString: function() {
+        size: function(){
+            return this.length;
+        },
+        toString: function() { //对得它们的tagName，组成纯数组返回
             var i = this.length,
             ret = [],
             getType = $.type;
@@ -78,59 +83,59 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             }
             return ret.join(", ");
         },
-        labor: function(nodes) {
+        labor: function(nodes) { //用于构建一个与对象具有相同属性，但里面的节点集不同的mass对象
             var neo = new $;
             neo.context = this.context;
             neo.selector = this.selector;
             neo.ownerDocument = this.ownerDocument;
             return $.Array.merge(neo, nodes || []);
         },
-        slice: function(a, b) {
+        slice: function(a, b) { //传入起止值，截取原某一部分再组成mass对象返回
             return this.labor($.slice(this, a, b));
         },
-        get: function(num) {
+        get: function(num) { //取得与索引值相对应的节点，若为负数从后面取起，如果不传，则返回节点集的纯数组
             return num == null ? this.valueOf() : this[num < 0 ? this.length + num : num];
         },
-        eq: function(i) {
+        eq: function(i) { //取得与索引值相对应的节点，并构成mass对象返回
             return i === -1 ? this.slice(i) : this.slice(i, +i + 1);
         },
-        gt: function(i) {
+        gt: function(i) { //取得原对象中索引值大于传参的节点们，并构成mass对象返回
             return this.slice(i + 1, this.length);
         },
-        lt: function(i) {
+        lt: function(i) { //取得原对象中索引值小于传参的节点们，并构成mass对象返回
             return this.slice(0, i);
         },
-        first: function() {
+        first: function() { //取得原对象中第一个的节点，并构成mass对象返回
             return this.slice(0, 1);
         },
-        even: function() {
+        last: function() { //取得原对象中最后一个的节点，并构成mass对象返回
+            return this.slice(-1);
+        },
+        even: function() { //取得原对象中索引值为偶数的节点，并构成mass对象返回
             return this.labor($.filter(this, function(_, i) {
                 return i % 2 === 0;
             }));
         },
-        odd: function() {
+        odd: function() { //取得原对象中索引值为奇数的节点，并构成mass对象返回
             return this.labor($.filter(this, function(_, i) {
                 return i % 2 === 1;
             }));
         },
-        last: function() {
-            return this.slice(-1);
-        },
+
         each: function(fn) {
             return $.each(this, fn);
         },
         map: function(fn) {
             return this.labor($.map(this, fn));
         },
-        clone: function(dataAndEvents, deepDataAndEvents) {
-            dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
+        clone: function(dataAndEvents, deepDataAndEvents) { //复制原mass对象，它里面的节点也一一复制，
+            dataAndEvents = dataAndEvents == null ? false : dataAndEvents; //传参用于决定是否复制事件与数据
             deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
             return this.map(function() {
                 return cloneNode(this, dataAndEvents, deepDataAndEvents);
             });
         },
-        //取得或设置节点的innerHTML属性
-        html: function(item) {
+        html: function(item) { //取得或设置节点的innerHTML属性
             item = item === void 0 ? item : item == null ? '' : item + ""
             return $.access(this, 0, item, function(el) { //getter
                 //如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
@@ -158,8 +163,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
                 this.empty().append(value);
             }, this);
         },
-        // 取得或设置节点的text或innerText或textContent属性
-        text: function(item) {
+        text: function(item) { // 取得或设置节点的text或innerText或textContent属性
             return $.access(this, 0, item, function(el) {
                 if(!el) { //getter
                     return "";
@@ -171,8 +175,8 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
                 this.empty().append(this.ownerDocument.createTextNode(item));
             }, this);
         },
-        // 取得或设置节点的outerHTML
-        outerHTML: function(item) {
+
+        outerHTML: function(item) { // 取得或设置节点的outerHTML
             return $.access(this, 0, item, function(el) {
                 if(el && el.nodeType === 1) {
                     return "outerHTML" in el ? el.outerHTML : outerHTML(el);
@@ -226,11 +230,11 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         }
     });
     //添加对jQuery insertAfter/insertBefore的兼容支持
-    $.fn.insertAfter = function(item){
+    $.fn.insertAfter = function(item) {
         $.log("insertAfter is deprecated, instead of afterTo")
         return this.afterTo(item);
     }
-    $.fn.insertBefore = function(item){
+    $.fn.insertBefore = function(item) {
         $.log("insertBefore is deprecated, instead of beforeTo")
         return this.beforeTo(item);
     }
@@ -267,22 +271,23 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     $.mix({
         //判定元素是否支持此样式   http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
-        //判定元素节点是否匹配CSS表达式
+   
         match: function(node, expr) {
+            //判定元素节点是否匹配CSS表达式
             try {
                 return node[matchesAPI](expr);
             } catch(e) {
-                var parent = node.parentNode,
-                array
+                var parent = node.parentNode;
                 if(parent) {
-                    array = $.query(expr, node.ownerDocument);
+                    var array = $.query(expr, node.ownerDocument);
                     return array.indexOf(node) != -1
                 }
                 return false;
             }
         },
-        //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
+
         access: function(elems, key, value, getter, setter, bind) {
+            //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
             var length = elems.length;
             setter = typeof setter === "function" ? setter : getter;
             bind = arguments[arguments.length - 1];
@@ -400,15 +405,16 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     tagHooks.optgroup = tagHooks.option;
     tagHooks.tbody = tagHooks.tfoot = tagHooks.colgroup = tagHooks.caption = tagHooks.thead;
     tagHooks.th = tagHooks.td;
-    function insertAdjacentNode(elems, item, handler) {
+
+    function insertAdjacentNode(elems, item, handler) { //使用appendChild,insertBefore实现，item为普通节点
         for(var i = 0, el; el = elems[i]; i++) { //第一个不用复制，其他要
             handler(el, i ? cloneNode(item, true, true) : item);
         }
     }
 
     function insertAdjacentHTML(elems, item, fastHandler, handler) {
-        for(var i = 0, el; el = elems[i++];) {
-            if(item.nodeType) {
+        for(var i = 0, el; el = elems[i++];) { //尝试使用insertAdjacentHTML
+            if(item.nodeType) { //如果是文档碎片
                 handler(el, item.cloneNode(true));
             } else {
                 fastHandler(el, item);
@@ -444,7 +450,8 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     function manipulate(nodes, type, item, doc) {
         var elems = $.filter(nodes, function(el) {
             return el.nodeType === 1; //转换为纯净的元素节点数组
-        }), handler = insertHooks[type];
+        }),
+        handler = insertHooks[type];
         if(item.nodeType) {
             //如果是传入元素节点或文本节点或文档碎片
             insertAdjacentNode(elems, item, handler);
@@ -452,19 +459,19 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             //如果传入的是字符串片断
             //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
             var fast = (type !== "replace") && $.support[adjacent] && !rnest.test(item);
-            if(!fast){
+            if(!fast) {
                 item = $.parseHTML(item, doc)
             }
             insertAdjacentHTML(elems, item, insertHooks[type + "2"], handler);
         } else if(item.length) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
-            insertAdjacentFragment(elems, item, doc,  handler);
+            insertAdjacentFragment(elems, item, doc, handler);
         }
         return nodes;
     }
     $.implement({
         data: function(key, item) {
-            if(key === void 0) {
+            if(key === void 0) { //如果什么都不传，则把用户数据与用户写在标签内以data-*形式储存的数据一并返回
                 if(this.length) {
                     var target = this[0],
                     data = $.data(target);
@@ -484,22 +491,24 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
                 return $.data(el, key, item);
             })
         },
-        removeData: function(key) {
+        removeData: function(key) { //移除用户数据
             return this.each(function() {
                 $.removeData(this, key);
             });
         }
     });
 
-    //移除节点对数据的清除
     function cleanNode(node) {
+        //移除节点对数据的清除
         $._removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-    //复制节点时对数据与事件的复制处理
+
     function cloneNode(node, dataAndEvents, deepDataAndEvents) {
+        //复制节点时对数据与事件的复制处理
         if(node.nodeType === 1) {
-            var neo = $.fixCloneNode(node), src, neos, i
+            var neo = $.fixCloneNode(node),
+            src, neos, i
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if(dataAndEvents) {
                 $.mergeData(neo, node);
@@ -514,7 +523,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             src = neos = null;
             return neo;
         } else {
-            return node.cloneNode(true)
+            return node.cloneNode(true);
         }
     }
 
@@ -539,32 +548,31 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     }
 
     $.implement({
-        //取得当前匹配节点的所有匹配expr的后代，组成新mass实例返回。
         find: function(expr) {
+            //取得当前匹配节点的所有匹配expr的后代，组成新mass实例返回。
             return this.labor($.query(expr, this));
         },
-        //取得当前匹配节点的所有匹配expr的节点，组成新mass实例返回。
         filter: function(expr) {
-            return this.labor(filterhElement(this.valueOf(), expr, this.ownerDocument, false));
+            //取得当前匹配节点的所有匹配expr的节点，组成新mass实例返回。
+            return this.labor(filterhElement(this, expr, this.ownerDocument, false));
         },
-        //取得当前匹配节点的所有不匹配expr的节点，组成新mass实例返回。
         not: function(expr) {
-            return this.labor(filterhElement(this.valueOf(), expr, this.ownerDocument, true));
+            //取得当前匹配节点的所有不匹配expr的节点，组成新mass实例返回。
+            return this.labor(filterhElement(this, expr, this.ownerDocument, true));
+        },
+        has: function(expr) {
+            //在当前的节点中，往下遍历他们的后代，收集匹配给定的CSS表达式的节点，封装成新mass实例返回
+            var nodes = $(expr, this.ownerDocument);
+            var array = $.filter(this, function(el){
+                for(var i = 0, node; node = nodes[i++];) {
+                    return $.contains(el, node) //a包含b
+                }
+            })
+            return this.labor(array)
         },
 
-        //在当前的节点中，往下遍历他们的后代，收集匹配给定的CSS表达式的节点，封装成新mass实例返回
-        has: function(expr) {
-            var nodes = $(expr, this.ownerDocument);
-            return this.filter(function() {
-                for(var i = 0, node; node = nodes[i++];) {
-                    if($.contains(this, node)) { //a包含b
-                        return true;
-                    }
-                }
-            });
-        },
-        // 在当前的节点中，往上遍历他们的祖先，收集最先匹配给定的CSS表达式的节点，封装成新mass实例返回
         closest: function(expr, context) {
+            // 在当前的节点中，往上遍历他们的祖先，收集最先匹配给定的CSS表达式的节点，封装成新mass实例返回
             var nodes = $(expr, context || this.ownerDocument).valueOf();
             //遍历原mass对象的节点
             for(var i = 0, ret = [], cur; cur = this[i++];) {
@@ -585,8 +593,9 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             //将节点集合重新包装成一个新jQuery对象返回
             return this.labor(ret);
         },
-        //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
+
         is: function(expr) {
+            //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
             var nodes = $.query(expr, this.ownerDocument),
             obj = {},
             uid;
@@ -598,9 +607,9 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
                 return obj[$.getUid(el)];
             });
         },
-        //返回指定节点在其所有兄弟中的位置
+
         index: function(expr) {
-            var first = this[0]
+            var first = this[0]; //返回指定节点在其所有兄弟中的位置
             if(!expr) { //如果没有参数，返回第一元素位于其兄弟的位置
                 return(first && first.parentNode) ? this.first().prevAll().length : -1;
             }
@@ -618,19 +627,17 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         not = !! not;
         if(typeof expr === "string") {
             var fit = $.query(expr, doc);
-            nodes.forEach(function(node) {
+            ret = $.filter(nodes, function(node) {
                 if(node.nodeType === 1) {
-                    if((fit.indexOf(node) !== -1) ^ not) {
-                        ret.push(node);
-                    }
+                    return (fit.indexOf(node) !== -1) ^ not
                 }
             });
         } else if($.type(expr, "Function")) {
-            return nodes.filter(function(node, i) {
+            return $.filter(nodes, function(node, i) {
                 return !!expr.call(node, node, i) ^ not;
             });
         } else if(expr.nodeType) {
-            return nodes.filter(function(node) {
+            return $.filter(nodes, function(node) {
                 return(node === expr) ^ not;
             });
         }
@@ -656,32 +663,32 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     };
 
     $.each({
-        parent: function(el) {
+        parent: function(el) {//取得父节点
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent : [];
         },
-        parents: function(el) {
+        parents: function(el) {//取得祖先节点
             return travel(el, "parentNode").reverse();
         },
-        parentsUntil: function(el, expr) {
+        parentsUntil: function(el, expr) {//往上取节点,直到某一条件不符合为止
             return travel(el, "parentNode", expr).reverse();
         },
-        next: function(el) { //nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
+        next: function(el) { //取右边的兄弟节点 nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
             return travel(el, "nextSibling", true);
         },
-        nextAll: function(el) {
+        nextAll: function(el) {//取右边所有的兄弟节点
             return travel(el, "nextSibling");
         },
-        nextUntil: function(el, expr) {
+        nextUntil: function(el, expr) {//往右取节点,直到某一条件不符合为止
             return travel(el, "nextSibling", expr);
         },
-        prev: function(el) {
+        prev: function(el) {//取左边的兄弟节点
             return travel(el, "previousSibling", true);
         },
-        prevAll: function(el) {
+        prevAll: function(el) {//取左边所有的兄弟节点
             return travel(el, "previousSibling").reverse();
         },
-        prevUntil: function(el, expr) {
+        prevUntil: function(el, expr) {//往左取节点,直到某一条件不符合为止
             return travel(el, "previousSibling", expr).reverse();
         },
         children: function(el) { //支持情况chrome1+ FF3.5+,IE5+,opera10+,safari4+
@@ -689,10 +696,10 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
                 return node.nodeType === 1;
             });
         },
-        siblings: function(el) {
+        siblings: function(el) {//取所有兄弟节点
             return travel(el, "previousSibling").reverse().concat(travel(el, "nextSibling"));
         },
-        contents: function(el) {
+        contents: function(el) {//取所有子孙
             return el.tagName === "IFRAME" ? el.contentDocument || el.contentWindow.document : $.slice(el.childNodes);
         }
     }, function(method, name) {
@@ -740,4 +747,4 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.5.28 cssName支持检测mozMatchesSelector, Fix $.match BUG
 2012.7.31 使用$.Array.merge代替不可靠的[].push,对cloneNode进行重构,只对元素节点进行修复
 2013.1.17 修正rnest正则,防止遗漏tbody
- */
+*/
