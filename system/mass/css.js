@@ -1,5 +1,5 @@
 //=========================================
-// 样式操作模块 v4 by 司徒正美
+// 样式操作模块 v5 by 司徒正美
 //=========================================
 define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     var adapter = $.cssHooks || ($.cssHooks = {}),
@@ -18,9 +18,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             styles = styles || getStyles(node);
             if(styles) {
                 ret = name == "filter" ? styles.getPropertyValue(name) : styles[name]
-                var style = node.style; //这里只有firefox与IE10会智能处理未插入DOM树的节点的样式,它会自动打内联样式
+                var style = node.style; //这里只有firefox与IE10会智能处理未插入DOM树的节点的样式,它会自动找内联样式
                 if(ret === "" && !$.contains(node.ownerDocument, node)) {
-                    ret = style[name]; //其他需要我们手动取内联样式
+                    ret = style[name]; //其他浏览器需要我们手动取内联样式
                 }
                 //  Dean Edwards大神的hack，用于转换margin的百分比值为更有用的像素值
                 // webkit不能转换top, bottom, left, right, margin, text-indent的百分比值
@@ -92,12 +92,27 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             if(value === void 0) { //获取样式
                 return(adapter[prop + ":get"] || getter)(node, name, styles);
             } else { //设置样式
-                var temp;
-                if(typeof value === "string" && (temp = rrelNum.exec(value))) {
-                    value = (temp[1] + 1) * temp[2] + parseFloat($.css(node, name, void 0, styles));
+                var type = typeof value,
+                    temp;
+                if(type === "string" && (temp = rrelNum.exec(value))) {
+                    if($.support.calc && name in styles) {
+                        //在firefox18, ie10中必须要求calc括号中的运算符两边都有空白才生效
+                        var cur = styles[name],
+                            unit = (cur.match(/[a-z%]+$/) || [""])[0];
+                        return node.style[name] = $.support.calc + "(" + [styles[name], temp[1], temp[2] + unit].join(" ") + ")";
+                    } else {
+                        value = (+(temp[1] + 1) * +temp[2]) + parseFloat($.css(node, name, void 0, styles));
+                        type = "number";
+                    }
                 }
-                if(isFinite(value) && !$.cssNumber[prop]) {
+                if(type === "number" && !isFinite(value + "")) { //因为isFinite(null) == true
+                    return;
+                }
+                if(type === "number" && !$.cssNumber[prop]) {
                     value += "px";
+                }
+                if(value === "" && !$.support.cloneBackgroundStyle && name.indexOf("background") === 0) {
+                    node.style[name] = "inherit";
                 }
                 (adapter[prop + ":set"] || adapter["_default:set"])(node, name, value, styles);
             }
@@ -203,38 +218,58 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                     } else {
                         return num > 0 ? this : $.css(node, lower, size);
                     }
-                }, this)
+                }, this);
             }
         })
 
     });
     //=========================　生成　show hide toggle　=========================
-    var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd", "inline"),
+    var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,kbd", "inline"),
         blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"),
-        sandbox, sandboxDoc
-        $.callSandbox = function(parent, callback) {
-            if(!sandbox) {
-                sandbox = document.createElement("iframe");
-                sandbox.frameBorder = sandbox.width = sandbox.height = 0;
+        shadowRoot, shadowDoc, shadowBody, shadowWin, reuse
+        $.applyShadowDOM = function(callback) {
+            //用于提供一个沙箱环境,IE6-10,opera,safari,firefox使用iframe, chrome20+使用Shodow DOM
+            if(!shadowRoot) {
+                if(window.WebKitShadowRoot) { //如果支持WebKitShadowRoot
+                    shadowRoot = new WebKitShadowRoot($.html);
+                    shadowBody = document.createElement("div");
+                    shadowRoot.appendChild(shadowBody);
+                } else {
+                    shadowRoot = document.createElement("iframe");
+                }
+                (shadowBody || shadowRoot).style.cssText = "width:0px;height:0px;border:0 none;";
             }
-            parent.appendChild(sandbox);
-            if(!sandboxDoc || !sandbox.createElement) {
-                sandboxDoc = (sandbox.contentWindow || sandbox.contentDocument).document;
-                sandboxDoc.write("<!doctype html><html><body>");
-                sandboxDoc.close();
+            if(shadowRoot.nodeType == 1) {
+                $.html.appendChild(shadowRoot);
+                if(!reuse) { //firefox, safari, chrome不能重用shadowDoc,shadowWin
+                    shadowDoc = shadowRoot.contentDocument || shadowRoot.contentWindow.document;
+                    shadowWin = shadowDoc.defaultView || shadowDoc.parentWindow;
+                    shadowDoc.write("<!doctype html><html><body>");
+                    shadowDoc.close();
+                    reuse = window.VBArray || window.opera; //opera9-12, ie6-10有效
+                }
+                callback(shadowWin, shadowDoc, shadowDoc.body);
+                $.html.removeChild(shadowRoot);
+            } else {
+                callback(window, document, shadowBody);
+                shadowBody.innerHTML = "";
             }
-            callback(sandboxDoc);
-            parent.removeChild(sandbox);
         }
 
     $.mix(cacheDisplay, blocks);
     $.parseDisplay = function(nodeName) {
+        //用于取得此类标签的默认display值
         nodeName = nodeName.toLowerCase();
         if(!cacheDisplay[nodeName]) {
-            $.callSandbox(document.body, function(doc) {
-                var elem = doc.createElement(nodeName);
-                doc.body.appendChild(elem);
-                cacheDisplay[nodeName] = getter(elem, "display");
+            $.applyShadowDOM(function(win, doc, body, val) {
+                var node = doc.createElement(nodeName);
+                body.appendChild(node);
+                if(win.getComputedStyle) {
+                    val = win.getComputedStyle(node, null).display;
+                } else {
+                    val = node.currentStyle.display;
+                }
+                cacheDisplay[nodeName] = val;
             });
         }
         return cacheDisplay[nodeName];
@@ -257,10 +292,10 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                 continue;
             }
             values[index] = $._data(elem, "olddisplay");
-            status[index] = isHidden(elem)
+            status[index] = isHidden(elem);
             if(!values[index]) {
                 values[index] = status[index] ? $.parseDisplay(elem.nodeName) : getter(elem, "display");
-                $._data(elem, "olddisplay", values[index])
+                $._data(elem, "olddisplay", values[index]);
             }
         }
         //第二个循环用于设置样式，-1为toggle, 1为show, 0为hide
@@ -290,7 +325,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     function setOffset(node, options) {
         if(node && node.nodeType == 1) {
             var position = getter(node, "position");
-            //强逼定位
+            //强制定位
             if(position === "static") {
                 node.style.position = "relative";
             }
@@ -352,7 +387,6 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
         // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
         pos.top = box.top + scrollTop - clientTop, pos.left = box.left + scrollLeft - clientLeft;
-
         return pos;
     }
     //=========================　处理　position　=========================
@@ -363,7 +397,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                 left: 0
             }
         if(!node || node.nodeType !== 1) {
-            return
+            return;
         }
         //fixed 元素是相对于window
         if(getter(node, "position") === "fixed") {
@@ -397,16 +431,16 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     }
     $.fn.scrollParent = function() {
         var scrollParent, node = this[0],
-            pos = getter(node, "position")
-            if((window.VBArray && (/(static|relative)/).test(pos)) || (/absolute/).test(pos)) {
-                scrollParent = this.parents().filter(function() {
-                    return(/(relative|absolute|fixed)/).test(getter(this, "position")) && (/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
-                }).eq(0);
-            } else {
-                scrollParent = this.parents().filter(function() {
-                    return(/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
-                }).eq(0);
-            }
+            pos = getter(node, "position");
+        if((window.VBArray && (/(static|relative)/).test(pos)) || (/absolute/).test(pos)) {
+            scrollParent = this.parents().filter(function() {
+                return(/(relative|absolute|fixed)/).test(getter(this, "position")) && (/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
+            }).eq(0);
+        } else {
+            scrollParent = this.parents().filter(function() {
+                return(/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
+            }).eq(0);
+        }
         return(/fixed/).test(pos) || !scrollParent.length ? $(document) : scrollParent;
     }
     //=========================　处理　scrollLeft scrollTop　=========================
@@ -452,7 +486,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
 2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css 升级到v3
 2012.5.10 FIX toFloat BUG
 2012.5.26 重构$.fn.width, $.fn.height,$.fn.innerWidth, $.fn.innerHeight, $.fn.outerWidth, $.fn.outerHeight
-2012.11.25 添加旋转
+2012.11.25 v4 添加旋转
+2012.1.28 v5 css_fix去掉对auto的处理,为了提高性能,内部使用getter, getStyle进行快速取样式精确值，
+利用css3 calc函数进行增量或减量的样式设置，为cssNumber添加两个新成员
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 //z-index的最大值（各浏览器）http://hi.baidu.com/flondon/item/a64550ba98a9d3ef4ec7fd77
 http://joeist.com/2012/06/what-is-the-highest-possible-z-index-value/ 这里有更全面的测试
