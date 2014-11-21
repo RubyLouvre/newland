@@ -36,7 +36,7 @@
             var vmodel = avalon.define({
                 $id: "xxx",
                 a: 1,
-                arr: [4,5],
+                arr: [4, 5],
                 b: {
                     c: 2
                 }
@@ -47,13 +47,27 @@
             vmodel.b.$watch("c", function(v) {
                 console.log("b下面的c值发生改变了", v)
             })
+            vmodel.arr.$watch("[*]", function(v) {
+                console.log("数组监听自己的元素变化", v)
+            })
+            vmodel.arr.$watch("length", function(v) {
+                console.log("length", v)
+            })
             vmodel.$watch("b.c", function(n, o, k) {
                 console.log("fire b.c ", n, o, this)
+            })
+            vmodel.$watch("arr[*]", function(n, o, k) {
+                console.log("父对象监听子数组元素变化 ", n, o)
             })
             setTimeout(function() {
                 vmodel.b.c = 9
             })
-
+            setTimeout(function() {
+                vmodel.arr[0] = 10000
+            })
+            setTimeout(function() {
+                vmodel.arr.push(12)
+            })
         </script>
 
     </head>
