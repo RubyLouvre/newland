@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <!--        <script>
+                    window.onload = function() {
+                        var paths = ["avalon","map","set", "util", "path"]
+                        paths.forEach(function(path) {
+                            var node = document.createElement("script")
+                            node.src = path+".js"
+                            document.head.appendChild(node)
+                        })
+                    }
+                </script>-->
+        <!--        <script src="observe.js">
+        
+                </script>
+                <script>
+                    var obj = {foo: {bar: 'baz'}};
+                    var observer = new PathObserver(obj, 'foo.bar');
+                    observer.open(function(newValue, oldValue) {
+                        console.log(newValue, oldValue)
+                        // respond to obj.foo.bar having changed value.
+                    });
+                    obj.foo.bar = 1
+                    console.log(observer)
+                    setTimeout(function() {
+                        obj.foo.bar = 4
+                    })
+        
+                </script>-->
+        <script src="avalon2.js"></script>
+        <script>
+            var vmodel = avalon.define({
+                $id: "xxx",
+                a: 1,
+                b: {
+                    c: 2
+                }
+            })
+            vmodel.$watch("a", function(n, o) {
+                console.log(this, n, o)
+            })
+            vmodel.b.$watch("c", function(v) {
+                console.log("b下面的c值发生改变了", v)
+            })
+            vmodel.$watch("b.c", function(n, o, k) {
+                console.log("fire b.c ", n, o)
+            })
+            setTimeout(function() {
+                vmodel.b.c = 9
+            })
+
+        </script>
+
+    </head>
+    <body>
+        <div>TODO write content</div>
+    </body>
+</html>
