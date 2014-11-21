@@ -36,6 +36,7 @@
             var vmodel = avalon.define({
                 $id: "xxx",
                 a: 1,
+                arr: [4,5],
                 b: {
                     c: 2
                 }
@@ -47,7 +48,7 @@
                 console.log("b下面的c值发生改变了", v)
             })
             vmodel.$watch("b.c", function(n, o, k) {
-                console.log("fire b.c ", n, o)
+                console.log("fire b.c ", n, o, this)
             })
             setTimeout(function() {
                 vmodel.b.c = 9

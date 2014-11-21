@@ -38,14 +38,25 @@ function observeCallback(changes) {
             var newValue = object[name]
             var oldValue = change.oldValue
             if (array.length) {
-                var newValue = object[name]
+                var newValue = "value" in change ? change.value : object[name]
+                var target = "target" in change ? change.target : object
                 var oldValue = change.oldValue
                 array.forEach(function(fn) {
-                    fn.call(object, newValue, oldValue)
+                    fn.call(target, newValue, oldValue)
                 })
             }
             if (object.$parent) {
-                object.$parent.$fire(object.$surname + "." + name, newValue, oldValue)
+                var notifier = Object.getNotifier(object.$parent)
+                notifier.notify({
+                    object: object.$parent,
+                    type: "update",
+                    name: object.$surname + "." + name,
+                    oldValue: oldValue,
+                    value: newValue,
+                    target: object
+                });
+                // console.log(object.$surname + "." + name)
+                // object.$parent.$fire(object.$surname + "." + name, newValue, oldValue)
             }
         }
     })
@@ -58,6 +69,13 @@ function isObject(obj) {
 }
 var $$skipArray = String("$id,$surname,$watch,$unwatch,$parent,$fire,$events,$model,$skipArray").match(rword)
 function modelFactory($scope) {
+    if (Array.isArray($scope)) {
+        //  var arr = $scope.concat()
+        //     $scope.length = 0
+        var collection = Collection($scope)
+        //    collection.pushArray(arr)
+        return collection
+    }
     $scope.$events = []
     $scope.$watch = function(name, fn) {
         var array = this.$events[name] = this.$events[name] || []
@@ -87,4 +105,9 @@ function modelFactory($scope) {
     }
     Object.observe($scope, observeCallback)
     return $scope
+}
+
+function Collection(array) {
+    Object.observe(array, observeCallback)
+    return array
 }
