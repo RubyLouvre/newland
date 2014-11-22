@@ -322,27 +322,28 @@
             if (change.type === "update") {
                 var object = change.object
                 var name = change.name
+                console.log(name)
                 var events = object.$events
                 var array = events[name] || []
                 var newValue = object[name]
+                var newValue = "newValue" in change ? change.newValue :  object[name]
                 var oldValue = change.oldValue
+                var target =   "target" in change ? change.target : object
                 if (array.length) {
-                    var newValue = "value" in change ? change.value : object[name]
-                    var target = "target" in change ? change.target : object
-                    var oldValue = change.oldValue
+                //    var newValue = "value" in change ? change.value : object[name]
+            
                     array.forEach(function(fn) {
-                        fn.call(target, newValue, oldValue)
+                        fn.call(target, newValue, oldValue, name)
                     })
                 }
 
                 if (Array.isArray(object) && isIndex(name)) {
                     var array = events["[*]"]
                     if (array.length) {
-                        var newValue = "value" in change ? change.value : object[name]
-                        var target = "target" in change ? change.target : object
+                    
                         var oldValue = change.oldValue
                         array.forEach(function(fn) {
-                            fn.call(target, newValue, oldValue)
+                            fn.call(target, newValue, oldValue, name)
                         })
                     }
                 }
@@ -354,25 +355,26 @@
                             type: "update",
                             name: object.$surname + "[" + name + "]",
                             oldValue: oldValue,
-                            value: newValue,
-                            target: object
+                            newValue: newValue,
+                            target: target
                         });
                         notifier.notify({
                             object: object.$parent,
                             type: "update",
                             name: object.$surname + "[*]",
                             oldValue: oldValue,
-                            value: newValue,
-                            target: object
+                            newValue: newValue,
+                            target: target
                         });
                     } else {
+                    //    console.log(newValue)
                         notifier.notify({
                             object: object.$parent,
                             type: "update",
                             name: object.$surname + "." + name,
                             oldValue: oldValue,
-                            value: newValue,
-                            target: object
+                            newValue: newValue,
+                            target: target
                         });
                     }
                 }
@@ -1009,5 +1011,333 @@
             this.clearHTML(node).appendChild(a)
         }
     }(DOC.createElement("template"));
+    /*********************************************************************
+     *                            扫描系统                                *
+     **********************************************************************/
+    var scanObject = {}
+    avalon.scanCallback = function(fn, group) {
+        group = group || "$all"
+        var array = scanObject[group] || (scanObject[group] = [])
+        array.push(fn)
+    }
+    avalon.scan = function(elem, vmodel, group) {
+        elem = elem || root
+        group = group || "$all"
+        var array = scanObject[group] || []
+        var vmodels = vmodel ? [].concat(vmodel) : []
+        var scanIndex = 0;
+        var scanAll = false
+        var fn
+        var dirty = false
+        function cb(i) {
+            scanIndex += i
+            dirty = true
+            setTimeout(function() {
+                if (scanIndex <= 0 && !scanAll) {
+                    scanAll = true
+                    while (fn = array.shift()) {
+                        fn()
+                    }
+                }
+            })
+        }
+        vmodels.cb = cb
+        scanTag(elem, vmodels)
+        //html, include, widget
+        if (!dirty) {
+            while (fn = array.shift()) {
+                fn()
+            }
+        }
+    }
 
+    //http://www.w3.org/TR/html5/syntax.html#void-elements
+    var stopScan = oneObject("area,base,basefont,br,col,command,embed,hr,img,input,link,meta,param,source,track,wbr,noscript,noscript,script,style,textarea".toUpperCase())
+
+    function checkScan(elem, callback, innerHTML) {
+        var id = setTimeout(function() {
+            var currHTML = elem.innerHTML
+            clearTimeout(id)
+            if (currHTML === innerHTML) {
+                callback()
+            } else {
+                checkScan(elem, callback, currHTML)
+            }
+        })
+    }
+
+    function scanTag(elem, vmodels, node) {
+        //扫描顺序  ms-skip(0) --> ms-important(1) --> ms-controller(2) --> ms-if(10) --> ms-repeat(100) 
+        //--> ms-if-loop(110) --> ms-attr(970) ...--> ms-each(1400)-->ms-with(1500)--〉ms-duplex(2000)垫后        
+        var a = elem.getAttribute("ms-skip")
+        var b = elem.getAttributeNode("ms-important")
+        var c = elem.getAttributeNode("ms-controller")
+        if (typeof a === "string") {
+            return
+        } else if (node = b || c) {
+            var newVmodel = avalon.vmodels[node.value]
+            if (!newVmodel) {
+                return
+            }
+            //ms-important不包含父VM，ms-controller相反
+            var cb = vmodels.cb
+            vmodels = node === b ? [newVmodel] : [newVmodel].concat(vmodels)
+            vmodels.cb = cb
+            elem.removeAttribute(node.name) //removeAttributeNode不会刷新[ms-controller]样式规则
+            elem.classList.remove(node.name)
+            createSignalTower(elem, newVmodel)
+            elem.setAttribute("avalonctrl", node.value)
+            newVmodel.$events.expr = elem.tagName + '[avalonctrl="' + node.value + '"]'
+        }
+        scanAttr(elem, vmodels) //扫描特性节点
+    }
+
+    function createSignalTower(elem, vmodel) {
+        var id = elem.getAttribute("avalonctrl") || vmodel.$id
+        elem.setAttribute("avalonctrl", id)
+        vmodel.$events.expr = elem.tagName + '[avalonctrl="' + id + '"]'
+    }
+
+    function scanNodeList(parent, vmodels) {
+        var node = parent.firstChild
+        while (node) {
+            var nextNode = node.nextSibling
+            scanNode(node, node.nodeType, vmodels)
+            node = nextNode
+        }
+    }
+
+    function scanNodeArray(nodes, vmodels) {
+        for (var i = 0, node; node = nodes[i++]; ) {
+            scanNode(node, node.nodeType, vmodels)
+        }
+    }
+    function scanNode(node, nodeType, vmodels) {
+        if (nodeType === 1) {
+            scanTag(node, vmodels) //扫描元素节点
+        } else if (nodeType === 3 && rexpr.test(node.data)) {
+            scanText(node, vmodels) //扫描文本节点
+        } else if (kernel.commentInterpolate && nodeType === 8 && !rexpr.test(node.nodeValue)) {
+            scanText(node, vmodels) //扫描注释节点
+        }
+    }
+
+    function scanText(textNode, vmodels) {
+        var bindings = []
+        if (textNode.nodeType === 8) {
+            var leach = []
+            var value = trimFilter(textNode.nodeValue, leach)
+            var token = {
+                expr: true,
+                value: value
+            }
+            if (leach.length) {
+                token.filters = leach
+            }
+            var tokens = [token]
+        } else {
+            tokens = scanExpr(textNode.data)
+        }
+        if (tokens.length) {
+            for (var i = 0, token; token = tokens[i++]; ) {
+                var node = DOC.createTextNode(token.value) //将文本转换为文本节点，并替换原来的文本节点
+                if (token.expr) {
+                    var filters = token.filters
+                    var binding = {
+                        type: "text",
+                        element: node,
+                        value: token.value,
+                        filters: filters
+                    }
+                    if (filters && filters.indexOf("html") !== -1) {
+                        avalon.Array.remove(filters, "html")
+                        binding.type = "html"
+                        binding.group = 1
+                        if (!filters.length) {
+                            delete bindings.filters
+                        }
+                    }
+                    bindings.push(binding) //收集带有插值表达式的文本
+                }
+                hyperspace.appendChild(node)
+            }
+            textNode.parentNode.replaceChild(hyperspace, textNode)
+            if (bindings.length)
+                executeBindings(bindings, vmodels)
+        }
+    }
+
+    var rmsAttr = /ms-(\w+)-?(.*)/
+    var priorityMap = {
+        "if": 10,
+        "repeat": 90,
+        "data": 100,
+        "widget": 110,
+        "each": 1400,
+        "with": 1500,
+        "duplex": 2000,
+        "on": 3000
+    }
+
+    var ons = oneObject("animationend,blur,change,input,click,dblclick,focus,keydown,keypress,keyup,mousedown,mouseenter,mouseleave,mousemove,mouseout,mouseover,mouseup,scroll,submit")
+
+    function scanAttr(elem, vmodels) {
+        var attributes = elem.attributes
+        var bindings = [],
+                msData = {},
+                match
+        for (var i = 0, attr; attr = attributes[i++]; ) {
+            if (attr.specified) {
+                if (match = attr.name.match(rmsAttr)) {
+                    //如果是以指定前缀命名的
+                    var type = match[1]
+                    var param = match[2] || ""
+                    var value = attr.value
+                    var name = attr.name
+                    msData[name] = value
+                    if (ons[type]) {
+                        param = type
+                        type = "on"
+                    }
+                    if (typeof bindingHandlers[type] === "function") {
+                        var binding = {
+                            type: type,
+                            param: param,
+                            element: elem,
+                            name: match[0],
+                            value: value,
+                            priority: type in priorityMap ? priorityMap[type] : type.charCodeAt(0) * 10 + (Number(param) || 0)
+                        }
+                        if (type === "if" && param === "loop") {
+                            binding.priority += 100
+                        }
+                        if (vmodels.length) {
+                            bindings.push(binding)
+                            if (type === "widget") {
+                                elem.msData = elem.msData || msData
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (msData["ms-attr-checked"] && msData["ms-duplex"]) {
+            log("warning!一个元素上不能同时定义ms-checked与ms-duplex")
+        }
+        bindings.sort(function(a, b) {
+            return a.priority - b.priority
+        })
+        var firstBinding = bindings[0] || {}
+        switch (firstBinding.type) {
+            case "if":
+            case "repeat":
+            case "widget":
+                executeBindings([firstBinding], vmodels)
+                break
+            default:
+                executeBindings(bindings, vmodels)
+                if (!stopScan[elem.tagName] && rbind.test(elem.innerHTML + elem.textContent)) {
+                    scanNodeList(elem, vmodels) //扫描子孙元素
+                }
+                break;
+        }
+    }
+
+    function executeBindings(bindings, vmodels) {
+        if (bindings.length)
+            vmodels.cb(bindings.length)
+        for (var i = 0, data; data = bindings[i++]; ) {
+            data.vmodels = vmodels
+            bindingHandlers[data.type](data, vmodels)
+            if (data.evaluator && data.element && data.element.nodeType === 1) { //移除数据绑定，防止被二次解析
+                //chrome使用removeAttributeNode移除不存在的特性节点时会报错 https://github.com/RubyLouvre/avalon/issues/99
+                data.element.removeAttribute(data.name)
+            }
+        }
+        bindings.length = 0
+    }
+
+    var rfilters = /\|\s*(\w+)\s*(\([^)]*\))?/g,
+            r11a = /\|\|/g,
+            r11b = /U2hvcnRDaXJjdWl0/g
+    function trimFilter(value, leach) {
+        if (value.indexOf("|") > 0) { // 抽取过滤器 先替换掉所有短路与
+            value = value.replace(r11a, "U2hvcnRDaXJjdWl0") //btoa("ShortCircuit")
+            value = value.replace(rfilters, function(c, d, e) {
+                leach.push(d + (e || ""))
+                return ""
+            })
+            value = value.replace(r11b, "||") //还原短路与
+        }
+        return value
+    }
+
+    function scanExpr(str) {
+        var tokens = [],
+                value, start = 0,
+                stop
+
+        do {
+            stop = str.indexOf(openTag, start)
+            if (stop === -1) {
+                break
+            }
+            value = str.slice(start, stop)
+            if (value) { // {{ 左边的文本
+                tokens.push({
+                    value: value,
+                    expr: false
+                })
+            }
+            start = stop + openTag.length
+            stop = str.indexOf(closeTag, start)
+            if (stop === -1) {
+                break
+            }
+            value = str.slice(start, stop)
+            if (value) { //处理{{ }}插值表达式
+                var leach = []
+                value = trimFilter(value, leach)
+                tokens.push({
+                    value: value,
+                    expr: true,
+                    filters: leach.length ? leach : void 0
+                })
+            }
+            start = stop + closeTag.length
+        } while (1)
+        value = str.slice(start)
+        if (value) { //}} 右边的文本
+            tokens.push({
+                value: value,
+                expr: false
+            })
+        }
+
+        return tokens
+    }
+
+    /*********************************************************************
+     *                            bindings                               *
+     **********************************************************************/
+    var bindingExecutors = avalon.bindingExecutors = {
+        "text": function(val, elem) {
+            val = val == null ? "" : val //不在页面上显示undefined null
+            if (elem.nodeType === 3) { //绑定在文本节点上
+                elem.data = val
+            } else { //绑定在特性节点上
+                elem.textContent = val
+            }
+        }
+    }
+    var bindingHandlers = avalon.bindingHandlers = {
+        "text": function(data, vmodels) {
+            console.log(data, vmodels)
+          //  parseExprProxy(data.value, vmodels, data)
+        }
+    }
+     DOC.addEventListener("DOMContentLoaded", function(){
+         avalon.scan(document.body)
+     })
+   
 })(document)

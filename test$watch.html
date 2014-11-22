@@ -39,10 +39,17 @@
                 arr: [4, 5],
                 b: {
                     c: 2
+                },
+                ddd: {
+                    ccc: {
+                        bbb: {
+                            aaa: 3
+                        }
+                    }
                 }
             })
-            vmodel.$watch("a", function(n, o) {
-                console.log(this, n, o)
+            vmodel.$watch("a", function(a, b, c) {
+                console.log(this, a, b, c)
             })
             vmodel.b.$watch("c", function(v) {
                 console.log("b下面的c值发生改变了", v)
@@ -53,11 +60,17 @@
             vmodel.arr.$watch("length", function(v) {
                 console.log("length", v)
             })
-            vmodel.$watch("b.c", function(n, o, k) {
-                console.log("fire b.c ", n, o, this)
+            vmodel.$watch("b.c", function(a, b, c) {
+                console.log("fire b.c ", a, b,c)
             })
-            vmodel.$watch("arr[*]", function(n, o, k) {
-                console.log("父对象监听子数组元素变化 ", n, o)
+            vmodel.$watch("arr[*]", function(a, b, c) {
+                console.log("父对象监听子数组元素变化 ", a, b,c ,this)
+            })
+            vmodel.$watch("ddd.ccc.bbb.aaa", function(a, b, c) {
+                console.log("深层对象监听 ", a, b, c, this)
+            })
+            setTimeout(function() {
+                vmodel.a = "xxx"
             })
             setTimeout(function() {
                 vmodel.b.c = 9
@@ -67,6 +80,7 @@
             })
             setTimeout(function() {
                 vmodel.arr.push(12)
+                vmodel.ddd.ccc.bbb.aaa = 999
             })
         </script>
 
