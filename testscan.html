@@ -23,11 +23,13 @@
             })
             setTimeout(function(){
                 console.log("change")
-                vmodel.a = 9
+                vmodel.b.c =222
             },2000)
         </script>
     </head>
     <body ms-controller="xxx">
-        <div>{{a}}</div>
+        <div>{{b['a'+c]}}</div>
+        
+        http://gmigdos.wordpress.com/2010/12/05/regular-expression-to-match-javascript-string-literals/
     </body>
 </html>

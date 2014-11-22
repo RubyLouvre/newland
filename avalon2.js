@@ -1330,23 +1330,334 @@
             }
         }
     }
+    // function 
+
     var bindingHandlers = avalon.bindingHandlers = {
         "text": function(data, vmodels) {
-           // console.log(data, vmodels)
-            var v = data.value
-
-            for (var i = 0, vmodel; vmodel = vmodels[i++]; ) {
-                if (vmodel.hasOwnProperty(v)) {
-                    vmodel.$watch(v, function(value) {
-                        bindingExecutors["text"](value, data.element)
-                    })
-                    bindingExecutors["text"](vmodel[v], data.element)
-                }
-                break
-            }
-            //  parseExprProxy(data.value, vmodels, data)
+            var vars = getVars(data.value)
+            var paths = getPaths(data.value)
+            console.log(vars)
+            console.log(paths)
+            //   parseExprProxy(data.value, vmodels, data)
         }
     }
+
+    /*********************************************************************
+     *                          编译系统                                  *
+     **********************************************************************/
+    var keywords =
+            // 关键字
+            "break,case,catch,continue,debugger,default,delete,do,else,false" +
+            ",finally,for,function,if,in,instanceof,new,null,return,switch,this" +
+            ",throw,true,try,typeof,var,void,while,with"
+            // 保留字
+            + ",abstract,boolean,byte,char,class,const,double,enum,export,extends" +
+            ",final,float,goto,implements,import,int,interface,long,native" +
+            ",package,private,protected,public,short,static,super,synchronized" +
+            ",throws,transient,volatile"
+            // ECMA 5 - use strict
+            + ",arguments,let,yield" + ",undefined"
+
+    var cacheVars = createCache(512)
+    var rpaths = /\b[\$\_a-z][\w$]*(?:\.[$\w]+|\[[^\]]+\])*/ig
+    var keywordOne = oneObject(keywords)
+    var rstringLiterals = /(['"])(\\\1|.)+?\1/g
+    var rregexp = /([^\/])(\/(?!\*|\/)(\\\/|.)+?\/[gim]{0,3})/g
+    var rcomment1 = /\/\/.*?\/?\*.+?(?=\n|\r|$)|\/\*[\s\S]*?\/\/[\s\S]*?\*\//g
+    var rcomment2 = /\/\/.+?(?=\n|\r|$)|\/\*[\s\S]+?\*\//g
+
+    var cachePaths = createCache(512)
+    //有多少个路径，绑多少次
+     function getPaths(code, paths) {
+        var key = "," + code.trim()
+        if (cachePaths[key])
+            return cachePaths[key]
+        paths = paths || []
+        //  var brackets = ","
+        var uid = '_' + +new Date(),
+                primatives = [],
+                primIndex = 0
+        code
+                /* 移除所有字符串*/
+                .replace(rstringLiterals, function(match) {
+                    primatives[primIndex] = match;
+                    return (uid + '') + primIndex++;
+                })
+                /* 移除所有正则 */
+                .replace(rregexp, function(match, $1, $2) {
+                    primatives[primIndex] = $2;
+                    return $1 + (uid + '') + primIndex++;
+                })
+                .replace(rcomment1, "")
+                .replace(rcomment2, "")
+                .replace(RegExp('\\/\\*[\\s\\S]+' + uid + '\\d+', 'g'), "")
+                .replace(rpaths, function(a) {
+                    if (keywordOne[a])
+                        return
+
+                    var inner = getBracket(a.replace(RegExp(uid + '(\\d+)', 'g'), ""))
+
+                    for (var j = 0, jn = inner.length; j < jn; j++) {
+                        getPaths(inner[j], paths)
+                    }
+
+                    //还原字符串与正则
+                    paths.push(a.replace(RegExp(uid + '(\\d+)', 'g'), function(match, n) {
+                        return primatives[n];
+                    }))
+                })
+        //    var array = uniqSet(paths)
+
+        return  cachePaths(key, uniqSet(paths))
+    }
+    function getBracket(code) {
+        var array = []
+        code.replace(/\[([^\]]+)\]/g, function(a, b) {
+            array.push(b)
+        })
+        return array
+    }
+   function getVars(code) {
+        var key = "," + code.trim()
+        if (cacheVars[key]) {
+            return cacheVars[key]
+        }
+        //得到顶层VM的属性名
+        var paths = getPaths(code)
+     //   var brackets = paths.brackets
+        var map = {}
+        var vars = []
+        var rpath = /^[\$\_a-z][\w$]*/
+        for (var i = 0, path; path = paths[i++]; ) {
+            path = path.replace(rpath, function(_) {
+                map["_" + _] = true
+                vars.push(_)
+                return ""
+            })
+        }
+        return vars
+
+    }
+
+    /*添加赋值语句*/
+
+    function addAssign(vars, scope, name, data) {
+        var ret = [],
+                prefix = " = " + name + "."
+        for (var i = vars.length, prop; prop = vars[--i]; ) {
+            console.log(prop)
+            if (scope.hasOwnProperty(prop)) {
+                ret.push(prop + prefix + prop)
+                //  console.log(prop)
+                if (data.type === "duplex") {
+                    vars.get = name + "." + prop
+                }
+                vars.splice(i, 1)
+            }
+        }
+        return ret
+    }
+
+    function uniqSet(array) {
+        var ret = [],
+                unique = {}
+        for (var i = 0; i < array.length; i++) {
+            var el = array[i]
+            var id = el && typeof el.$id === "string" ? el.$id : el
+            if (!unique[id]) {
+                unique[id] = ret.push(el)
+            }
+        }
+        return ret
+    }
+
+
+    function createCache(maxLength) {
+        var keys = []
+
+        function cache(key, value) {
+            if (keys.push(key) > maxLength) {
+                delete cache[keys.shift()]
+            }
+            return cache[key] = value;
+        }
+        return cache;
+    }
+    //缓存求值函数，以便多次利用
+    var cacheExprs = createCache(128)
+    //取得求值函数及其传参
+    var rduplex = /\w\[.*\]|\w\.\w/
+    var rproxy = /(\$proxy\$[a-z]+)\d+$/
+
+    function parseExpr(code, scopes, data) {
+        var dataType = data.type
+        var filters = data.filters ? data.filters.join("") : ""
+        var exprId = scopes.map(function(el) {
+            return String(el.$id).replace(rproxy, "$1")
+        }) + code + dataType + filters
+        var vars = getVariables(code).concat(),
+                assigns = [],
+                names = [],
+                args = [],
+                prefix = ""
+        //args 是一个对象数组， names 是将要生成的求值函数的参数
+        scopes = uniqSet(scopes)
+        data.vars = []
+        for (var i = 0, sn = scopes.length; i < sn; i++) {
+            if (vars.length) {
+                var name = "vm" + expose + "_" + i
+                names.push(name)
+                args.push(scopes[i])
+                var ss = addAssign(vars, scopes[i], name, data)
+                if (ss.length) {
+                    console.log(vars)
+                    assigns.push.apply(assigns, ss)
+                }
+
+            }
+        }
+        if (!assigns.length && dataType === "duplex") {
+            return
+        }
+
+        //---------------args----------------
+        if (filters) {
+            args.push(avalon.filters)
+        }
+        data.args = args
+        //---------------cache----------------
+        var fn = cacheExprs[exprId] //直接从缓存，免得重复生成
+        if (fn) {
+            data.evaluator = fn
+            return
+        }
+        var prefix = assigns.join(", ")
+        if (prefix) {
+            prefix = "var " + prefix
+        }
+        if (filters) { //文本绑定，双工绑定才有过滤器
+            code = "\nvar ret" + expose + " = " + code
+            var textBuffer = [],
+                    fargs
+            textBuffer.push(code, "\r\n")
+            for (var i = 0, fname; fname = data.filters[i++]; ) {
+                var start = fname.indexOf("(")
+                if (start !== -1) {
+                    fargs = fname.slice(start + 1, fname.lastIndexOf(")")).trim()
+                    fargs = "," + fargs
+                    fname = fname.slice(0, start).trim()
+                } else {
+                    fargs = ""
+                }
+                textBuffer.push(" if(filters", expose, ".", fname, "){\n\ttry{\nret", expose,
+                        " = filters", expose, ".", fname, "(ret", expose, fargs, ")\n\t}catch(e){} \n}\n")
+            }
+            code = textBuffer.join("")
+            code += "\nreturn ret" + expose
+            names.push("filters" + expose)
+        } else if (dataType === "duplex") { //双工绑定
+            var _body = "'use strict';\nreturn function(vvv){\n\t" +
+                    prefix +
+                    ";\n\tif(!arguments.length){\n\t\treturn " +
+                    code +
+                    "\n\t}\n\t" + (!rduplex.test(code) ? vars.get : code) +
+                    "= vvv;\n} "
+            try {
+                fn = Function.apply(noop, names.concat(_body))
+                data.evaluator = cacheExprs(exprId, fn)
+            } catch (e) {
+                log("debug: parse error," + e.message)
+            }
+            return
+        } else if (dataType === "on") { //事件绑定
+            if (code.indexOf("(") === -1) {
+                code += ".call(this, $event)"
+            } else {
+                code = code.replace("(", ".call(this,")
+            }
+            names.push("$event")
+            code = "\nreturn " + code + ";" //IE全家 Function("return ")出错，需要Function("return ;")
+            var lastIndex = code.lastIndexOf("\nreturn")
+            var header = code.slice(0, lastIndex)
+            var footer = code.slice(lastIndex)
+            code = header + "\n" + footer
+        } else { //其他绑定
+            code = "\nreturn " + code + ";" //IE全家 Function("return ")出错，需要Function("return ;")
+        }
+        try {
+            fn = Function.apply(noop, names.concat("'use strict';\n" + prefix + code))
+            data.evaluator = cacheExprs(exprId, fn)
+        } catch (e) {
+            log("debug: parse error," + e.message)
+        } finally {
+            vars = textBuffer = names = null //释放内存
+        }
+    }
+
+    var meta = {
+        '\b': '\\b',
+        '\t': '\\t',
+        '\n': '\\n',
+        '\f': '\\f',
+        '\r': '\\r',
+        '"': '\\"',
+        '\\': '\\\\'
+    }
+    var quote = window.JSON && JSON.stringify || function(str) {
+        return '"' + str.replace(/[\\\"\x00-\x1f]/g, function(a) {
+            var c = meta[a];
+            return typeof c === 'string' ? c :
+                    '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+        }) + '"'
+    }
+    //parseExpr的智能引用代理
+
+    function parseExprProxy(code, scopes, data, tokens, noregister) {
+        scopes.cb(-1)
+        if (Array.isArray(tokens)) {
+            code = tokens.map(function(el) {
+                return el.expr ? "(" + el.value + ")" : quote(el.value)
+            }).join(" + ")
+        }
+        parseExpr(code, scopes, data)
+        if (data.evaluator && !noregister) {
+            data.handler = bindingExecutors[data.handlerName || data.type]
+            //方便调试
+            //这里非常重要,我们通过判定视图刷新函数的element是否在DOM树决定
+            //将它移出订阅者列表
+            registerSubscriber(data)
+        }
+    }
+    avalon.parseExprProxy = parseExprProxy
+
+
+    var ronduplex = /^(duplex|on)$/
+    function registerSubscriber(data) {
+        //  Registry[expose] = data //暴光此函数,方便collectSubscribers收集
+        avalon.openComputedCollect = true
+        var fn = data.evaluator
+        if (fn) { //如果是求值函数
+            try {
+                var c = ronduplex.test(data.type) ? data : fn.apply(0, data.args)
+                data.handler(c, data.element, data)
+            } catch (e) {
+                log("warning:exception throwed in [registerSubscriber] " + e)
+                delete data.evaluator
+                var node = data.element
+                if (node.nodeType === 3) {
+                    var parent = node.parentNode
+                    if (kernel.commentInterpolate) {
+                        parent.replaceChild(DOC.createComment(data.value), node)
+                    } else {
+                        node.data = openTag + data.value + closeTag
+                    }
+                }
+            }
+        }
+        avalon.openComputedCollect = false
+        //  delete Registry[expose]
+    }
+
     DOC.addEventListener("DOMContentLoaded", function() {
         avalon.scan(document.body)
     })
