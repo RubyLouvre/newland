@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <script src="avalon2.js"></script>
+        <script>
+            var vmodel = avalon.define({
+                $id: "xxx",
+                a: 1,
+                arr: [4, 5],
+                b: {
+                    c: 2
+                },
+                ddd: {
+                    ccc: {
+                        bbb: {
+                            aaa: 3
+                        }
+                    }
+                }
+            })
+            setTimeout(function(){
+                console.log("change")
+                vmodel.a = 9
+            },2000)
+        </script>
+    </head>
+    <body ms-controller="xxx">
+        <div>{{a}}</div>
+    </body>
+</html>

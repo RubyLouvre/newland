@@ -326,12 +326,12 @@
                 var events = object.$events
                 var array = events[name] || []
                 var newValue = object[name]
-                var newValue = "newValue" in change ? change.newValue :  object[name]
+                var newValue = "newValue" in change ? change.newValue : object[name]
                 var oldValue = change.oldValue
-                var target =   "target" in change ? change.target : object
+                var target = "target" in change ? change.target : object
                 if (array.length) {
-                //    var newValue = "value" in change ? change.value : object[name]
-            
+                    //    var newValue = "value" in change ? change.value : object[name]
+
                     array.forEach(function(fn) {
                         fn.call(target, newValue, oldValue, name)
                     })
@@ -340,7 +340,7 @@
                 if (Array.isArray(object) && isIndex(name)) {
                     var array = events["[*]"]
                     if (array.length) {
-                    
+
                         var oldValue = change.oldValue
                         array.forEach(function(fn) {
                             fn.call(target, newValue, oldValue, name)
@@ -367,7 +367,7 @@
                             target: target
                         });
                     } else {
-                    //    console.log(newValue)
+                        //    console.log(newValue)
                         notifier.notify({
                             object: object.$parent,
                             type: "update",
@@ -1332,12 +1332,23 @@
     }
     var bindingHandlers = avalon.bindingHandlers = {
         "text": function(data, vmodels) {
-            console.log(data, vmodels)
-          //  parseExprProxy(data.value, vmodels, data)
+           // console.log(data, vmodels)
+            var v = data.value
+
+            for (var i = 0, vmodel; vmodel = vmodels[i++]; ) {
+                if (vmodel.hasOwnProperty(v)) {
+                    vmodel.$watch(v, function(value) {
+                        bindingExecutors["text"](value, data.element)
+                    })
+                    bindingExecutors["text"](vmodel[v], data.element)
+                }
+                break
+            }
+            //  parseExprProxy(data.value, vmodels, data)
         }
     }
-     DOC.addEventListener("DOMContentLoaded", function(){
-         avalon.scan(document.body)
-     })
-   
+    DOC.addEventListener("DOMContentLoaded", function() {
+        avalon.scan(document.body)
+    })
+
 })(document)
