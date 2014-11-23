@@ -322,7 +322,7 @@
             if (change.type === "update") {
                 var object = change.object
                 var name = change.name
-                console.log(name)
+
                 var events = object.$events
                 var array = events[name] || []
                 var newValue = object[name]
@@ -1338,10 +1338,36 @@
             var paths = getPaths(data.value)
             console.log(vars)
             console.log(paths)
+            for (var i = 0, n = paths.length; i < n; i++) {
+                 var path = new Path(paths[i])
+                 console.log(path+"")
+            }
+
             //   parseExprProxy(data.value, vmodels, data)
         }
     }
 
+    function Path(path) {
+        this.source = path
+        //aaa['bbb'] --> aaa.bbb
+        //aaa[ "ddd" ][ '333' ] --> aaa.ddd.333
+        //去掉中括号内侧的空白
+        path = path.replace(/\[\s*/g, "[").replace(/\s*\]/g, "]")
+        path = path.replace(/\[['"]?([^'"]+)['"]?\]/g, function(match, name) {
+            return '.' + name;
+        })
+        // b.c["333" + d] 如果中括号里面是一个变量 --> b.c.`avalon.subscribers` --> b.c.$12321323
+        path = path.replace(rvolatile, function() {
+            return '.' + avalon.subscribers
+        })
+        this.parts = path.split(".")
+    }
+    Path.prototype = {
+        constructor: Path,
+        toString: function() {
+            return this.parts.join(".")
+        }
+    }
     /*********************************************************************
      *                          编译系统                                  *
      **********************************************************************/
@@ -1365,10 +1391,11 @@
     var rregexp = /([^\/])(\/(?!\*|\/)(\\\/|.)+?\/[gim]{0,3})/g
     var rcomment1 = /\/\/.*?\/?\*.+?(?=\n|\r|$)|\/\*[\s\S]*?\/\/[\s\S]*?\*\//g
     var rcomment2 = /\/\/.+?(?=\n|\r|$)|\/\*[\s\S]+?\*\//g
+    var rvolatile = /\[([^\]]+)\]/g
 
     var cachePaths = createCache(512)
     //有多少个路径，绑多少次
-     function getPaths(code, paths) {
+    function getPaths(code, paths) {
         var key = "," + code.trim()
         if (cachePaths[key])
             return cachePaths[key]
@@ -1412,19 +1439,19 @@
     }
     function getBracket(code) {
         var array = []
-        code.replace(/\[([^\]]+)\]/g, function(a, b) {
+        code.replace(rvolatile, function(a, b) {
             array.push(b)
         })
         return array
     }
-   function getVars(code) {
+    function getVars(code) {
         var key = "," + code.trim()
         if (cacheVars[key]) {
             return cacheVars[key]
         }
         //得到顶层VM的属性名
         var paths = getPaths(code)
-     //   var brackets = paths.brackets
+        //   var brackets = paths.brackets
         var map = {}
         var vars = []
         var rpath = /^[\$\_a-z][\w$]*/
@@ -1445,10 +1472,8 @@
         var ret = [],
                 prefix = " = " + name + "."
         for (var i = vars.length, prop; prop = vars[--i]; ) {
-            console.log(prop)
             if (scope.hasOwnProperty(prop)) {
                 ret.push(prop + prefix + prop)
-                //  console.log(prop)
                 if (data.type === "duplex") {
                     vars.get = name + "." + prop
                 }
@@ -1495,7 +1520,10 @@
         var exprId = scopes.map(function(el) {
             return String(el.$id).replace(rproxy, "$1")
         }) + code + dataType + filters
-        var vars = getVariables(code).concat(),
+
+
+
+        var vars = getVars(code).concat(),
                 assigns = [],
                 names = [],
                 args = [],
@@ -1510,7 +1538,7 @@
                 args.push(scopes[i])
                 var ss = addAssign(vars, scopes[i], name, data)
                 if (ss.length) {
-                    console.log(vars)
+                    // console.log(vars)
                     assigns.push.apply(assigns, ss)
                 }
 
@@ -1626,6 +1654,14 @@
             //这里非常重要,我们通过判定视图刷新函数的element是否在DOM树决定
             //将它移出订阅者列表
             registerSubscriber(data)
+        }
+    }
+
+    function addWatcher(data) {
+        if (data.evaluator) {
+            var paths = getPaths(data.value)
+            console.log(paths)
+
         }
     }
     avalon.parseExprProxy = parseExprProxy
