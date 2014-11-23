@@ -1338,7 +1338,7 @@
             var vars = getVars(data.value)
             var paths = getPaths(data.value)
             avalon.parseExprProxy(data.value, vmodels, data)
-        
+
             for (var i = 0, n = paths.length; i < n; i++) {
                 var path = new Path(paths[i]);
                 (function(v, expr) {
@@ -1346,7 +1346,7 @@
                         function callback() {
                             //如果元素已经被移除
                             var is$unwatch = !data.element || !root.contains(data.element)
-                            
+
                             try {
                                 if (!is$unwatch) {
                                     var evaluation = data.evaluator
@@ -1395,10 +1395,10 @@
         //aaa['bbb'] --> aaa.bbb
         //aaa[ "ddd" ][ '333' ] --> aaa.ddd.333
         //去掉中括号内侧的空白
-        path = path.replace(/\[\s*/g, "[").replace(/\s*\]/g, "]")
-        path = path.replace(/\[['"]?([^'"]+)['"]?\]/g, function(match, name) {
-            return '.' + name;
-        })
+//        path = path.replace(/\[\s+/g, "[").replace(/\s+\]/g, "]")
+//        path = path.replace(/\[['"]?([^'"]+)['"]?\]/g, function(match, name) {
+//            return '.' + name;
+//        })
         // b.c["333" + d] 如果中括号里面是一个变量 --> b.c.`avalon.subscribers` --> b.c.$12321323
         path = path.replace(rvolatile, function() {
             return '.' + avalon.subscribers
@@ -1452,14 +1452,17 @@
         var uid = '_' + +new Date(),
                 primatives = [],
                 primIndex = 0
-        code
+            code
+                .replace(/\[\s*(['"])([^'"]+)\1\s*\]/g, function($0, $1, $2) {
+                    return '.' + $2;
+                })
                 /* 移除所有字符串*/
                 .replace(rstringLiterals, function(match) {
                     primatives[primIndex] = match;
                     return (uid + '') + primIndex++;
                 })
                 /* 移除所有正则 */
-                .replace(rregexp, function(match, $1, $2) {
+                .replace(rregexp, function($0, $1, $2) {
                     primatives[primIndex] = $2;
                     return $1 + (uid + '') + primIndex++;
                 })
@@ -1663,9 +1666,9 @@
         try {
             fn = Function.apply(noop, names.concat("'use strict';\n" + prefix + code))
             data.evaluator = cacheExprs(exprId, fn)
-            avalon.log(fn+"")
+            avalon.log(fn + "")
         } catch (e) {
-           
+
         } finally {
             vars = textBuffer = names = null //释放内存
         }
@@ -1712,29 +1715,7 @@
 
     var ronduplex = /^(duplex|on)$/
     function registerSubscriber(data) {
-        //  Registry[expose] = data //暴光此函数,方便collectSubscribers收集
-        avalon.openComputedCollect = true
-        var fn = data.evaluator
-        if (fn) { //如果是求值函数
-            try {
-                var c = ronduplex.test(data.type) ? data : fn.apply(0, data.args)
-                data.handler(c, data.element, data)
-            } catch (e) {
-                log("warning:exception throwed in [registerSubscriber] " + e)
-                delete data.evaluator
-                var node = data.element
-                if (node.nodeType === 3) {
-                    var parent = node.parentNode
-                    if (kernel.commentInterpolate) {
-                        parent.replaceChild(DOC.createComment(data.value), node)
-                    } else {
-                        node.data = openTag + data.value + closeTag
-                    }
-                }
-            }
-        }
-        avalon.openComputedCollect = false
-        //  delete Registry[expose]
+
     }
 
     DOC.addEventListener("DOMContentLoaded", function() {
