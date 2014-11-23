@@ -428,6 +428,7 @@
     var EventManager = {
         $watch: function(type, callback) {
             if (typeof callback === "function") {
+                console.log(type)
                 var callbacks = this.$events[type]
                 if (callbacks) {
                     callbacks.push(callback)
@@ -1336,14 +1337,58 @@
         "text": function(data, vmodels) {
             var vars = getVars(data.value)
             var paths = getPaths(data.value)
-            console.log(vars)
-            console.log(paths)
+            avalon.parseExprProxy(data.value, vmodels, data)
+        
             for (var i = 0, n = paths.length; i < n; i++) {
-                 var path = new Path(paths[i])
-                 console.log(path+"")
-            }
+                var path = new Path(paths[i]);
+                (function(v, expr) {
+                    if (v) {
+                        function callback() {
+                            //如果元素已经被移除
+                            var is$unwatch = !data.element || !root.contains(data.element)
+                            
+                            try {
+                                if (!is$unwatch) {
+                                    var evaluation = data.evaluator
+                                    var c = ronduplex.test(data.type) ? data : evaluation.apply(0, data.args)
+                                    data.handler(c, data.element, data)
+                                   // console.log("xxxxx")
+                                }
+                            } catch (e) {
+                                console.log(e)
+                                is$unwatch = true
+                            }
+                            if (is$unwatch) {
+                                v.$unwatch(path + "", callback)
+                              //  restoreBinding(data)
+                            }
+                        }
+                        v.$watch(expr, callback)
+                        callback()
+                    }
 
-            //   parseExprProxy(data.value, vmodels, data)
+                })(getHost(path.top, vmodels), path + "")
+            }
+        }
+    }
+
+    function restoreBinding(data) {
+        delete data.evaluator
+        var node = data.element
+        if (node && node.nodeType === 3) {
+            var parent = node.parentNode
+            if (kernel.commentInterpolate) {
+                parent.replaceChild(DOC.createComment(data.value), node)
+            } else {
+                node.data = openTag + data.value + closeTag
+            }
+        }
+    }
+
+    function getHost(top, vmodels) {
+        for (var i = 0, v; v = vmodels[i++]; ) {
+            v.hasOwnProperty(top)
+            return v
         }
     }
 
@@ -1361,11 +1406,15 @@
             return '.' + avalon.subscribers
         })
         this.parts = path.split(".")
+        this.top = this.parts[0]
     }
     Path.prototype = {
         constructor: Path,
         toString: function() {
             return this.parts.join(".")
+        },
+        match: function(vmodel) {
+
         }
     }
     /*********************************************************************
@@ -1615,8 +1664,9 @@
         try {
             fn = Function.apply(noop, names.concat("'use strict';\n" + prefix + code))
             data.evaluator = cacheExprs(exprId, fn)
+            avalon.log(fn+"")
         } catch (e) {
-            log("debug: parse error," + e.message)
+           
         } finally {
             vars = textBuffer = names = null //释放内存
         }
@@ -1650,20 +1700,14 @@
         parseExpr(code, scopes, data)
         if (data.evaluator && !noregister) {
             data.handler = bindingExecutors[data.handlerName || data.type]
+            avalon.log(data.handler)
             //方便调试
             //这里非常重要,我们通过判定视图刷新函数的element是否在DOM树决定
             //将它移出订阅者列表
-            registerSubscriber(data)
+            //registerSubscriber(data)
         }
     }
 
-    function addWatcher(data) {
-        if (data.evaluator) {
-            var paths = getPaths(data.value)
-            console.log(paths)
-
-        }
-    }
     avalon.parseExprProxy = parseExprProxy
 
 
