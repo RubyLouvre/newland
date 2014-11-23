@@ -1352,15 +1352,13 @@
                                     var evaluation = data.evaluator
                                     var c = ronduplex.test(data.type) ? data : evaluation.apply(0, data.args)
                                     data.handler(c, data.element, data)
-                                   // console.log("xxxxx")
                                 }
                             } catch (e) {
-                                console.log(e)
                                 is$unwatch = true
                             }
                             if (is$unwatch) {
                                 v.$unwatch(path + "", callback)
-                              //  restoreBinding(data)
+                                restoreBinding(data)
                             }
                         }
                         v.$watch(expr, callback)
