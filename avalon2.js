@@ -1448,6 +1448,7 @@
             return cachePaths[key]
         paths = paths || []
         //  var brackets = ","
+        //http://james.padolsey.com/javascript/javascript-comment-removal-revisted/
         var uid = '_' + +new Date(),
                 primatives = [],
                 primIndex = 0
