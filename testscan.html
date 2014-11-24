@@ -7,11 +7,12 @@
         <script src="avalon2.js"></script>
         <script>
             var vmodel = avalon.define({
-                $id: "xxx",
+                $id: "test",
                 a: 1,
                 arr: [4, 5],
                 b: {
-                    c: 2
+                    c: 2,
+                    d: 4
                 },
                 ddd: {
                     ccc: {
@@ -21,18 +22,26 @@
                     }
                 }
             })
+           avalon.define({
+                $id: "test2",
+                c: "c"
+            })
             setTimeout(function() {
-
+                console.log("开始变化")
                 vmodel.b.c = 222
+                console.log("变化完毕")
             }, 2000)
             setTimeout(function() {
 
-                vmodel.b.c = 111
+             //  vmodel.b.c = 111
             }, 4000)
         </script>
     </head>
-    <body ms-controller="xxx">
-        <div>{{b[ 'c' ]}}</div>
+    <body ms-controller="test">
+        <div >
+            <div>{{b[ "c" ]}}</div>
+        </div>
+
 
         http://gmigdos.wordpress.com/2010/12/05/regular-expression-to-match-javascript-string-literals/
     </body>

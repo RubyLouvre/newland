@@ -1343,14 +1343,14 @@
                 var path = new Path(paths[i]);
                 (function(v, expr) {
                     if (v) {
-                        function callback() {
+                        function callback(a) {
+                           // console.log(vmodels)
                             //如果元素已经被移除
                             var is$unwatch = !data.element || !root.contains(data.element)
-
                             try {
                                 if (!is$unwatch) {
-                                    var evaluation = data.evaluator
-                                    var c = ronduplex.test(data.type) ? data : evaluation.apply(0, data.args)
+                                    var evaluator = data.evaluator
+                                    var c = ronduplex.test(data.type) ? data : evaluator.apply(0, data.args)
                                     data.handler(c, data.element, data)
                                 }
                             } catch (e) {
@@ -1452,7 +1452,7 @@
         var uid = '_' + +new Date(),
                 primatives = [],
                 primIndex = 0
-            code
+        code
                 .replace(/\[\s*(['"])([^'"]+)\1\s*\]/g, function($0, $1, $2) {
                     return '.' + $2;
                 })
@@ -1666,7 +1666,6 @@
         try {
             fn = Function.apply(noop, names.concat("'use strict';\n" + prefix + code))
             data.evaluator = cacheExprs(exprId, fn)
-            avalon.log(fn + "")
         } catch (e) {
 
         } finally {
@@ -1702,7 +1701,6 @@
         parseExpr(code, scopes, data)
         if (data.evaluator && !noregister) {
             data.handler = bindingExecutors[data.handlerName || data.type]
-            avalon.log(data.handler)
             //方便调试
             //这里非常重要,我们通过判定视图刷新函数的element是否在DOM树决定
             //将它移出订阅者列表
