@@ -1341,6 +1341,7 @@
 
             for (var i = 0, n = paths.length; i < n; i++) {
                 var path = new Path(paths[i]);
+                console.log(path);
                 (function(v, expr) {
                     if (v) {
                         function callback(a) {
@@ -1391,6 +1392,12 @@
     }
 
     function Path(path) {
+        
+        for(var i = 0, n = path.length; i < n; i++){
+            
+        }
+    
+        console.log(path)
         this.source = path
         //aaa['bbb'] --> aaa.bbb
         //aaa[ "ddd" ][ '333' ] --> aaa.ddd.333
@@ -1400,11 +1407,11 @@
 //            return '.' + name;
 //        })
         // b.c["333" + d] 如果中括号里面是一个变量 --> b.c.`avalon.subscribers` --> b.c.$12321323
-        path = path.replace(rvolatile, function() {
-            return '.' + avalon.subscribers
-        })
-        this.parts = path.split(".")
-        this.top = this.parts[0]
+     //   path = path.replace(rvolatile, function() {
+     //       return '.' + avalon.subscribers
+     //   })
+     //   this.parts = path.split(".")
+     //   this.top = this.parts[0]
     }
     Path.prototype = {
         constructor: Path,
@@ -1435,9 +1442,7 @@
     var rpaths = /\b[\$\_a-z][\w$]*(?:\.[$\w]+|\[[^\]]+\])*/ig
     var keywordOne = oneObject(keywords)
     var rstringLiterals = /(['"])(\\\1|.)+?\1/g
-    var rregexp = /([^\/])(\/(?!\*|\/)(\\\/|.)+?\/[gim]{0,3})/g
-    var rcomment1 = /\/\/.*?\/?\*.+?(?=\n|\r|$)|\/\*[\s\S]*?\/\/[\s\S]*?\*\//g
-    var rcomment2 = /\/\/.+?(?=\n|\r|$)|\/\*[\s\S]+?\*\//g
+
     var rvolatile = /\[([^\]]+)\]/g
 
     var cachePaths = createCache(512)
@@ -1452,39 +1457,41 @@
         var uid = '_' + +new Date(),
                 primatives = [],
                 primIndex = 0
-        code
-                .replace(/\[\s*(['"])([^'"]+)\1\s*\]/g, function($0, $1, $2) {
-                    return '.' + $2;
-                })
+      code =  code
+//                .replace(/\[\s*(['"])([^'"]+)\1\s*\]/g, function($0, $1, $2) {
+//                    return '.' + $2;
+//                })
                 /* 移除所有字符串*/
                 .replace(rstringLiterals, function(match) {
                     primatives[primIndex] = match;
+           // console.log(match, (uid + '') + primIndex++)
                     return (uid + '') + primIndex++;
                 })
-                /* 移除所有正则 */
-                .replace(rregexp, function($0, $1, $2) {
-                    primatives[primIndex] = $2;
-                    return $1 + (uid + '') + primIndex++;
-                })
-                .replace(rcomment1, "")
-                .replace(rcomment2, "")
-                .replace(RegExp('\\/\\*[\\s\\S]+' + uid + '\\d+', 'g'), "")
-                .replace(rpaths, function(a) {
+                /* 不支持正则与字符串 */
+
+     
+        
+              code =  code.replace(rpaths, function(a) {
                     if (keywordOne[a])
                         return
-
-                    var inner = getBracket(a.replace(RegExp(uid + '(\\d+)', 'g'), ""))
-
-                    for (var j = 0, jn = inner.length; j < jn; j++) {
-                        getPaths(inner[j], paths)
-                    }
-
-                    //还原字符串与正则
-                    paths.push(a.replace(RegExp(uid + '(\\d+)', 'g'), function(match, n) {
-                        return primatives[n];
-                    }))
+               //  console.log(a+"!!")
+                 
+                 
+             //    var inner = getBracket(a.replace(RegExp(uid + '(\\d+)', 'g'), ""))
+                 
+                 paths.push( new Path(a) )
+//
+                 //   for (var j = 0, jn = inner.length; j < jn; j++) {
+                  //      getPaths(inner[j], paths)
+                //    }
+//
+//                    //还原字符串与正则
+//                    paths.push(a.replace(RegExp(uid + '(\\d+)', 'g'), function(match, n) {
+//                        return primatives[n];
+//                    }))
                 })
         //    var array = uniqSet(paths)
+//console.log(uniqSet(paths))
 
         return  cachePaths(key, uniqSet(paths))
     }
